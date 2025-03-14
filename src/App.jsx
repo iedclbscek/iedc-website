@@ -13,6 +13,9 @@ import EventPage from './components/EventPage';
 import Footer from './components/Footer';
 import Login from './components/Login';
 import Admin from './components/Admin';
+import Dashboard from './components/Dashboard';
+import EditProfile from './components/EditProfile';
+import NodalOfficerDashboard from './components/NodalOfficerDashboard';
 import { FaBars, FaTimes } from 'react-icons/fa';
 
 function App() {
@@ -28,13 +31,17 @@ function App() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const PrivateRoute = ({ children }) => {
+    const token = localStorage.getItem('token');
+    return token ? children : <Navigate to="/login" />;
+  };
+
   const Navigation = () => (
     <nav className={`fixed top-0 left-0 right-0 w-full z-50 transition-all duration-300 ${
       isScrolled ? 'bg-white shadow-lg' : 'bg-blue-900 bg-opacity-90'
     }`}>
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center h-16">
-          {/* Logo and Text */}
           <Link to="/" className="flex items-center space-x-3 pl-4">
             <img 
               src="/img/IEDCLBSLogoColorWhiteText.webp" 
@@ -48,7 +55,6 @@ function App() {
             </span>
           </Link>
 
-          {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-8 pr-4">
             <a href="/#about" className={`transition-colors ${
               isScrolled ? 'text-blue-900 hover:text-blue-700' : 'text-white hover:text-blue-200'
@@ -67,7 +73,6 @@ function App() {
             }`}>Communities</Link>
           </div>
 
-          {/* Mobile Menu Button */}
           <button
             className={`md:hidden transition-colors ${
               isScrolled ? 'text-blue-900' : 'text-white'
@@ -78,7 +83,6 @@ function App() {
           </button>
         </div>
 
-        {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="md:hidden absolute top-16 left-0 right-0 bg-blue-900 bg-opacity-90 py-4">
             <div className="flex flex-col space-y-4">
@@ -105,11 +109,6 @@ function App() {
     </>
   );
 
-  const PrivateRoute = ({ children }) => {
-    const isAuthenticated = localStorage.getItem('isAuthenticated');
-    return isAuthenticated ? children : <Navigate to="/login" />;
-  };
-
   return (
     <Router>
       <div className="min-h-screen">
@@ -124,6 +123,10 @@ function App() {
             <Route path="/events" element={<EventPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/admin" element={<PrivateRoute><Admin /></PrivateRoute>} />
+            <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+            <Route path="/edit-profile" element={<PrivateRoute><EditProfile /></PrivateRoute>} />
+            <Route path="/nodal-login" element={<Login />} />
+            <Route path="/nodal-dashboard" element={<PrivateRoute><NodalOfficerDashboard /></PrivateRoute>} />
           </Routes>
         </main>
 
