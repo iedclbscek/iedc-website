@@ -150,15 +150,82 @@ const communityData = {
     }
   },
   floss: {
-    name: "Floss",
+    name: "FOSS Club",
     description: "Free/Libre and Open Source Software community",
     icon: "🔓",
-    longDescription: "FLOSS promotes the use and development of free and open-source software. The community contributes to various open-source projects and helps students understand the importance of open source.",
-    activities: ["Open Source Contributions", "Linux Workshops", "Code Sprints", "FOSS Awareness Programs"],
-    achievements: ["100+ Open Source Contributions", "Best FOSS Community 2023", "5+ Major Project Releases"],
+    longDescription: "The FOSS Club at LBSCEK is a vibrant community of open-source enthusiasts dedicated to fostering a culture of collaboration, learning, and innovation. We empower students to explore, contribute to, and build projects using Free and Open Source Software (FOSS). By embracing open-source principles, we create an environment where knowledge is shared freely, and technology is developed transparently.",
+    whyWeDoIt: "In today's digital world, open-source technology is driving innovation across industries. At FOSS Club LBSCEK, we believe that technology should be accessible to all. Our mission is to help students learn and grow by providing exposure to Linux, GitHub, open-source tools, and real-world project contributions. We aim to bridge the gap between students and the global open-source community.",
+    whatWeDo: "We actively engage, educate, and empower students through hands-on workshops on Linux, Git, GitHub, and open-source contributions. We organize hackathons and coding challenges to encourage innovation.",
+    whatWeProvide: {
+      title: "🚀 Our Open-Source Mantra",
+      items: [
+        {
+          name: "💡 Linux Exploration",
+          description: "Ever wondered how Linux works? We'll show you!"
+        },
+        {
+          name: "🌍 GitHub Contributions",
+          description: "Want to contribute to GitHub? We'll guide you!"
+        },
+        {
+          name: "🔧 Open Source Projects",
+          description: "Building something cool? Let's make it open-source!"
+        },
+        {
+          name: "🛠 Developer Growth",
+          description: "Dream of becoming a top developer? Open-source is your gateway!"
+        }
+      ]
+    },
+    vision: "To create a thriving open-source ecosystem where students can learn, contribute, and innovate together, making technology accessible to all.",
+    mission: "By 2025, we aim to cultivate a strong open-source community that empowers students with the knowledge and skills to contribute meaningfully to global open-source projects while fostering innovation and collaboration.",
+    activities: [
+      "💻 Git and GitHub hands-on workshops",
+      "🚀 Training 300+ students through our Git Workshop Series",
+      "🏆 Showcasing open-source at Teranis Innovation Corner",
+      "🎤 Hosting webinars with industry experts (e.g., ICFOSS collaboration)",
+      "🌍 Encouraging global FOSS contributions and collaborations",
+      "🤖 Machine Learning Application Development Workshop (Part 1 & 2)",
+      "☁️ Introduction to Hadoop on Google Cloud Platform",
+      "🐍 Workshop on Python Programming",
+      "🔌 Introduction to Arduino",
+      "🚀 ML App Launchpad",
+      "🌐 Introduction to Campus Community Chapters",
+      "🤖 Python for Machine Learning",
+      "🎉 Freedom Fest 2023",
+      "🏛️ ICFOSS Visit",
+      "🏕️ 3-Day Residential Program at Central University Kasaragod"
+    ],
+    achievements: [
+      "📚 Increased student engagement in open-source projects",
+      "🎖 Active contributions to major open-source initiatives",
+      "🖥 Boosted GitHub activity through club-driven initiatives",
+      "🌍 Expanded collaborations with industry leaders like ICFOSS",
+      "🎓 Enhanced technical skills through specialized workshops (ML, Python, Hadoop, Arduino)",
+      "🔥 Empowered students with hands-on training in open-source tools"
+    ],
+    execomTeam: [
+      {
+        name: "Alvira Ruchbah",
+        role: "Chief Foss Ambassador",
+        image: "/img/team/sarah.jpg",
+        contact: "alviraruchbah123@gmail.com",
+        linkedin: "www.linkedin.com/in/alvira-ruchbah-759a24330",
+        github: "https://github.com/alviraruchbah"
+      },
+      {
+        name: "Kadheejath Siraja",
+        role: "Deputy Cheif Foss Ambassador",
+        image: "/img/team/john.jpg",
+        contact: "sirajaahmed99@gmail.com",
+        linkedin: "https://www.linkedin.com/in/kadeejath-siraja-c-a-257608318?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app",
+        github: "https://github.com/Kadeejathsiraja"
+      }
+    ],
+    joinUs: "🚀 Join FOSS Club and be part of the open-source revolution! Whether you're a beginner or an experienced developer, there's a place for you in our community. Together, we can make technology accessible to all through collaboration and innovation. Remember, every line of code can make a difference!",
     contact: {
-      email: "floss@iedc.com",
-      coordinator: "Sarah Williams"
+      email: "fossclub.lbscek@gmail.com",
+      coordinator: "Alvira Ruchbah"
     }
   },
   mlsa: {
@@ -273,12 +340,59 @@ const communityData = {
     name: "GDG",
     description: "Google Developer Groups community",
     icon: "🌐",
-    longDescription: "GDG is a community of developers interested in Google's developer technology. The group organizes events and workshops to help members learn and grow.",
-    activities: ["DevFests", "Code Labs", "Study Jams", "Tech Talks"],
-    achievements: ["Best GDG Chapter 2023", "1000+ Event Participants", "10+ Google Certifications"],
+    longDescription: "Google Developer Groups (GDG) bring together developers and technologists to connect, learn, and grow alongside Google's technologies and experts. We are a community for college students who are interested in technology and Google developer technologies.",
+    whyWeDoIt: "At GDG, we believe in the power of community-driven learning and collaboration. We aim to create an environment where students can explore Google's cutting-edge technologies, build innovative projects, and connect with industry experts. Our community fosters growth through hands-on experience, knowledge sharing, and networking opportunities.",
+    whatWeDo: "We organize various events and activities to help students learn and grow with Google technologies. From workshops and study jams to hackathons and tech talks, we provide opportunities for students to enhance their skills and build their portfolio.",
+    whatWeProvide: {
+      title: "What We Offer",
+      items: [
+        {
+          name: "Technical Learning",
+          description: "Access to Google's latest technologies and development tools"
+        },
+        {
+          name: "Hands-on Experience",
+          description: "Build real projects using Google Cloud, Android, Flutter, and more"
+        },
+        {
+          name: "Networking",
+          description: "Connect with Google experts and fellow developers"
+        },
+        {
+          name: "Career Growth",
+          description: "Opportunities for internships, certifications, and job placements"
+        }
+      ]
+    },
+    vision: "To create a thriving community of developers who leverage Google technologies to build innovative solutions and shape the future of technology.",
+    mission: "By 2025, we aim to empower 5,000+ students with Google technologies through hands-on learning, project development, and industry connections.",
+    activities: [
+      "Google Cloud Workshops",
+      "Android Development Sessions",
+      "Flutter App Development",
+      "Study Jams",
+      "DevFests",
+      "Code Labs",
+      "Tech Talks"
+    ],
+    achievements: [
+      "Created a GDG stall at innovation corner"
+    ],
+    execomTeam: [
+      {
+        name: "Midhuna M",
+        role: "Lead",
+        image: "/img/team/david.jpg",
+        contact: "mmidhuna69@gmail.com",
+        linkedin: "https://www.linkedin.com/in/midhuna-m-724a80340?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app",
+        github: "#"
+      },
+  
+    ],
+    joinUs: "🚀 Join GDG and be part of the Google developer ecosystem! Whether you're a beginner or an experienced developer, there's something for everyone in our community. Together, we can learn, build, and grow with Google technologies!",
     contact: {
-      email: "gdg@iedc.com",
-      coordinator: "David Lee"
+      email: "mmidhuna69@gmail.com",
+      coordinator: "Midhuna M"
     }
   },
   "ed-club": {
@@ -345,12 +459,64 @@ const communityData = {
     }
   },
   "yip-club": {
-    name: "YIP club",
-    description: "Young Innovators Program club",
+    name: "YIP Club",
+    description: "Innovations for equitable and sustainable development",
     icon: "✨",
-    longDescription: "YIP Club nurtures young innovators by providing them with resources, mentorship, and opportunities to work on innovative projects.",
-    activities: ["Innovation Workshops", "Project Development", "Design Thinking Sessions", "Prototype Development"],
-    achievements: ["15+ Patents Filed", "Best Innovation Club 2023", "National Innovation Awards"],
+    longDescription: "The YIP Club helps to foster innovative thinking among youth while providing mentorship and domain-specific guidance. We create an environment where students can develop their ideas into impactful solutions for sustainable development.",
+    whyWeDoIt: "We believe that young minds have the power to create innovative solutions for global challenges. Through YIP, we provide the platform, mentorship, and resources needed to transform ideas into reality.",
+    whatWeDo: "We facilitate idea submission and mentorship programs, connecting students with industry experts and mentors who can guide them in developing their innovative solutions.",
+    whatWeProvide: {
+      title: "What We Offer",
+      items: [
+        {
+          name: "Mentorship",
+          description: "Domain-specific guidance from industry experts"
+        },
+        {
+          name: "Innovation Platform",
+          description: "Opportunity to showcase and develop innovative ideas"
+        },
+        {
+          name: "Competition Experience",
+          description: "Participation in district, state, and national level competitions"
+        }
+      ]
+    },
+    vision: "To create a community of young innovators who develop sustainable solutions for global challenges.",
+    mission: "To empower students with the knowledge, skills, and mentorship needed to transform their innovative ideas into impactful solutions.",
+    activities: [
+      "Idea Submission Programs",
+      "Mentorship Sessions",
+      "Innovation Workshops",
+      "Competition Preparations",
+      "Project Development"
+    ],
+    achievements: [
+      "YIP 7.0: Kasaragod district first, 5th place among KTU colleges",
+      "YIP 6.0: One state level winner",
+      "Best institute North Malabar",
+      "4 district level winners"
+    ],
+    execomTeam: [
+      {
+        name: "Adhish R",
+        role: "President",
+        image: "/img/team/tom.jpg",
+        contact: "Adhishrpublic@gmail.com",
+        linkedin: "https://www.linkedin.com/in/adhishratheesh?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app",
+        github: "#"
+      }
+      ,
+      {
+        name: "Anagha A",
+        role: "Secretary",
+        image: "/img/team/sanjay.jpg",
+        contact: "anagharaghavan0104@gmail.com",
+        linkedin: "https://www.linkedin.com/in/anagha-a-365838287",
+        github: "#"
+      }
+    ],
+    joinUs: "🚀 Join YIP Club and be part of the innovation revolution! Whether you have an idea or want to help others develop theirs, there's a place for you in our community. Together, we can create sustainable solutions for a better future!",
     contact: {
       email: "yip@iedc.com",
       coordinator: "Tom Wilson"
