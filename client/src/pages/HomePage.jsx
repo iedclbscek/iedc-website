@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { events } from '../contexts/eventsData';
+import { events } from '../data/eventsData';
 import EventDetailModal from '../components/ui/EventDetailModal';
 import { FaCalendarAlt, FaMapMarkerAlt, FaArrowRight } from 'react-icons/fa';
 

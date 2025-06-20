@@ -11,6 +11,8 @@ import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import EventsPage from './pages/EventsPage';
 import TeamPage from './pages/TeamPage';
+import CommunitiesPage from './pages/CommunitiesPage';
+import CommunityPage from './pages/CommunityPage';
 
 // Placeholder page component
 const PlaceholderPage = ({ title }) => (
@@ -50,7 +52,8 @@ function App() {
             <Route path="/about" element={<AboutPage />} />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/team" element={<TeamPage />} />
-            <Route path="/contact" element={<PlaceholderPage title="Contact Us" />} />
+            <Route path="/communities" element={<CommunitiesPage />} />
+            <Route path="/communities/:id" element={<CommunityPage />} />
             <Route path="/login" element={<PlaceholderPage title="Dashboard Login" />} />
             <Route path="/dashboard/*" element={<PlaceholderPage title="Dashboard" />} />
             <Route path="*" element={<PlaceholderPage title="Page Not Found" />} />

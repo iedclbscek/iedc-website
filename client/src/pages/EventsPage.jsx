@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { events } from '../contexts/eventsData';
+import { events } from '../data/eventsData';
 import EventDetailModal from '../components/ui/EventDetailModal';
 import { FaCalendarAlt, FaMapMarkerAlt } from 'react-icons/fa';
 

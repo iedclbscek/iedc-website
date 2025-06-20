@@ -218,7 +218,6 @@ export const teamData = {
       {
         id: "member-3-2025",
         name: "Sethulakshmi K V",
-        role: "Marketing Lead",
         image: "/img/team/2025/sethulakshmi.jpg",
       },
       {

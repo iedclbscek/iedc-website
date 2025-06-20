@@ -5,8 +5,11 @@ import { FaLinkedin, FaGithub, FaEnvelope } from 'react-icons/fa';
 const TeamCard = ({ member }) => {
   const [isHovered, setIsHovered] = useState(false);
   
+  // Early return if member is undefined
+  if (!member) return null;
+  
   // Default image if member image is not available
-  const defaultImage = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=random`;
+  const defaultImage = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name || 'User')}&background=random`;
 
   return (
     <motion.div
@@ -21,10 +24,10 @@ const TeamCard = ({ member }) => {
     >
       {/* Member Photo in a clean circle format */}
       <div className="relative mx-auto mb-3">
-        <div className="w-32 h-32 rounded-lg overflow-hidden mx-auto shadow-md">
+        <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-lg overflow-hidden mx-auto shadow-md">
           <img
             src={member.image || defaultImage}
-            alt={member.name}
+            alt={member.name || 'Team Member'}
             className="w-full h-full object-cover"
             onError={(e) => {
               e.target.onerror = null;
@@ -34,7 +37,7 @@ const TeamCard = ({ member }) => {
         </div>
         
         {/* Social links overlay on hover */}
-        {isHovered && (
+        {isHovered && member && (member.linkedin || member.github || member.email) && (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -49,7 +52,7 @@ const TeamCard = ({ member }) => {
                   className="bg-white p-1.5 rounded-full text-accent hover:bg-accent hover:text-white transition-colors"
                   aria-label="LinkedIn Profile"
                 >
-                  <FaLinkedin size={16} />
+                  <FaLinkedin size={14} />
                 </a>
               )}
               {member.github && (
@@ -60,7 +63,7 @@ const TeamCard = ({ member }) => {
                   className="bg-white p-1.5 rounded-full text-accent hover:bg-accent hover:text-white transition-colors"
                   aria-label="GitHub Profile"
                 >
-                  <FaGithub size={16} />
+                  <FaGithub size={14} />
                 </a>
               )}
               {member.email && (
@@ -69,7 +72,7 @@ const TeamCard = ({ member }) => {
                   className="bg-white p-1.5 rounded-full text-accent hover:bg-accent hover:text-white transition-colors"
                   aria-label="Email Contact"
                 >
-                  <FaEnvelope size={16} />
+                  <FaEnvelope size={14} />
                 </a>
               )}
             </div>
@@ -78,8 +81,8 @@ const TeamCard = ({ member }) => {
       </div>
       
       {/* Member name and role */}
-      <h3 className="font-bold text-text-dark text-base">{member.name}</h3>
-      <p className="text-accent text-sm font-medium">{member.role}</p>
+      <h3 className="font-bold text-text-dark text-sm">{member.name || 'Name Unavailable'}</h3>
+      <p className="text-accent text-xs font-medium">{member.role || 'Team Member'}</p>
     </motion.div>
   );
 };
