@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 
 // Components
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import Loader from './components/ui/Loader';
+import ScrollToTop from './components/ui/ScrollToTop';
 
 // Pages
 import HomePage from './pages/HomePage';
@@ -24,43 +25,57 @@ const PlaceholderPage = ({ title }) => (
   </div>
 );
 
-function App() {
+// App router wrapper to access location
+const AppContent = () => {
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
 
   const handleLoadComplete = () => {
     setLoading(false);
   };
 
   useEffect(() => {
+    // Reset loading state when navigating away from home
+    if (location.pathname !== '/') {
+      setLoading(false);
+    }
     // Preload any assets if needed
     return () => {
       // Cleanup if needed
     };
-  }, []);
+  }, [location.pathname]);
 
-  if (loading) {
+  // Only show loader on home page
+  if (loading && location.pathname === '/') {
     return <Loader onComplete={handleLoadComplete} />;
   }
 
   return (
+    <div className="flex flex-col min-h-screen">
+      <Navbar />
+      <main className="flex-grow">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/events" element={<EventsPage />} />
+          <Route path="/team" element={<TeamPage />} />
+          <Route path="/communities" element={<CommunitiesPage />} />
+          <Route path="/communities/:id" element={<CommunityPage />} />
+          <Route path="/login" element={<PlaceholderPage title="Dashboard Login" />} />
+          <Route path="/dashboard/*" element={<PlaceholderPage title="Dashboard" />} />
+          <Route path="*" element={<PlaceholderPage title="Page Not Found" />} />
+        </Routes>
+      </main>
+      <Footer />
+    </div>
+  );
+};
+
+function App() {
+  return (
     <BrowserRouter>
-      <div className="flex flex-col min-h-screen">
-        <Navbar />
-        <main className="flex-grow">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/events" element={<EventsPage />} />
-            <Route path="/team" element={<TeamPage />} />
-            <Route path="/communities" element={<CommunitiesPage />} />
-            <Route path="/communities/:id" element={<CommunityPage />} />
-            <Route path="/login" element={<PlaceholderPage title="Dashboard Login" />} />
-            <Route path="/dashboard/*" element={<PlaceholderPage title="Dashboard" />} />
-            <Route path="*" element={<PlaceholderPage title="Page Not Found" />} />
-          </Routes>
-        </main>
-        <Footer />
-      </div>
+      <ScrollToTop />
+      <AppContent />
     </BrowserRouter>
   );
 }
