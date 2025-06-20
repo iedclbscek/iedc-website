@@ -37,9 +37,9 @@ const HomePage = () => {
                 mentorship, resources, and opportunities to build the next generation of leaders.
               </p>
               <div className="flex flex-wrap gap-4">
-                <a href="/events" className="px-8 py-3 bg-cta text-white font-semibold rounded-lg hover:bg-cta-hover transition-colors shadow-lg">
+                <Link to="/events" className="px-8 py-3 bg-cta text-white font-semibold rounded-lg hover:bg-cta-hover transition-colors shadow-lg">
                   Explore Programs
-                </a>
+                </Link>
                 <a href="https://www.whatsapp.com/channel/0029VaAYL1D2f3EAIot5Yl2N" className="px-8 py-3 border-2 border-accent text-accent font-semibold rounded-lg hover:bg-accent hover:text-white transition-colors" target='_blank'>
                   Join Us
                 </a>
