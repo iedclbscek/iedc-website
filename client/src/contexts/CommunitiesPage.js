@@ -58,10 +58,10 @@ const communities = [
     path: "/communities/yip-club"
   },
   {
-    name: "Robotics",
-    description: "Robotics and automation community",
-    icon: "🤖",
-    path: "/communities/robotics"
+    name: "Women Tech Makers (WTM)",
+    description: "Google's Women Techmakers program empowering women in technology",
+    icon: "👩‍💻",
+    path: "/communities/wtm"
   },
   {
     name: "FSA club",

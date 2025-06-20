@@ -38,7 +38,7 @@ const teamData = {
         name: "Dr. Sarith Divakar M",
         role: "Nodal Officer",
         image: "/img/team/2024/sarith.jpeg",
-        linkedin: "#",
+        linkedin: "https://www.linkedin.com/in/sarithdivakarm/",
         github: "#"
       },
       {
@@ -52,7 +52,7 @@ const teamData = {
         name: "Dr. Vinodu George",
         role: "President(IIC)",
         image: "/img/team/2024/vinod.jpg",
-        linkedin: "#",
+        linkedin: "https://www.linkedin.com/in/vinodu-george-bb227611/",
         github: "#"
       },
       {
@@ -76,122 +76,121 @@ const teamData = {
         name: "Hridyaprabha M ",
         role: "CO-CEO",
         image: "/img/team/2024/haridapriya.jpg",
-        linkedin: "#",
+        linkedin: "https://www.linkedin.com/in/hridyaprabha-m-109214280/",
         github: "#"
       },
       {
-        name: "Hridyaprabha M ",
-        role: "CO-CEO",
-        image: "/img/team/2024/haridapriya.jpg",
-        linkedin: "#",
+        name: "Fathima Basheer MTP",
+        role: "Operations Lead",
+        image: "/img/team/2024/fathima.jpg",
+        linkedin: "https://www.linkedin.com/in/fathimabasheermtp/",
         github: "#"
       },
       {
-        name: "Hridyaprabha M ",
-        role: "CO-CEO",
-        image: "/img/team/2024/haridapriya.jpg",
-        linkedin: "#",
+        name: "Oneela Gopi  ",
+        role: "Operations Co-Lead",
+        image: "/img/team/2024/oneela.jpg",
+        linkedin: "https://www.linkedin.com/in/oneelagopi/",
         github: "#"
       },
       {
-        name: "Hridyaprabha M ",
-        role: "CO-CEO",
-        image: "/img/team/2024/haridapriya.jpg",
-        linkedin: "#",
+        name: "Umar Al Mukhtar Ibrahimkutty",
+        role: "Technical Lead ",
+        image: "/img/team/2024/umar.jpg",
+        linkedin: "https://www.linkedin.com/in/umaralmukhtaribrahimkutty/",
         github: "#"
       },
       {
-        name: "Hridyaprabha M ",
-        role: "CO-CEO",
-        image: "/img/team/2024/haridapriya.jpg",
-        linkedin: "#",
+        name: "Krishnendu S",
+        role: "Technical Co-Lead ",
+        image: "/img/team/2024/krish.jpg",
+        linkedin: "https://www.linkedin.com/in/krishnendu-s-933532328/",
         github: "#"
       },
       {
-        name: "Hridyaprabha M ",
-        role: "CO-CEO",
-        image: "/img/team/2024/haridapriya.jpg",
-        linkedin: "#",
+        name: "Fathima Rifda ",
+        role: "Marketing Lead ",
+        image: "/img/team/2024/rifda.jpg",
+        linkedin: "https://www.linkedin.com/in/fathima-rifda-170486304/",
         github: "#"
       },
       {
-        name: "Hridyaprabha M ",
-        role: "CO-CEO",
-        image: "/img/team/2024/haridapriya.jpg",
-        linkedin: "#",
+        name: "Mohammed Riza ",
+        role: "Marketing Co-Lead",
+        image: "/img/team/2024/riza.jpg",
+        linkedin: "https://www.linkedin.com/in/mohammed-riza-534820296/",
         github: "#"
       },
       {
-        name: "Hridyaprabha M ",
-        role: "CO-CEO",
-        image: "/img/team/2024/haridapriya.jpg",
-        linkedin: "#",
+        name: "Yadumithra U N ",
+        role: "Creative Lead ",
+        image: "/img/team/2024/yadu.jpg",
+        linkedin: "https://www.linkedin.com/in/yadumithra-u-n/",
         github: "#"
       },
       {
-        name: "Hridyaprabha M ",
-        role: "CO-CEO",
-        image: "/img/team/2024/haridapriya.jpg",
-        linkedin: "#",
+        name: "Adhish R",
+        role: "Creative  Co-Lead ",
+        image: "/img/team/2024/adish.jpg",
+        linkedin: "https://www.linkedin.com/in/adhishratheesh/",
         github: "#"
       },
       {
-        name: "Hridyaprabha M ",
-        role: "CO-CEO",
-        image: "/img/team/2024/haridapriya.jpg",
-        linkedin: "#",
+        name: "Sreesha S ",
+        role: "Women Innovation Lead",
+        image: "/img/team/2024/sreesha.jpg",
+        linkedin: "https://www.linkedin.com/in/sreesha-sreedharan-410197292/",
         github: "#"
       },
       {
-        name: "Hridyaprabha M ",
-        role: "CO-CEO",
-        image: "/img/team/2024/haridapriya.jpg",
-        linkedin: "#",
+        name: "Harithasree P ",
+        role: "Women Innovation  Co-Lead",
+        image: "/img/team/2024/haritha.jpg",
+        linkedin: "https://www.linkedin.com/in/harithasree-p-5824b2320/",
         github: "#"
       },
       {
-        name: "Hridyaprabha M ",
-        role: "CO-CEO",
-        image: "/img/team/2024/haridapriya.jpg",
-        linkedin: "#",
+        name: "Aiswarya A",
+        role: "Community Lead",
+        image: "/img/team/2024/aiswarya.jpg",
+        linkedin: "https://www.linkedin.com/in/aiswarya-a-81187b280/",
         github: "#"
       },
       {
-        name: "Hridyaprabha M ",
-        role: "CO-CEO",
-        image: "/img/team/2024/haridapriya.jpg",
-        linkedin: "#",
+        name: "Remitha Mol A P",
+        role: "Community Co-Lead",
+        image: "/img/team/2024/remitha.jpg",
+        linkedin: "https://www.linkedin.com/in/remitha-mol-a-p-951915280/",
         github: "#"
       },
       {
-        name: "Hridyaprabha M ",
-        role: "CO-CEO",
-        image: "/img/team/2024/haridapriya.jpg",
-        linkedin: "#",
+        name: "Anagha A ",
+        role: "Finance Lead ",
+        image: "/img/team/2024/anagha.jpg",
+        linkedin: "https://www.linkedin.com/in/anagha-a-365838287/",
         github: "#"
       },
       {
-        name: "Hridyaprabha M ",
-        role: "CO-CEO",
-        image: "/img/team/2024/haridapriya.jpg",
-        linkedin: "#",
+        name: "Vishal Kodoth",
+        role: "Finance Co-Lead",
+        image: "/img/team/2024/vishal.jpg",
+        linkedin: "https://www.linkedin.com/in/vishal-kodoth/",
         github: "#"
       },
       {
-        name: "Hridyaprabha M ",
-        role: "CO-CEO",
-        image: "/img/team/2024/haridapriya.jpg",
-        linkedin: "#",
+        name: "Shamil Cherukattuparambil",
+        role: "IPR & Research Lead",
+        image: "/img/team/2024/shamil.jpg",
+        linkedin: "https://www.linkedin.com/in/shamil-shameer-336747272/",
         github: "#"
       },
       {
-        name: "Hridyaprabha M ",
-        role: "CO-CEO",
-        image: "/img/team/2024/haridapriya.jpg",
+        name: "Abin N R",
+        role: "IPR & Research Co-Lead",
+        image: "/img/team/2024/abin.jpg",
         linkedin: "#",
         github: "#"
       },
-
     ]
   },
 
@@ -201,33 +200,56 @@ const TeamMember = ({ member }) => {
 
   return (
     <motion.div
-      className="bg-white rounded-xl shadow-lg p-6 text-center relative"
+      className="bg-white rounded-xl shadow-lg relative overflow-hidden group"
       onMouseEnter={() => setShowLinkedIn(true)}
       onMouseLeave={() => setShowLinkedIn(false)}
     >
-      <div className="relative w-40 h-40 mx-auto mb-4">
+      <div className="relative w-full aspect-square">
+        {/* Profile Image */}
         <img
           src={member.image}
           alt={member.name}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover object-center group-hover:opacity-80 transition-all duration-300"
           onError={(e) => {
-            e.target.src = 'https://via.placeholder.com/150?text=' + member.name.charAt(0);
+            e.target.src = `https://via.placeholder.com/150?text=${member.name.charAt(0)}`;
           }}
         />
-        {showLinkedIn && member.linkedin && (
-          <motion.a
-            href={member.linkedin}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-teal-500 hover:bg-teal-700 text-white rounded-full p-2 transition-opacity"
-            style={{ opacity: showLinkedIn ? 1 : 0 }}
+
+        {/* LinkedIn Popup */}
+        {member.linkedin && (
+          <motion.div
+            className="absolute bottom-4 left-0 w-full flex justify-center"
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ 
+              y: showLinkedIn ? 0 : 100,
+              opacity: showLinkedIn ? 1 : 0 
+            }}
+            transition={{ 
+              type: "spring",
+              stiffness: 400,
+              damping: 25
+            }}
           >
-            <FaLinkedin size={20} />
-          </motion.a>
+            <motion.a
+              href={member.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-white text-blue-600 px-4 py-2 rounded-full shadow-lg hover:bg-blue-600 hover:text-white transition-all duration-300 flex items-center gap-2"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <FaLinkedin size={20} />
+              <span className="font-medium">Connect</span>
+            </motion.a>
+          </motion.div>
         )}
       </div>
-      <h3 className="text-xl font-bold text-blue-900 mb-2">{member.name}</h3>
-      <p className="text-blue-600 font-semibold mb-2">{member.role}</p>
+
+      {/* Member Info */}
+      <div className="p-4 bg-white">
+        <h3 className="text-xl font-bold text-blue-900 mb-2">{member.name}</h3>
+        <p className="text-blue-600 font-semibold">{member.role}</p>
+      </div>
     </motion.div>
   );
 };
@@ -244,8 +266,7 @@ const HeroSection = () => (
       <h2 className="text-3xl text-green-500 mb-4">It's our team!</h2>
       <FaInfoCircle className="inline-block text-gray-600 text-xl mb-4" />
       <p className="text-xl text-gray-600 max-w-3xl">
-        The soul of an organisation is its team who consistently works for its upliftment.
-        IEDC TKMCE holds the most creative and innovative leaders to guide you to your dreams and visions.
+      we welcome all—no prior experience needed! Just bring your enthusiasm and a sense of adventure. As for an application process, we believe in 'Join now, ask questions later! 
       </p>
     </div>
     <div className="w-1/2">
