@@ -37,12 +37,12 @@ const HomePage = () => {
                 mentorship, resources, and opportunities to build the next generation of leaders.
               </p>
               <div className="flex flex-wrap gap-4">
-                <button className="px-8 py-3 bg-cta text-white font-semibold rounded-lg hover:bg-cta-hover transition-colors shadow-lg">
+                <a href="/events" className="px-8 py-3 bg-cta text-white font-semibold rounded-lg hover:bg-cta-hover transition-colors shadow-lg">
                   Explore Programs
-                </button>
-                <button className="px-8 py-3 border-2 border-accent text-accent font-semibold rounded-lg hover:bg-accent hover:text-white transition-colors">
+                </a>
+                <a href="https://www.whatsapp.com/channel/0029VaAYL1D2f3EAIot5Yl2N" className="px-8 py-3 border-2 border-accent text-accent font-semibold rounded-lg hover:bg-accent hover:text-white transition-colors" target='_blank'>
                   Join Us
-                </button>
+                </a>
               </div>
             </div>
             
@@ -210,9 +210,9 @@ const HomePage = () => {
             Join IEDC LBSCEK and be a part of a growing community of innovators and entrepreneurs
             shaping the future.
           </p>
-          <button className="px-8 py-3 bg-cta text-white font-semibold rounded-lg hover:bg-cta-hover transition-colors shadow-lg mx-auto">
+          <a href="https://www.whatsapp.com/channel/0029VaAYL1D2f3EAIot5Yl2N" className="px-8 py-3 bg-cta text-white font-semibold rounded-lg hover:bg-cta-hover transition-colors shadow-lg mx-auto" target='_blank'>
             Join IEDC LBSCEK Today
-          </button>
+          </a>
         </div>
       </section>
 

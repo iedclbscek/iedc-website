@@ -69,6 +69,7 @@ const TeamCard = ({ member }) => {
               href={`mailto:${member.email}`}
               className="text-text-light hover:text-accent transition-colors"
               aria-label="Email Contact"
+              target='_blank'
             >
               <FaEnvelope size={18} />
             </a>

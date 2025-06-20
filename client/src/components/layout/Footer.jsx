@@ -24,16 +24,16 @@ const Footer = () => {
             </p>
             
             <div className="flex space-x-4 mb-6">
-              <a href="https://x.com/lbsiedc" className="w-10 h-10 rounded-full bg-background flex items-center justify-center hover:bg-accent/10 text-accent transition-colors" aria-label="Twitter">
+              <a href="https://x.com/lbsiedc" className="w-10 h-10 rounded-full bg-background flex items-center justify-center hover:bg-accent/10 text-accent transition-colors" aria-label="Twitter"  target='_blank'>
                 <FaTwitter className="w-5 h-5" />
               </a>
-              <a href="https://www.linkedin.com/company/iedc-lbscek/" className="w-10 h-10 rounded-full bg-background flex items-center justify-center hover:bg-accent/10 text-accent transition-colors" aria-label="LinkedIn">
+              <a href="https://www.linkedin.com/company/iedc-lbscek/" className="w-10 h-10 rounded-full bg-background flex items-center justify-center hover:bg-accent/10 text-accent transition-colors" aria-label="LinkedIn" target='_blank'>
                 <FaLinkedin className="w-5 h-5" />
               </a>
-              <a href="https://www.instagram.com/lbsiedc/" className="w-10 h-10 rounded-full bg-background flex items-center justify-center hover:bg-accent/10 text-accent transition-colors" aria-label="Instagram">
+              <a href="https://www.instagram.com/lbsiedc/" className="w-10 h-10 rounded-full bg-background flex items-center justify-center hover:bg-accent/10 text-accent transition-colors" aria-label="Instagram" target='_blank'>
                 <FaInstagram className="w-5 h-5" />
               </a>
-              <a href="https://www.facebook.com/iedclbs" className="w-10 h-10 rounded-full bg-background flex items-center justify-center hover:bg-accent/10 text-accent transition-colors" aria-label="Facebook">
+              <a href="https://www.facebook.com/iedclbs" className="w-10 h-10 rounded-full bg-background flex items-center justify-center hover:bg-accent/10 text-accent transition-colors" aria-label="Facebook" target='_blank'>
                 <FaFacebookF className="w-5 h-5" />
               </a>
             </div>
