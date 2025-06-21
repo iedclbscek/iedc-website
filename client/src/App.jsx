@@ -20,7 +20,7 @@ const PlaceholderPage = ({ title }) => (
   <div className="min-h-screen pt-24 pb-16 px-6">
     <div className="max-w-7xl mx-auto">
       <h1 className="text-3xl font-bold mb-6">{title}</h1>
-      <p className="text-gray-600">This page is under construction.</p>
+      <p className="text-gray-600">🚧This page is under construction.🏗️</p>
     </div>
   </div>
 );
