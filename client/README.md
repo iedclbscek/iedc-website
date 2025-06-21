@@ -10,3 +10,22 @@ Currently, two official plugins are available:
 ## Expanding the ESLint configuration
 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+
+# IEDC Website
+
+## Direct URL Access Fix
+
+If you're having issues with direct URL access (e.g., going directly to `/team`), there are just two things you need:
+
+### 1. Keep these files in your project:
+
+- `render.yaml` in the root directory (has the correct destination: `/index.html`)
+- `_redirects` file in client/public
+
+### 2. In Render Dashboard:
+
+- Go to your site → Settings → Redirects/Rewrites
+- Add a rewrite rule: `/* → /index.html`
+- Save the changes
+
+That's it. Your app should now work with direct URL access.
