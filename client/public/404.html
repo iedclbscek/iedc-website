@@ -4,21 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IEDC LBSCEK</title>
-    <script>
-      // Grab the path and redirect to the main app with that path
-      (function () {
-        var path = window.location.pathname;
-        var redirectUrl = window.location.origin;
-
-        // Store the path in session storage
-        sessionStorage.setItem("redirectPath", path);
-
-        // Redirect to the main page which will handle the path
-        window.location.href = redirectUrl;
-      })();
-    </script>
+    <meta http-equiv="refresh" content="0;url=/" />
   </head>
   <body>
-    <p>Redirecting...</p>
+    <p>Redirecting to homepage...</p>
   </body>
 </html>

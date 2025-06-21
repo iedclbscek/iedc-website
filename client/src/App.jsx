@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
 
 // Components
 import Navbar from './components/layout/Navbar';
@@ -43,9 +43,8 @@ const AppContent = () => {
     return () => {
       // Cleanup if needed
     };
-  }, [location.pathname]);
-  // Only show loader on home page and handle direct navigation
-  if (loading && (location.pathname === '/' || location.pathname === '/index.html')) {
+  }, [location.pathname]);  // Only show loader on home page
+  if (loading && location.pathname === '/') {
     return <Loader onComplete={handleLoadComplete} />;
   }
 
@@ -71,13 +70,12 @@ const AppContent = () => {
 };
 
 function App() {
-  // The PUBLIC_URL env variable helps with subdirectory deployments if needed
-  // Render will serve all routes from the root, so basename is typically "/"
+  // Using HashRouter for reliable routing without server configuration
   return (
-    <BrowserRouter basename="/">
+    <HashRouter>
       <ScrollToTop />
       <AppContent />
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
