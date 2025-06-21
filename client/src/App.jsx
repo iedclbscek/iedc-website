@@ -44,9 +44,8 @@ const AppContent = () => {
       // Cleanup if needed
     };
   }, [location.pathname]);
-
-  // Only show loader on home page
-  if (loading && location.pathname === '/') {
+  // Only show loader on home page and handle direct navigation
+  if (loading && (location.pathname === '/' || location.pathname === '/index.html')) {
     return <Loader onComplete={handleLoadComplete} />;
   }
 
@@ -72,8 +71,10 @@ const AppContent = () => {
 };
 
 function App() {
+  // The PUBLIC_URL env variable helps with subdirectory deployments if needed
+  // Render will serve all routes from the root, so basename is typically "/"
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/">
       <ScrollToTop />
       <AppContent />
     </BrowserRouter>

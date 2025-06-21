@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>IEDC LBSCEK</title>
+    <meta
+      name="description"
+      content="Innovation and Entrepreneurship Development Cell, LBS College of Engineering Kasaragod"
+    />
+    <link rel="icon" href="/favicon.ico" />
+
+    <!-- Ensure proper behavior for direct URL access -->
+    <script>
+      // This helps with 404 issues on direct URL access
+      (function () {
+        // Get the current path
+        var path = window.location.pathname;
+        // If we got a 404 on a path that should be handled by the router
+        if (path !== "/" && path !== "/index.html") {
+          // Store the path to restore after reload
+          sessionStorage.setItem("redirectPath", path);
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+
+    <!-- Handle potential 404 redirects -->
+    <script>
+      (function () {
+        // Check if we have a stored path from a 404
+        var redirectPath = sessionStorage.getItem("redirectPath");
+        if (redirectPath) {
+          // Clear the stored path
+          sessionStorage.removeItem("redirectPath");
+          // If we're on the root path now (after a refresh/reload)
+          if (
+            window.location.pathname === "/" ||
+            window.location.pathname === "/index.html"
+          ) {
+            // Push the original path to history once the app loads
+            window.addEventListener("DOMContentLoaded", function () {
+              setTimeout(function () {
+                window.history.pushState(null, "", redirectPath);
+              }, 300);
+            });
+          }
+        }
+      })();
+    </script>
+  </body>
+</html>
