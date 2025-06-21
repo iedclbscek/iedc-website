@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 
 // Components
 import Navbar from './components/layout/Navbar';
@@ -70,12 +70,12 @@ const AppContent = () => {
 };
 
 function App() {
-  // Using HashRouter for reliable routing without server configuration
+  // Using BrowserRouter for clean URLs (requires proper server configuration)
   return (
-    <HashRouter>
+    <BrowserRouter>
       <ScrollToTop />
       <AppContent />
-    </HashRouter>
+    </BrowserRouter>
   );
 }
 
