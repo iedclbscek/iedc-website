@@ -8,17 +8,29 @@ const TeamPage = () => {
   const [teamMembers, setTeamMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // Add year filter
   const [filteredMembers, setFilteredMembers] = useState({
     facultyMembers: [],
     coreTeam: [],
     teamMembers: []
   });
 
+  // Generate available years (2020 to current year + 1)
+  const currentYear = new Date().getFullYear();
+  const availableYears = [];
+  for (let year = 2020; year <= currentYear + 1; year++) {
+    availableYears.push(year);
+  }
+
   // Fetch team members from API
   useEffect(() => {
     const fetchTeamMembers = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/public-team`);
+        const url = selectedYear 
+          ? `${import.meta.env.VITE_API_URL}/api/users/public-team?year=${selectedYear}`
+          : `${import.meta.env.VITE_API_URL}/api/users/public-team`;
+        
+        const response = await fetch(url);
         if (response.ok) {
           const data = await response.json();
           // Handle the server response format { success, users, count }
@@ -41,7 +53,7 @@ const TeamPage = () => {
     };
 
     fetchTeamMembers();
-  }, []);
+  }, [selectedYear]); // Add selectedYear as dependency
 
   // Organize members by category and filter based on search query
   useEffect(() => {
@@ -54,22 +66,41 @@ const TeamPage = () => {
       // Filter out admin users from public display
       const publicMembers = members.filter(member => member.role !== 'admin');
       
-      const facultyMembers = publicMembers.filter(member => 
-        member.role === 'nodal_officer' || 
-        (member.teamRole && member.teamRole.toLowerCase().includes('faculty'))
-      );
+      // Helper function to get role and team role for the selected year
+      const getRoleForYear = (member, year) => {
+        const yearlyRole = member.yearlyRoles?.find(yr => yr.year === year);
+        if (yearlyRole) {
+          return {
+            role: yearlyRole.role,
+            teamRole: yearlyRole.teamRole
+          };
+        }
+        // Fallback to general role if no yearly role found
+        return {
+          role: member.role,
+          teamRole: member.teamRole
+        };
+      };
       
-      const coreTeam = publicMembers.filter(member => 
-        ['ceo', 'lead'].includes(member.role) ||
-        (member.teamRole && ['President', 'Vice President', 'Secretary', 'Treasurer'].includes(member.teamRole))
-      );
+      const facultyMembers = publicMembers.filter(member => {
+        const memberRole = getRoleForYear(member, selectedYear);
+        return memberRole.role === 'nodal_officer' || 
+               (memberRole.teamRole && memberRole.teamRole.toLowerCase().includes('faculty'));
+      });
       
-      const teamMembersFiltered = publicMembers.filter(member => 
-        !['ceo', 'lead', 'nodal_officer'].includes(member.role) &&
-        !(member.teamRole && ['President', 'Vice President', 'Secretary', 'Treasurer', 'Faculty'].some(role => 
-          member.teamRole.toLowerCase().includes(role.toLowerCase())
-        ))
-      );
+      const coreTeam = publicMembers.filter(member => {
+        const memberRole = getRoleForYear(member, selectedYear);
+        return ['ceo', 'lead'].includes(memberRole.role) ||
+               (memberRole.teamRole && ['President', 'Vice President', 'Secretary', 'Treasurer'].includes(memberRole.teamRole));
+      });
+      
+      const teamMembersFiltered = publicMembers.filter(member => {
+        const memberRole = getRoleForYear(member, selectedYear);
+        return !['ceo', 'lead', 'nodal_officer'].includes(memberRole.role) &&
+               !(memberRole.teamRole && ['President', 'Vice President', 'Secretary', 'Treasurer', 'Faculty'].some(role => 
+                 memberRole.teamRole.toLowerCase().includes(role.toLowerCase())
+               ));
+      });
       
       return { facultyMembers, coreTeam, teamMembers: teamMembersFiltered };
     };
@@ -80,17 +111,35 @@ const TeamPage = () => {
     }
     
     const query = searchQuery.toLowerCase();
+    // Helper function to get role and team role for the selected year for search
+    const getRoleForYear = (member, year) => {
+      const yearlyRole = member.yearlyRoles?.find(yr => yr.year === year);
+      if (yearlyRole) {
+        return {
+          role: yearlyRole.role,
+          teamRole: yearlyRole.teamRole
+        };
+      }
+      return {
+        role: member.role,
+        teamRole: member.teamRole
+      };
+    };
+    
     // Ensure teamMembers is an array before filtering and exclude admin users
     const filtered = Array.isArray(teamMembers) ? teamMembers.filter(
-      member => 
-        member.role !== 'admin' && // Exclude admin users from search results too
-        (member.name?.toLowerCase().includes(query) || 
-        member.role?.toLowerCase().includes(query) ||
-        member.teamRole?.toLowerCase().includes(query))
+      member => {
+        if (member.role === 'admin') return false; // Exclude admin users from search results
+        
+        const memberRole = getRoleForYear(member, selectedYear);
+        return member.name?.toLowerCase().includes(query) || 
+               memberRole.role?.toLowerCase().includes(query) ||
+               memberRole.teamRole?.toLowerCase().includes(query);
+      }
     ) : [];
     
     setFilteredMembers(organizeMembersByCategory(filtered));
-  }, [searchQuery, teamMembers]);
+  }, [searchQuery, teamMembers, selectedYear]); // Add selectedYear to dependencies
   
   return (
     <div className="min-h-screen bg-primary/5">
@@ -120,15 +169,36 @@ const TeamPage = () => {
       {/* Main content */}
       <section className="py-8">
         <div className="container mx-auto px-4">
-          {/* Search bar */}
-          <div className="max-w-md mx-auto mb-8">
-            <input
-              type="text"
-              placeholder="Search by name or role..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg border border-primary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-colors"
-            />
+          {/* Search and Filter controls */}
+          <div className="max-w-2xl mx-auto mb-8 space-y-4">
+            {/* Year Filter */}
+            <div className="text-center">
+              <label className="block text-sm font-medium text-text-dark mb-2">
+                Select Team Year
+              </label>
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                className="px-4 py-2 rounded-lg border border-primary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-colors"
+              >
+                {availableYears.map(year => (
+                  <option key={year} value={year}>
+                    {year} {year === currentYear ? '(Current)' : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            {/* Search bar */}
+            <div>
+              <input
+                type="text"
+                placeholder="Search by name or role..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-2 rounded-lg border border-primary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-colors"
+              />
+            </div>
           </div>
           
           {/* Team sections */}
@@ -149,7 +219,7 @@ const TeamPage = () => {
                   <h2 className="text-2xl font-bold text-text-dark mb-6 text-center">Faculty Members</h2>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                     {filteredMembers.facultyMembers.map(member => (
-                      <TeamCard key={member._id || member.id} member={member} />
+                      <TeamCard key={member._id || member.id} member={member} selectedYear={selectedYear} />
                     ))}
                   </div>
                 </div>
@@ -161,7 +231,7 @@ const TeamPage = () => {
                   <h2 className="text-2xl font-bold text-text-dark mb-6 text-center">Core Team</h2>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                     {filteredMembers.coreTeam.map(member => (
-                      <TeamCard key={member._id || member.id} member={member} />
+                      <TeamCard key={member._id || member.id} member={member} selectedYear={selectedYear} />
                     ))}
                   </div>
                 </div>
@@ -173,7 +243,7 @@ const TeamPage = () => {
                   <h2 className="text-2xl font-bold text-text-dark mb-6 text-center">Team Members</h2>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                     {filteredMembers.teamMembers.map(member => (
-                      <TeamCard key={member._id || member.id} member={member} />
+                      <TeamCard key={member._id || member.id} member={member} selectedYear={selectedYear} />
                     ))}
                   </div>
                 </div>

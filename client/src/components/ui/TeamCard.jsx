@@ -2,11 +2,29 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FaLinkedin, FaGithub, FaEnvelope } from 'react-icons/fa';
 
-const TeamCard = ({ member }) => {
+const TeamCard = ({ member, selectedYear }) => {
   const [isHovered, setIsHovered] = useState(false);
   
   // Early return if member is undefined
   if (!member) return null;
+  
+  // Get role and team role for the selected year
+  const getRoleForYear = (member, year) => {
+    const yearlyRole = member.yearlyRoles?.find(yr => yr.year === year);
+    if (yearlyRole) {
+      return {
+        role: yearlyRole.role,
+        teamRole: yearlyRole.teamRole
+      };
+    }
+    // Fallback to general role if no yearly role found
+    return {
+      role: member.role,
+      teamRole: member.teamRole
+    };
+  };
+
+  const { role, teamRole } = getRoleForYear(member, selectedYear);
   
   // Default image if member image is not available
   const defaultImage = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name || 'User')}&background=random`;
@@ -84,7 +102,7 @@ const TeamCard = ({ member }) => {
       
       {/* Member name and role */}
       <h3 className="font-bold text-text-dark text-sm">{member.name || 'Name Unavailable'}</h3>
-      <p className="text-accent text-xs font-medium">{member.teamRole || member.role || 'Team Member'}</p>
+      <p className="text-accent text-xs font-medium">{teamRole || role || 'Team Member'}</p>
     </motion.div>
   );
 };

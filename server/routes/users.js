@@ -134,8 +134,10 @@ router.get(
 // @access  Public
 router.get("/public-team", async (req, res) => {
   try {
+    const { year } = req.query; // Optional year filter
+    
     // Only get active users with basic public information, excluding admin users
-    const users = await User.find({
+    let query = {
       isActive: true,
       role: { $ne: "admin" }, // Exclude admin users from public display
       $or: [
@@ -145,20 +147,39 @@ router.get("/public-team", async (req, res) => {
           },
         },
         { teamRole: { $exists: true, $ne: "" } }, // Users with team roles
+        { "yearlyRoles.role": { $in: ["nodal_officer", "ceo", "lead", "co_lead", "coordinator"] } }, // Users with yearly roles
+        { "yearlyRoles.teamRole": { $exists: true, $ne: "" } }, // Users with yearly team roles
       ],
-    })
+    };
+
+    // Add year filter if provided
+    if (year) {
+      query.$and = [
+        query,
+        {
+          $or: [
+            { teamYears: parseInt(year) }, // Include users with the specific year in teamYears
+            { teamYear: year.toString() }, // Backward compatibility with single teamYear
+            { "yearlyRoles.year": parseInt(year) } // Include users with yearly roles for the specific year
+          ]
+        }
+      ];
+    }
+
+    const users = await User.find(query)
       .sort({
         role: 1, // Sort by role priority
         createdAt: -1,
       })
       .select(
-        "name teamRole role department year profilePicture linkedin github bio"
+        "name teamRole role department year teamYear teamYears yearlyRoles profilePicture linkedin github bio"
       );
 
     res.status(200).json({
       success: true,
       users,
       count: users.length,
+      year: year ? parseInt(year) : null,
     });
   } catch (error) {
     console.error("Get public team members error:", error);

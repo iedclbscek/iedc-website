@@ -52,29 +52,31 @@ const userSchema = new mongoose.Schema(
       default: "member",
     },
     // Year-specific roles for multi-year members
-    yearlyRoles: [{
-      year: {
-        type: Number,
-        required: true
+    yearlyRoles: [
+      {
+        year: {
+          type: Number,
+          required: true,
+        },
+        role: {
+          type: String,
+          enum: [
+            "admin",
+            "nodal_officer",
+            "ceo",
+            "lead",
+            "co_lead",
+            "coordinator",
+            "member",
+          ],
+          required: true,
+        },
+        teamRole: {
+          type: String,
+          trim: true,
+        },
       },
-      role: {
-        type: String,
-        enum: [
-          "admin",
-          "nodal_officer", 
-          "ceo",
-          "lead",
-          "co_lead",
-          "coordinator",
-          "member",
-        ],
-        required: true
-      },
-      teamRole: {
-        type: String,
-        trim: true
-      }
-    }],
+    ],
     teamRole: {
       type: String,
       trim: true,

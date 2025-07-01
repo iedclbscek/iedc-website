@@ -244,11 +244,14 @@ router.post(
         role: role, // Keep primary role for backward compatibility
         teamYear: teamYears[0]?.toString() || "2025", // Keep first year for backward compatibility
         teamYears: teamYears, // Store all team years
-        yearlyRoles: yearlyRoles.length > 0 ? yearlyRoles : teamYears.map(year => ({
-          year: year,
-          role: role || "member",
-          teamRole: teamRole || ""
-        })), // Create yearly roles from team years if not provided
+        yearlyRoles:
+          yearlyRoles.length > 0
+            ? yearlyRoles
+            : teamYears.map((year) => ({
+                year: year,
+                role: role || "member",
+                teamRole: teamRole || "",
+              })), // Create yearly roles from team years if not provided
         isActive: sendEmail, // Only active if email is sent (current year members)
         isEmailVerified: false,
       };
