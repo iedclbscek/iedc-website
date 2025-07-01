@@ -135,36 +135,26 @@ router.get(
 router.get("/public-team", async (req, res) => {
   try {
     const { year } = req.query; // Optional year filter
-    
-    // Only get active users with basic public information, excluding admin users
+
+    console.log(`📊 Fetching public team members for year: ${year || "all"}`);
+
+    // Base query - only get active users, excluding admin users
     let query = {
       isActive: true,
       role: { $ne: "admin" }, // Exclude admin users from public display
-      $or: [
-        {
-          role: {
-            $in: ["nodal_officer", "ceo", "lead", "co_lead", "coordinator"],
-          },
-        },
-        { teamRole: { $exists: true, $ne: "" } }, // Users with team roles
-        { "yearlyRoles.role": { $in: ["nodal_officer", "ceo", "lead", "co_lead", "coordinator"] } }, // Users with yearly roles
-        { "yearlyRoles.teamRole": { $exists: true, $ne: "" } }, // Users with yearly team roles
-      ],
     };
 
     // Add year filter if provided
     if (year) {
-      query.$and = [
-        query,
-        {
-          $or: [
-            { teamYears: parseInt(year) }, // Include users with the specific year in teamYears
-            { teamYear: year.toString() }, // Backward compatibility with single teamYear
-            { "yearlyRoles.year": parseInt(year) } // Include users with yearly roles for the specific year
-          ]
-        }
+      const yearInt = parseInt(year);
+      query.$or = [
+        { teamYears: yearInt }, // Include users with the specific year in teamYears
+        { teamYear: year.toString() }, // Backward compatibility with single teamYear
+        { "yearlyRoles.year": yearInt }, // Include users with yearly roles for the specific year
       ];
     }
+
+    console.log("📊 MongoDB query:", JSON.stringify(query, null, 2));
 
     const users = await User.find(query)
       .sort({
@@ -172,8 +162,10 @@ router.get("/public-team", async (req, res) => {
         createdAt: -1,
       })
       .select(
-        "name teamRole role department year teamYear teamYears yearlyRoles profilePicture linkedin github bio"
+        "name teamRole role department year teamYear teamYears yearlyRoles profilePicture linkedin github bio email"
       );
+
+    console.log(`📊 Found ${users.length} team members`);
 
     res.status(200).json({
       success: true,
@@ -183,9 +175,11 @@ router.get("/public-team", async (req, res) => {
     });
   } catch (error) {
     console.error("Get public team members error:", error);
+    console.error("Error stack:", error.stack);
     res.status(500).json({
       success: false,
       message: "An error occurred while fetching team members",
+      error: error.message,
     });
   }
 });
