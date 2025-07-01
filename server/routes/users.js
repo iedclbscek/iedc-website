@@ -141,13 +141,7 @@ router.get("/public-team", async (req, res) => {
       $or: [
         {
           role: {
-            $in: [
-              "nodal_officer",
-              "ceo",
-              "lead",
-              "co_lead",
-              "coordinator",
-            ],
+            $in: ["nodal_officer", "ceo", "lead", "co_lead", "coordinator"],
           },
         },
         { teamRole: { $exists: true, $ne: "" } }, // Users with team roles

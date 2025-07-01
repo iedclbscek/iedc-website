@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
+import { FaTrash, FaToggleOn, FaToggleOff } from 'react-icons/fa';
 import axios from 'axios';
 
 const TeamManagement = () => {
@@ -124,6 +125,35 @@ const TeamManagement = () => {
     } catch (error) {
       console.error('Error updating user status:', error);
       toast.error('Failed to update user status');
+    }
+  };
+
+  const deleteMember = async (userId, memberName) => {
+    // Confirm deletion
+    if (!window.confirm(`Are you sure you want to permanently delete ${memberName}? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.delete(
+        `${import.meta.env.VITE_API_URL}/api/users/${userId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      if (response.status === 200) {
+        toast.success(`${memberName} has been deleted successfully`);
+        fetchTeamMembers();
+      }
+    } catch (error) {
+      console.error('Error deleting member:', error);
+      if (error.response?.status === 400 && error.response?.data?.error === "Cannot delete own account") {
+        toast.error('You cannot delete your own account');
+      } else {
+        toast.error(error.response?.data?.message || 'Failed to delete member');
+      }
     }
   };
 
@@ -389,16 +419,26 @@ const TeamManagement = () => {
                       {member.email}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button
-                        onClick={() => toggleUserStatus(member._id, member.isActive)}
-                        className={`${
-                          member.isActive
-                            ? 'text-red-600 hover:text-red-900'
-                            : 'text-green-600 hover:text-green-900'
-                        }`}
-                      >
-                        {member.isActive ? 'Deactivate' : 'Activate'}
-                      </button>
+                      <div className="flex items-center space-x-3">
+                        <button
+                          onClick={() => toggleUserStatus(member._id, member.isActive)}
+                          className={`inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded ${
+                            member.isActive
+                              ? 'text-red-700 bg-red-100 hover:bg-red-200'
+                              : 'text-green-700 bg-green-100 hover:bg-green-200'
+                          } transition-colors`}
+                        >
+                          {member.isActive ? <FaToggleOff className="mr-1" /> : <FaToggleOn className="mr-1" />}
+                          {member.isActive ? 'Deactivate' : 'Activate'}
+                        </button>
+                        <button
+                          onClick={() => deleteMember(member._id, member.name)}
+                          className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-red-700 bg-red-100 hover:bg-red-200 transition-colors"
+                        >
+                          <FaTrash className="mr-1" />
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
