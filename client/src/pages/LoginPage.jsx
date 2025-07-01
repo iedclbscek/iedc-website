@@ -199,7 +199,13 @@ const LoginPage = () => {
             </motion.button>
           </div>
 
-          <div className="text-center">
+          <div className="text-center space-y-2">
+            <Link
+              to="/forgot-password"
+              className="text-sm text-accent hover:text-accent-hover transition-colors duration-200"
+            >
+              Forgot your password?
+            </Link>
             <p className="text-sm text-text-light">
               Don't have access?{' '}
               <span className="text-accent">

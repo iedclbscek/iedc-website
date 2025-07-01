@@ -19,6 +19,8 @@ import TeamPage from './pages/TeamPage';
 import CommunitiesPage from './pages/CommunitiesPage';
 import CommunityPage from './pages/CommunityPage';
 import LoginPage from './pages/LoginPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import SetPasswordPage from './pages/SetPasswordPage';
 import DashboardPage from './pages/DashboardPage';
 
@@ -56,6 +58,8 @@ const AppContent = () => {
   // Dashboard routes don't need navbar/footer
   const isDashboardRoute = location.pathname.startsWith('/dashboard') || 
                            location.pathname === '/login' || 
+                           location.pathname === '/forgot-password' ||
+                           location.pathname.startsWith('/reset-password') ||
                            location.pathname.startsWith('/set-password');
 
   if (isDashboardRoute) {
@@ -63,6 +67,8 @@ const AppContent = () => {
       <div className="min-h-screen">
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
           <Route path="/set-password/:token" element={<SetPasswordPage />} />
           <Route path="/dashboard/*" element={<DashboardPage />} />
         </Routes>

@@ -33,6 +33,8 @@ This is a full-stack web application built for IEDC LBS CEK to showcase their ac
 - ✅ Team member invitation system
 - ✅ User status management (Active/Inactive)
 - ✅ Profile management with photo uploads
+- ✅ Admin profile editing for all users (email, role, year, status)
+- ✅ Admin password reset for any user
 - ✅ Bulk operations and filtering
 
 ### 🛠 Technical Features
@@ -41,6 +43,8 @@ This is a full-stack web application built for IEDC LBS CEK to showcase their ac
 - ✅ Secure password hashing
 - ✅ Input validation and sanitization
 - ✅ Rate limiting for API security
+- ✅ Forgot password and reset functionality
+- ✅ Email-based password recovery
 - ✅ Responsive design for all devices
 - ✅ Toast notifications for user feedback
 - ✅ RESTful API architecture
@@ -64,6 +68,7 @@ This is a full-stack web application built for IEDC LBS CEK to showcase their ac
 - bcryptjs for password hashing
 - Multer for file uploads
 - Express Rate Limit for security
+- Nodemailer for email services
 
 ## Project Structure
 

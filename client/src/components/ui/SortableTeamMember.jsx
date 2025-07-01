@@ -1,9 +1,9 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { FaGripVertical, FaToggleOn, FaToggleOff, FaTrash } from 'react-icons/fa';
+import { FaGripVertical, FaToggleOn, FaToggleOff, FaTrash, FaEdit } from 'react-icons/fa';
 
-const SortableTeamMember = ({ member, selectedYear, onToggleStatus, onDelete }) => {
+const SortableTeamMember = ({ member, selectedYear, onToggleStatus, onDelete, onEdit }) => {
   const {
     attributes,
     listeners,
@@ -140,6 +140,13 @@ const SortableTeamMember = ({ member, selectedYear, onToggleStatus, onDelete }) 
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
         <div className="flex items-center space-x-3">
+          <button
+            onClick={() => onEdit(member)}
+            className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-blue-700 bg-blue-100 hover:bg-blue-200 transition-colors"
+          >
+            <FaEdit className="mr-1" />
+            Edit
+          </button>
           <button
             onClick={() => onToggleStatus(member._id, member.isActive)}
             className={`inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded ${

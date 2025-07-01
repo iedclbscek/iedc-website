@@ -4,6 +4,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { authenticateToken, authorizeRoles } from "../middleware/auth.js";
 import User from "../models/User.js";
+import { body, validationResult } from "express-validator";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -509,5 +510,191 @@ router.get("/profile", authenticateToken, async (req, res) => {
     });
   }
 });
+
+// @route   PUT /api/users/:id/admin-edit
+// @desc    Admin edit any user's profile (admin only)
+// @access  Private
+router.put(
+  "/:id/admin-edit",
+  authenticateToken,
+  authorizeRoles("admin"),
+  upload.single("profilePicture"),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const {
+        name,
+        email,
+        role,
+        teamRole,
+        department,
+        year,
+        phoneNumber,
+        linkedin,
+        github,
+        bio,
+        teamYears,
+        yearlyRoles,
+        isActive,
+      } = req.body;
+
+      // Build update object
+      const updateData = {};
+
+      if (name && name.trim()) updateData.name = name.trim();
+      if (email && email.trim()) {
+        // Check if email is already taken by another user
+        const existingUser = await User.findOne({
+          email: email.trim().toLowerCase(),
+          _id: { $ne: id },
+        });
+        if (existingUser) {
+          return res.status(400).json({
+            success: false,
+            message: "Email is already taken by another user",
+          });
+        }
+        updateData.email = email.trim().toLowerCase();
+      }
+      if (role) updateData.role = role;
+      if (teamRole !== undefined) updateData.teamRole = teamRole.trim();
+      if (department !== undefined) updateData.department = department.trim();
+      if (year !== undefined && year !== null && year !== "") {
+        const parsedYear = parseInt(year);
+        if (!isNaN(parsedYear)) {
+          updateData.year = parsedYear;
+        }
+      }
+      if (phoneNumber !== undefined)
+        updateData.phoneNumber = phoneNumber.trim();
+      if (linkedin !== undefined) updateData.linkedin = linkedin.trim();
+      if (github !== undefined) updateData.github = github.trim();
+      if (bio !== undefined) updateData.bio = bio.trim();
+      if (isActive !== undefined) updateData.isActive = isActive;
+
+      // Handle team years and yearly roles
+      if (teamYears) {
+        try {
+          const parsedTeamYears = Array.isArray(teamYears)
+            ? teamYears
+            : JSON.parse(teamYears);
+          updateData.teamYears = parsedTeamYears.map((year) => parseInt(year));
+        } catch (e) {
+          return res.status(400).json({
+            success: false,
+            message: "Invalid team years format",
+          });
+        }
+      }
+
+      if (yearlyRoles) {
+        try {
+          const parsedYearlyRoles = Array.isArray(yearlyRoles)
+            ? yearlyRoles
+            : JSON.parse(yearlyRoles);
+          updateData.yearlyRoles = parsedYearlyRoles;
+        } catch (e) {
+          return res.status(400).json({
+            success: false,
+            message: "Invalid yearly roles format",
+          });
+        }
+      }
+
+      // Handle profile picture upload
+      if (req.file) {
+        updateData.profilePicture = `/uploads/profiles/${req.file.filename}`;
+      }
+
+      const user = await User.findByIdAndUpdate(id, updateData, {
+        new: true,
+        runValidators: true,
+      }).select("-password -passwordResetToken -passwordResetExpires");
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        message: "User profile updated successfully",
+        user,
+      });
+    } catch (error) {
+      console.error("Admin edit user error:", error);
+
+      if (error.name === "ValidationError") {
+        return res.status(400).json({
+          success: false,
+          message: "Validation error",
+          details: Object.values(error.errors).map((err) => err.message),
+        });
+      }
+
+      res.status(500).json({
+        success: false,
+        message: "An error occurred while updating user profile",
+      });
+    }
+  }
+);
+
+// @route   POST /api/users/:id/reset-password-admin
+// @desc    Admin reset any user's password (admin only)
+// @access  Private
+router.post(
+  "/:id/reset-password-admin",
+  authenticateToken,
+  authorizeRoles("admin"),
+  [
+    body("newPassword")
+      .isLength({ min: 6 })
+      .withMessage("Password must be at least 6 characters long"),
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          message: "Validation error",
+          details: errors.array().map((err) => err.msg),
+        });
+      }
+
+      const { id } = req.params;
+      const { newPassword } = req.body;
+
+      const user = await User.findById(id);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+      }
+
+      // Update password (will be hashed by pre-save hook)
+      user.password = newPassword;
+      // Clear any existing reset tokens
+      user.passwordResetToken = undefined;
+      user.passwordResetExpires = undefined;
+      await user.save();
+
+      res.status(200).json({
+        success: true,
+        message: `Password for ${user.name} has been reset successfully`,
+      });
+    } catch (error) {
+      console.error("Admin reset password error:", error);
+      res.status(500).json({
+        success: false,
+        message: "An error occurred while resetting the password",
+      });
+    }
+  }
+);
 
 export default router;

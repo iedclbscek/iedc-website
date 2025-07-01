@@ -17,6 +17,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import SortableTeamMember from './ui/SortableTeamMember';
+import UserEditModal from './ui/UserEditModal';
 
 const TeamManagement = () => {
   const [loading, setLoading] = useState(false);
@@ -38,6 +39,8 @@ const TeamManagement = () => {
     yearlyRoles: {} // Object with year as key and {role, teamRole} as value
   });
   const [showInviteForm, setShowInviteForm] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   const roles = [
     { value: 'admin', label: 'Admin' },
@@ -365,6 +368,21 @@ const TeamManagement = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Handle edit user
+  const handleEditUser = (user) => {
+    setEditingUser(user);
+    setShowEditModal(true);
+  };
+
+  // Handle user update
+  const handleUserUpdate = (updatedUser) => {
+    setTeamMembers(prev => 
+      prev.map(member => 
+        member._id === updatedUser._id ? updatedUser : member
+      )
+    );
   };
 
   return (
@@ -717,6 +735,7 @@ const TeamManagement = () => {
                           selectedYear={selectedYear}
                           onToggleStatus={toggleUserStatus}
                           onDelete={deleteMember}
+                          onEdit={handleEditUser}
                         />
                       ))
                     }
@@ -727,6 +746,17 @@ const TeamManagement = () => {
           </DndContext>
         </div>
       </div>
+
+      {/* User Edit Modal */}
+      <UserEditModal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setEditingUser(null);
+        }}
+        user={editingUser}
+        onUpdate={handleUserUpdate}
+      />
     </div>
   );
 };
