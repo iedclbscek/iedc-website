@@ -138,9 +138,8 @@ router.get("/public-team", async (req, res) => {
 
     console.log(`📊 Fetching public team members for year: ${year || "all"}`);
 
-    // Base query - only get active users, excluding admin users
+    // Base query - get all non-admin users (temporarily including inactive for debugging)
     let query = {
-      isActive: true,
       role: { $ne: "admin" }, // Exclude admin users from public display
     };
 
@@ -162,15 +161,29 @@ router.get("/public-team", async (req, res) => {
         createdAt: -1,
       })
       .select(
-        "name teamRole role department year teamYear teamYears yearlyRoles profilePicture linkedin github bio email"
+        "name teamRole role department year teamYear teamYears yearlyRoles profilePicture linkedin github bio email isActive"
       );
 
     console.log(`📊 Found ${users.length} team members`);
+    if (users.length > 0) {
+      console.log('📊 Sample user data:', {
+        name: users[0].name,
+        role: users[0].role,
+        isActive: users[0].isActive,
+        teamYears: users[0].teamYears,
+        yearlyRoles: users[0].yearlyRoles
+      });
+    }
+
+    // Filter to only return active users in the response
+    const activeUsers = users.filter(user => user.isActive);
+    console.log(`📊 Active users: ${activeUsers.length} out of ${users.length}`);
 
     res.status(200).json({
       success: true,
-      users,
-      count: users.length,
+      users: activeUsers,
+      count: activeUsers.length,
+      totalFound: users.length,
       year: year ? parseInt(year) : null,
     });
   } catch (error) {
