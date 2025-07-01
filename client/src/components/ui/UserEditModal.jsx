@@ -1,16 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
-import { FaTimes, FaSave, FaKey } from 'react-icons/fa';
+import { FaTimes, FaSave, FaKey, FaCrop } from 'react-icons/fa';
 import axios from 'axios';
 
 const UserEditModal = ({ isOpen, onClose, user, onUpdate }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    role: 'member',
-    teamRole: '',
     department: '',
-    year: '',
     phoneNumber: '',
     linkedin: '',
     github: '',
@@ -23,6 +20,22 @@ const UserEditModal = ({ isOpen, onClose, user, onUpdate }) => {
   const [showPasswordReset, setShowPasswordReset] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  // Image cropping states
+  const [imagePreview, setImagePreview] = useState(null);
+  const [showCropModal, setShowCropModal] = useState(false);
+  const [croppedImage, setCroppedImage] = useState(null);
+  const [_originalFile, setOriginalFile] = useState(null);
+  const [cropData, setCropData] = useState({ x: 0, y: 0, width: 200, height: 200 });
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [resizeHandle, setResizeHandle] = useState(null);
+  const canvasRef = React.useRef(null);
+  const imageRef = React.useRef(null);
+  const fileInputRef = React.useRef(null);
+  const cropContainerRef = React.useRef(null);
 
   const roles = [
     { value: 'admin', label: 'Admin' },
@@ -56,10 +69,7 @@ const UserEditModal = ({ isOpen, onClose, user, onUpdate }) => {
       setFormData({
         name: user.name || '',
         email: user.email || '',
-        role: user.role || 'member',
-        teamRole: user.teamRole || '',
         department: user.department || '',
-        year: user.year || '',
         phoneNumber: user.phoneNumber || '',
         linkedin: user.linkedin || '',
         github: user.github || '',
@@ -70,6 +80,18 @@ const UserEditModal = ({ isOpen, onClose, user, onUpdate }) => {
       });
       setNewPassword('');
       setShowPasswordReset(false);
+      setImagePreview(null);
+      setShowCropModal(false);
+      setCroppedImage(null);
+      setOriginalFile(null);
+      setImageLoaded(false);
+      setCropData({ x: 0, y: 0, width: 200, height: 200 });
+      setIsDragging(false);
+      setIsResizing(false);
+      setResizeHandle(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   }, [user, isOpen]);
 
@@ -97,6 +119,7 @@ const UserEditModal = ({ isOpen, onClose, user, onUpdate }) => {
             year: year,
             role: 'member',
             teamRole: '',
+            academicYear: '',
             order: 0
           });
         }
@@ -122,8 +145,213 @@ const UserEditModal = ({ isOpen, onClose, user, onUpdate }) => {
   };
 
   const handleFileChange = (e) => {
-    setProfilePicture(e.target.files[0]);
+    const file = e.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+      // Check file size (limit to 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image size should be less than 5MB');
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        return;
+      }
+
+      setOriginalFile(file);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setImagePreview(event.target.result);
+        setImageLoaded(false);
+        setShowCropModal(true);
+      };
+      reader.onerror = () => {
+        toast.error('Failed to read image file');
+      };
+      reader.readAsDataURL(file);
+    } else {
+      toast.error('Please select a valid image file');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
   };
+
+  const cropImage = () => {
+    const canvas = canvasRef.current;
+    const image = imageRef.current;
+    
+    if (!canvas || !image || !image.complete || image.naturalWidth === 0) {
+      toast.error('Image not loaded properly. Please try again.');
+      return;
+    }
+
+    const ctx = canvas.getContext('2d');
+
+    // Set canvas size to desired output size (square)
+    const size = 300;
+    canvas.width = size;
+    canvas.height = size;
+
+    // Get the display size of the image
+    const displayWidth = image.clientWidth;
+    const displayHeight = image.clientHeight;
+    
+    // Calculate the scale factor between display and natural size
+    const scaleX = image.naturalWidth / displayWidth;
+    const scaleY = image.naturalHeight / displayHeight;
+
+    // Calculate crop dimensions based on the crop selection
+    const cropX = cropData.x * scaleX;
+    const cropY = cropData.y * scaleY;
+    const cropWidth = cropData.width * scaleX;
+    const cropHeight = cropData.height * scaleY;
+
+    // Clear canvas and draw cropped image
+    ctx.clearRect(0, 0, size, size);
+    ctx.drawImage(
+      image,
+      cropX, cropY, cropWidth, cropHeight,
+      0, 0, size, size
+    );
+
+    // Convert canvas to blob
+    canvas.toBlob((blob) => {
+      if (blob) {
+        const file = new File([blob], 'profile-picture.jpg', { type: 'image/jpeg' });
+        setProfilePicture(file);
+        setCroppedImage(canvas.toDataURL('image/jpeg', 0.9));
+        setShowCropModal(false);
+        toast.success('Image cropped successfully!');
+      } else {
+        toast.error('Failed to crop image. Please try again.');
+      }
+    }, 'image/jpeg', 0.9);
+  };
+
+  const handleImageLoad = () => {
+    setImageLoaded(true);
+    const image = imageRef.current;
+    if (image) {
+      // Calculate initial crop area (center square)
+      const displayWidth = image.clientWidth;
+      const displayHeight = image.clientHeight;
+      const size = Math.min(displayWidth, displayHeight) * 0.8;
+      const x = (displayWidth - size) / 2;
+      const y = (displayHeight - size) / 2;
+      
+      setCropData({ x, y, width: size, height: size });
+    }
+  };
+
+  const handleMouseDown = (e, handle = null) => {
+    e.preventDefault();
+    e.stopPropagation(); // Prevent event bubbling
+    
+    const rect = cropContainerRef.current.getBoundingClientRect();
+    const startX = e.clientX - rect.left;
+    const startY = e.clientY - rect.top;
+    
+    setDragStart({ x: startX, y: startY });
+    
+    if (handle) {
+      setIsResizing(true);
+      setResizeHandle(handle);
+      setIsDragging(false); // Make sure dragging is off when resizing
+    } else {
+      setIsDragging(true);
+      setIsResizing(false); // Make sure resizing is off when dragging
+    }
+  };
+
+  // Add global mouse event listeners
+  React.useEffect(() => {
+    const handleMouseMoveGlobal = (e) => {
+      if (!isDragging && !isResizing) return;
+      
+      const rect = cropContainerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      
+      const currentX = e.clientX - rect.left;
+      const currentY = e.clientY - rect.top;
+      const deltaX = currentX - dragStart.x;
+      const deltaY = currentY - dragStart.y;
+      
+      const image = imageRef.current;
+      if (!image) return;
+      
+      const maxX = image.clientWidth;
+      const maxY = image.clientHeight;
+      
+      if (isDragging) {
+        setCropData(prev => {
+          const newX = Math.max(0, Math.min(prev.x + deltaX, maxX - prev.width));
+          const newY = Math.max(0, Math.min(prev.y + deltaY, maxY - prev.height));
+          return { ...prev, x: newX, y: newY };
+        });
+        setDragStart({ x: currentX, y: currentY });
+      } else if (isResizing && resizeHandle) {
+        setCropData(prev => {
+          let newCropData = { ...prev };
+          
+          switch (resizeHandle) {
+            case 'se': {// bottom-right
+              const newWidth = Math.max(50, Math.min(currentX - prev.x, maxX - prev.x));
+              const newHeight = Math.max(50, Math.min(currentY - prev.y, maxY - prev.y));
+              const newSize = Math.min(newWidth, newHeight); // Keep square
+              newCropData.width = newSize;
+              newCropData.height = newSize;
+              break;
+            }
+            case 'sw': {// bottom-left
+              const newWidth = Math.max(50, Math.min(prev.x + prev.width - currentX, prev.x + prev.width));
+              const newHeight = Math.max(50, Math.min(currentY - prev.y, maxY - prev.y));
+              const newSize = Math.min(newWidth, newHeight); // Keep square
+              newCropData.width = newSize;
+              newCropData.height = newSize;
+              newCropData.x = prev.x + prev.width - newSize;
+              break;
+            }
+            case 'ne': {// top-right
+              const newWidth = Math.max(50, Math.min(currentX - prev.x, maxX - prev.x));
+              const newHeight = Math.max(50, Math.min(prev.y + prev.height - currentY, prev.y + prev.height));
+              const newSize = Math.min(newWidth, newHeight); // Keep square
+              newCropData.width = newSize;
+              newCropData.height = newSize;
+              newCropData.y = prev.y + prev.height - newSize;
+              break;
+            }
+            case 'nw': {// top-left
+              const newWidth = Math.max(50, Math.min(prev.x + prev.width - currentX, prev.x + prev.width));
+              const newHeight = Math.max(50, Math.min(prev.y + prev.height - currentY, prev.y + prev.height));
+              const newSize = Math.min(newWidth, newHeight); // Keep square
+              newCropData.width = newSize;
+              newCropData.height = newSize;
+              newCropData.x = prev.x + prev.width - newSize;
+              newCropData.y = prev.y + prev.height - newSize;
+              break;
+            }
+          }
+          
+          return newCropData;
+        });
+      }
+    };
+    
+    const handleMouseUpGlobal = () => {
+      setIsDragging(false);
+      setIsResizing(false);
+      setResizeHandle(null);
+    };
+    
+    if (isDragging || isResizing) {
+      document.addEventListener('mousemove', handleMouseMoveGlobal);
+      document.addEventListener('mouseup', handleMouseUpGlobal);
+      
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMoveGlobal);
+        document.removeEventListener('mouseup', handleMouseUpGlobal);
+      };
+    }
+  }, [isDragging, isResizing, dragStart, resizeHandle]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -247,32 +475,6 @@ const UserEditModal = ({ isOpen, onClose, user, onUpdate }) => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Role</label>
-              <select
-                name="role"
-                value={formData.role}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              >
-                {roles.map(role => (
-                  <option key={role.value} value={role.value}>{role.label}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Team Role</label>
-              <input
-                type="text"
-                name="teamRole"
-                value={formData.teamRole}
-                onChange={handleInputChange}
-                placeholder="e.g., Technical Lead, Marketing Head"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
               <label className="block text-sm font-medium text-gray-700">Department</label>
               <select
                 name="department"
@@ -284,22 +486,6 @@ const UserEditModal = ({ isOpen, onClose, user, onUpdate }) => {
                 {departments.map(dept => (
                   <option key={dept} value={dept}>{dept}</option>
                 ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Academic Year</label>
-              <select
-                name="year"
-                value={formData.year}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              >
-                <option value="">Select Year</option>
-                <option value="1">1st Year</option>
-                <option value="2">2nd Year</option>
-                <option value="3">3rd Year</option>
-                <option value="4">4th Year</option>
               </select>
             </div>
 
@@ -342,11 +528,34 @@ const UserEditModal = ({ isOpen, onClose, user, onUpdate }) => {
             <div>
               <label className="block text-sm font-medium text-gray-700">Profile Picture</label>
               <input
+                ref={fileInputRef}
                 type="file"
                 accept="image/*"
                 onChange={handleFileChange}
                 className="mt-1 block w-full"
               />
+              {croppedImage && (
+                <div className="mt-2">
+                  <img
+                    src={croppedImage}
+                    alt="Cropped preview"
+                    className="w-16 h-16 rounded-full object-cover border-2 border-gray-300"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCroppedImage(null);
+                      setProfilePicture(null);
+                      if (fileInputRef.current) {
+                        fileInputRef.current.value = '';
+                      }
+                    }}
+                    className="mt-1 text-xs text-red-600 hover:text-red-800"
+                  >
+                    Remove
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -405,7 +614,7 @@ const UserEditModal = ({ isOpen, onClose, user, onUpdate }) => {
                   return (
                     <div key={year} className="bg-gray-50 p-4 rounded-lg">
                       <h4 className="text-sm font-medium text-gray-900 mb-3">{year}</h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
                           <label className="block text-xs font-medium text-gray-700 mb-1">Role</label>
                           <select
@@ -427,6 +636,20 @@ const UserEditModal = ({ isOpen, onClose, user, onUpdate }) => {
                             placeholder="e.g., Technical Lead"
                             className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
                           />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Academic Year</label>
+                          <select
+                            value={yearlyRole.academicYear || ''}
+                            onChange={(e) => handleYearlyRoleChange(year, 'academicYear', e.target.value)}
+                            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                          >
+                            <option value="">Select Year</option>
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+                          </select>
                         </div>
                       </div>
                     </div>
@@ -494,6 +717,103 @@ const UserEditModal = ({ isOpen, onClose, user, onUpdate }) => {
             </button>
           </div>
         </form>
+
+        {/* Image Crop Modal */}
+        {showCropModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-auto">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Crop Profile Picture</h3>
+              
+              <div className="mb-4 text-center relative">
+                <div 
+                  ref={cropContainerRef}
+                  className="relative inline-block max-w-full"
+                  style={{ maxHeight: '400px' }}
+                >
+                  <img
+                    ref={imageRef}
+                    src={imagePreview}
+                    alt="Preview"
+                    className="max-w-full max-h-96 mx-auto border rounded block"
+                    onLoad={handleImageLoad}
+                    onError={() => {
+                      toast.error('Failed to load image');
+                    }}
+                    crossOrigin="anonymous"
+                    style={{ display: 'block' }}
+                  />
+                  
+                  {/* Crop selection box */}
+                  {imageLoaded && (
+                    <div
+                      className="absolute border-2 border-blue-500 bg-blue-500 bg-opacity-20 select-none"
+                      style={{
+                        left: `${cropData.x}px`,
+                        top: `${cropData.y}px`,
+                        width: `${cropData.width}px`,
+                        height: `${cropData.height}px`,
+                        cursor: isDragging ? 'grabbing' : 'grab'
+                      }}
+                      onMouseDown={(e) => handleMouseDown(e)}
+                    >
+                      {/* Corner handles */}
+                      <div 
+                        className="absolute -top-2 -left-2 w-4 h-4 bg-blue-500 border-2 border-white cursor-nw-resize hover:bg-blue-600 rounded-sm z-10"
+                        onMouseDown={(e) => handleMouseDown(e, 'nw')}
+                      ></div>
+                      <div 
+                        className="absolute -top-2 -right-2 w-4 h-4 bg-blue-500 border-2 border-white cursor-ne-resize hover:bg-blue-600 rounded-sm z-10"
+                        onMouseDown={(e) => handleMouseDown(e, 'ne')}
+                      ></div>
+                      <div 
+                        className="absolute -bottom-2 -left-2 w-4 h-4 bg-blue-500 border-2 border-white cursor-sw-resize hover:bg-blue-600 rounded-sm z-10"
+                        onMouseDown={(e) => handleMouseDown(e, 'sw')}
+                      ></div>
+                      <div 
+                        className="absolute -bottom-2 -right-2 w-4 h-4 bg-blue-500 border-2 border-white cursor-se-resize hover:bg-blue-600 rounded-sm z-10"
+                        onMouseDown={(e) => handleMouseDown(e, 'se')}
+                      ></div>
+                    </div>
+                  )}
+                </div>
+                
+                <p className="text-sm text-gray-500 mt-2">
+                  {imageLoaded ? 'Drag the selection box to move it, or drag corner handles to resize' : 'Loading image...'}
+                </p>
+              </div>
+              
+              <canvas ref={canvasRef} className="hidden" />
+              
+              <div className="flex justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCropModal(false);
+                    setImagePreview(null);
+                    setProfilePicture(null);
+                    setOriginalFile(null);
+                    setImageLoaded(false);
+                    if (fileInputRef.current) {
+                      fileInputRef.current.value = '';
+                    }
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={cropImage}
+                  disabled={!imageLoaded}
+                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <FaCrop className="mr-2" />
+                  Crop & Use
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

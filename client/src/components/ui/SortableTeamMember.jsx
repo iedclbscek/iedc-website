@@ -3,7 +3,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { FaGripVertical, FaToggleOn, FaToggleOff, FaTrash, FaEdit } from 'react-icons/fa';
 
-const SortableTeamMember = ({ member, selectedYear, onToggleStatus, onDelete, onEdit }) => {
+const SortableTeamMember = ({ member, selectedYear, enableSorting, onToggleStatus, onDelete, onEdit }) => {
   const {
     attributes,
     listeners,
@@ -61,13 +61,33 @@ const SortableTeamMember = ({ member, selectedYear, onToggleStatus, onDelete, on
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="flex items-center">
           <button
-            className="text-gray-400 hover:text-gray-600 mr-3 cursor-grab active:cursor-grabbing"
-            {...attributes}
-            {...listeners}
+            className={`text-gray-400 hover:text-gray-600 mr-3 ${
+              enableSorting && selectedYear 
+                ? 'cursor-grab active:cursor-grabbing' 
+                : 'cursor-not-allowed opacity-50'
+            }`}
+            {...(enableSorting && selectedYear ? attributes : {})}
+            {...(enableSorting && selectedYear ? listeners : {})}
+            disabled={!enableSorting || !selectedYear}
           >
             <FaGripVertical />
           </button>
-          <div className="text-sm font-medium text-gray-900">{member.name}</div>
+          <div className="flex items-center">
+            <div className="h-8 w-8 rounded-full overflow-hidden bg-gray-200 mr-3 flex-shrink-0">
+              {member.profilePicture ? (
+                <img
+                  src={`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}${member.profilePicture}`}
+                  alt={member.name}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="h-full w-full flex items-center justify-center text-gray-400 text-xs font-medium">
+                  {member.name?.charAt(0)?.toUpperCase() || '?'}
+                </div>
+              )}
+            </div>
+            <div className="text-sm font-medium text-gray-900">{member.name}</div>
+          </div>
         </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">

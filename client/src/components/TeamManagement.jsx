@@ -25,6 +25,7 @@ const TeamManagement = () => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // Add year filter
   const [sortedMembers, setSortedMembers] = useState([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [enableSorting, setEnableSorting] = useState(false); // Add sorting toggle
   const [inviteForm, setInviteForm] = useState({
     name: '',
     email: '',
@@ -97,6 +98,11 @@ const TeamManagement = () => {
       }
     }));
   }, []);
+
+  // Reset sorting when year changes
+  useEffect(() => {
+    setEnableSorting(false);
+  }, [selectedYear]);
 
   const fetchTeamMembers = async () => {
     try {
@@ -397,8 +403,8 @@ const TeamManagement = () => {
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none flex gap-3">
           {/* Year Filter */}
           <select
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+            value={selectedYear || ''}
+            onChange={(e) => setSelectedYear(e.target.value ? parseInt(e.target.value) : null)}
             className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
           >
             <option value="">All Years</option>
@@ -408,6 +414,21 @@ const TeamManagement = () => {
               </option>
             ))}
           </select>
+          
+          {/* Sort Toggle Button */}
+          {selectedYear && (
+            <button
+              type="button"
+              onClick={() => setEnableSorting(!enableSorting)}
+              className={`block rounded-md py-2 px-3 text-center text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
+                enableSorting 
+                  ? 'bg-green-600 text-white hover:bg-green-500 focus-visible:outline-green-600' 
+                  : 'bg-gray-600 text-white hover:bg-gray-500 focus-visible:outline-gray-600'
+              }`}
+            >
+              {enableSorting ? 'Sorting ON' : 'Enable Sort'}
+            </button>
+          )}
           
           <button
             type="button"
@@ -641,30 +662,15 @@ const TeamManagement = () => {
                 Team Members {selectedYear ? `- ${selectedYear}` : '(All Years)'}
               </h2>
               <p className="text-sm text-gray-500 mt-1">
-                Drag and drop to reorder team members. This will affect how they appear on the public team page.
+                {enableSorting && selectedYear 
+                  ? `Drag and drop to reorder team members for ${selectedYear}. This will affect how they appear on the public team page.`
+                  : selectedYear 
+                    ? `Select "Enable Sort" to reorder team members for ${selectedYear}.`
+                    : 'Select a year and enable sorting to reorder team members.'
+                }
               </p>
             </div>
-            <div className="flex items-center space-x-4">
-              {/* Year Filter */}
-              <div>
-                <label htmlFor="yearFilter" className="block text-sm font-medium text-gray-700 mb-1">
-                  Filter by Year
-                </label>
-                <select
-                  id="yearFilter"
-                  value={selectedYear || ''}
-                  onChange={(e) => setSelectedYear(e.target.value ? parseInt(e.target.value) : null)}
-                  className="block w-32 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
-                >
-                  <option value="">All Years</option>
-                  {teamYears.map(year => (
-                    <option key={year} value={year}>
-                      {year} {year === currentYear ? '(Current)' : ''}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              
+            <div className="flex items-center space-x-4">              
               {hasUnsavedChanges && (
                 <button
                   onClick={saveOrder}
@@ -679,9 +685,9 @@ const TeamManagement = () => {
           </div>
           
           <DndContext 
-            sensors={sensors}
+            sensors={enableSorting && selectedYear ? sensors : []}
             collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
+            onDragEnd={enableSorting && selectedYear ? handleDragEnd : undefined}
           >
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
@@ -733,6 +739,7 @@ const TeamManagement = () => {
                           key={member._id}
                           member={member}
                           selectedYear={selectedYear}
+                          enableSorting={enableSorting}
                           onToggleStatus={toggleUserStatus}
                           onDelete={deleteMember}
                           onEdit={handleEditUser}
