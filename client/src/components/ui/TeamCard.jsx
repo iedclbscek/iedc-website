@@ -84,7 +84,7 @@ const TeamCard = ({ member }) => {
       
       {/* Member name and role */}
       <h3 className="font-bold text-text-dark text-sm">{member.name || 'Name Unavailable'}</h3>
-      <p className="text-accent text-xs font-medium">{member.role || 'Team Member'}</p>
+      <p className="text-accent text-xs font-medium">{member.teamRole || member.role || 'Team Member'}</p>
     </motion.div>
   );
 };

@@ -129,6 +129,52 @@ router.get(
   }
 );
 
+// @route   GET /api/users/public-team
+// @desc    Get public team members (no auth required)
+// @access  Public
+router.get("/public-team", async (req, res) => {
+  try {
+    // Only get active users with basic public information
+    const users = await User.find({
+      isActive: true,
+      $or: [
+        {
+          role: {
+            $in: [
+              "admin",
+              "nodal_officer",
+              "ceo",
+              "lead",
+              "co_lead",
+              "coordinator",
+            ],
+          },
+        },
+        { teamRole: { $exists: true, $ne: "" } }, // Users with team roles
+      ],
+    })
+      .sort({
+        role: 1, // Sort by role priority
+        createdAt: -1,
+      })
+      .select(
+        "name teamRole role department year profilePicture linkedin github bio"
+      );
+
+    res.status(200).json({
+      success: true,
+      users,
+      count: users.length,
+    });
+  } catch (error) {
+    console.error("Get public team members error:", error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while fetching team members",
+    });
+  }
+});
+
 // @route   GET /api/users/:id
 // @desc    Get user by ID
 // @access  Private

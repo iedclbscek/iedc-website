@@ -1,52 +1,92 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { FaArrowLeft } from 'react-icons/fa';
-import { teamData, getAvailableYears } from '../data/teamData';
 import TeamCard from '../components/ui/TeamCard';
-import Tabs from '../components/ui/Tabs';
 
 const TeamPage = () => {
-  const availableYears = getAvailableYears();
-  const [selectedYear, setSelectedYear] = useState(availableYears[0] || '2025');
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredMembers, setFilteredMembers] = useState({
     facultyMembers: [],
     coreTeam: [],
     teamMembers: []
   });
-  const currentTeam = teamData[selectedYear] || { facultyMembers: [], coreTeam: [], teamMembers: [] };
-  
-  // Filter members based on search query
+
+  // Fetch team members from API
   useEffect(() => {
+    const fetchTeamMembers = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/public-team`);
+        if (response.ok) {
+          const data = await response.json();
+          // Handle the server response format { success, users, count }
+          if (data.success && Array.isArray(data.users)) {
+            setTeamMembers(data.users);
+          } else {
+            console.error('Invalid API response format:', data);
+            setTeamMembers([]);
+          }
+        } else {
+          console.error('Failed to fetch team members:', response.status);
+          setTeamMembers([]);
+        }
+      } catch (error) {
+        console.error('Error fetching team members:', error);
+        setTeamMembers([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTeamMembers();
+  }, []);
+
+  // Organize members by category and filter based on search query
+  useEffect(() => {
+    const organizeMembersByCategory = (members) => {
+      // Ensure members is an array
+      if (!Array.isArray(members)) {
+        return { facultyMembers: [], coreTeam: [], teamMembers: [] };
+      }
+      
+      const facultyMembers = members.filter(member => 
+        member.role === 'nodal_officer' || 
+        (member.teamRole && member.teamRole.toLowerCase().includes('faculty'))
+      );
+      
+      const coreTeam = members.filter(member => 
+        ['admin', 'ceo', 'lead'].includes(member.role) ||
+        (member.teamRole && ['President', 'Vice President', 'Secretary', 'Treasurer'].includes(member.teamRole))
+      );
+      
+      const teamMembersFiltered = members.filter(member => 
+        !['admin', 'ceo', 'lead', 'nodal_officer'].includes(member.role) &&
+        !(member.teamRole && ['President', 'Vice President', 'Secretary', 'Treasurer', 'Faculty'].some(role => 
+          member.teamRole.toLowerCase().includes(role.toLowerCase())
+        ))
+      );
+      
+      return { facultyMembers, coreTeam, teamMembers: teamMembersFiltered };
+    };
+
     if (!searchQuery.trim()) {
-      setFilteredMembers({
-        facultyMembers: currentTeam.facultyMembers || [],
-        coreTeam: currentTeam.coreTeam || [],
-        teamMembers: currentTeam.teamMembers || []
-      });
+      setFilteredMembers(organizeMembersByCategory(teamMembers));
       return;
     }
     
     const query = searchQuery.toLowerCase();
+    // Ensure teamMembers is an array before filtering
+    const filtered = Array.isArray(teamMembers) ? teamMembers.filter(
+      member => 
+        member.name?.toLowerCase().includes(query) || 
+        member.role?.toLowerCase().includes(query) ||
+        member.teamRole?.toLowerCase().includes(query)
+    ) : [];
     
-    setFilteredMembers({
-      facultyMembers: (currentTeam.facultyMembers || []).filter(
-        member => member.name.toLowerCase().includes(query) || member.role.toLowerCase().includes(query)
-      ),
-      coreTeam: (currentTeam.coreTeam || []).filter(
-        member => member.name.toLowerCase().includes(query) || member.role.toLowerCase().includes(query)
-      ),
-      teamMembers: (currentTeam.teamMembers || []).filter(
-        member => member.name.toLowerCase().includes(query) || member.role.toLowerCase().includes(query)
-      )
-    });
-  }, [searchQuery, selectedYear, currentTeam]);
-
-  const handleYearChange = (year) => {
-    setSelectedYear(year);
-    setSearchQuery(''); // Reset search when changing years
-  };
+    setFilteredMembers(organizeMembersByCategory(filtered));
+  }, [searchQuery, teamMembers]);
   
   return (
     <div className="min-h-screen bg-primary/5">
@@ -64,7 +104,7 @@ const TeamPage = () => {
             transition={{ duration: 0.6 }}
             className="text-center"
           >
-            <h1 className="text-4xl md:text-5xl font-bold text-text-dark mb-4">IEDC Execom '{selectedYear.substring(2)}</h1>
+            <h1 className="text-4xl md:text-5xl font-bold text-text-dark mb-4">IEDC Team</h1>
             <div className="w-20 h-1 bg-accent mb-6 mx-auto"></div>
             <p className="text-lg text-text-light leading-relaxed max-w-3xl mx-auto">
               Meet the passionate individuals driving innovation and entrepreneurship at IEDC LBSCEK.
@@ -76,13 +116,6 @@ const TeamPage = () => {
       {/* Main content */}
       <section className="py-8">
         <div className="container mx-auto px-4">
-          {/* Year tabs */}
-          <Tabs 
-            tabs={availableYears}
-            activeTab={selectedYear}
-            onTabChange={handleYearChange}
-          />
-          
           {/* Search bar */}
           <div className="max-w-md mx-auto mb-8">
             <input
@@ -95,12 +128,14 @@ const TeamPage = () => {
           </div>
           
           {/* Team sections */}
-          <AnimatePresence mode="wait">
+          {loading ? (
+            <div className="text-center py-12">
+              <p className="text-text-light">Loading team members...</p>
+            </div>
+          ) : (
             <motion.div
-              key={selectedYear}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
               transition={{ duration: 0.4 }}
               className="max-w-6xl mx-auto"
             >
@@ -143,15 +178,15 @@ const TeamPage = () => {
               {/* No results message */}
               {filteredMembers.facultyMembers.length === 0 && 
                filteredMembers.coreTeam.length === 0 && 
-               filteredMembers.teamMembers.length === 0 && (
+               filteredMembers.teamMembers.length === 0 && !loading && (
                 <div className="text-center py-12">
                   <p className="text-text-light">
-                    {searchQuery ? `No team members found for "${searchQuery}"` : `No team data available for ${selectedYear}`}
+                    {searchQuery ? `No team members found for "${searchQuery}"` : 'No team members available'}
                   </p>
                 </div>
               )}
             </motion.div>
-          </AnimatePresence>
+          )}
         </div>
       </section>
     </div>

@@ -1,20 +1,40 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { teamData, getAvailableYears } from '../../data/teamData';
+import axios from 'axios';
 
 const TeamPreviewSection = () => {
   const [hovered, setHovered] = useState(null);
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
   
-  // Get the latest year's data
-  const availableYears = getAvailableYears();
-  const latestYear = availableYears[0]; // First year is the latest (should be sorted in descending order)
-  const currentTeam = teamData[latestYear] || { facultyMembers: [], coreTeam: [], teamMembers: [] };
+  // Fetch team members from API
+  useEffect(() => {
+    const fetchTeamMembers = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/users/public-team`);
+        if (response.data && response.data.success && Array.isArray(response.data.users)) {
+          setTeamMembers(response.data.users);
+        }
+      } catch (error) {
+        console.error('Error fetching team members:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTeamMembers();
+  }, []);
   
-  // Combine core team members and faculty for display, prioritizing core team
-  const displayMembers = [
-    ...(currentTeam.coreTeam || []).slice(0, 2),  // First 2 from core team
-    ...(currentTeam.facultyMembers || []).slice(0, 1) // 1 from faculty
-  ].slice(0, 3); // Ensure we have at most 3 total
+  // Get top team members for preview (leaders and key roles)
+  const displayMembers = teamMembers
+    .filter(member => 
+      ['admin', 'ceo', 'lead', 'nodal_officer'].includes(member.role) ||
+      (member.teamRole && ['President', 'Vice President', 'Secretary', 'Treasurer', 'Faculty'].some(role => 
+        member.teamRole.toLowerCase().includes(role.toLowerCase())
+      ))
+    )
+    .slice(0, 3); // Show top 3 team members
   
   return (
     <section id="team" className="py-24 bg-primary/10 relative overflow-hidden">
@@ -53,7 +73,7 @@ const TeamPreviewSection = () => {
             >
               <div className="w-48 h-48 md:w-56 md:h-56 rounded-full overflow-hidden">
                 <img 
-                  src={member?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(member?.name || 'Team Member')}&background=random&size=200`} 
+                  src={member?.profilePicture ? `${import.meta.env.VITE_API_URL}${member.profilePicture}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(member?.name || 'Team Member')}&background=random&size=200`} 
                   alt={member?.name || 'Team Member'}
                   className="w-full h-full object-cover transition-transform duration-700 ease-in-out hover:scale-110"
                   onError={(e) => {
@@ -71,7 +91,7 @@ const TeamPreviewSection = () => {
                 transition={{ duration: 0.3 }}
               >
                 <h3 className="text-lg font-bold text-text-dark">{member?.name || 'Team Member'}</h3>
-                <p className="text-accent">{member?.role || 'Member'}</p>
+                <p className="text-accent">{member?.teamRole || member?.role || 'Member'}</p>
               </motion.div>
             </motion.div>
           ))}
