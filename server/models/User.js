@@ -68,6 +68,18 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "2025",
     },
+    teamYears: {
+      type: [Number],
+      default: function() {
+        return [new Date().getFullYear()];
+      },
+      validate: {
+        validator: function(v) {
+          return v && v.length > 0;
+        },
+        message: 'Team member must be associated with at least one year'
+      }
+    },
     phoneNumber: {
       type: String,
       trim: true,

@@ -216,9 +216,11 @@ router.post(
         department,
         year,
         teamYear = "2025",
+        teamYears = [2025], // Default to current year if not provided
         phoneNumber,
         linkedin,
         github,
+        sendEmail = true, // Default to true for backward compatibility
       } = req.body;
 
       // Check if user already exists
@@ -230,21 +232,26 @@ router.post(
         });
       }
 
-      // Generate reset token
-      const resetToken = generateResetToken();
-      const hashedToken = hashResetToken(resetToken);
+      // Generate reset token only if email will be sent
+      const resetToken = sendEmail ? generateResetToken() : null;
+      const hashedToken = resetToken ? hashResetToken(resetToken) : null;
 
-      // Create user data object with only defined fields
+      // Create user data object with only defined fields  
       const userData = {
         name,
         email,
         role,
-        teamYear,
-        passwordResetToken: hashedToken,
-        passwordResetExpires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
-        isActive: true,
+        teamYear: teamYears[0]?.toString() || "2025", // Keep first year for backward compatibility
+        teamYears: teamYears, // Store all team years
+        isActive: sendEmail, // Only active if email is sent (current year members)
         isEmailVerified: false,
       };
+
+      // Add password reset fields only if email will be sent
+      if (sendEmail) {
+        userData.passwordResetToken = hashedToken;
+        userData.passwordResetExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+      }
 
       // Add optional fields only if they are provided
       if (teamRole && teamRole.trim()) userData.teamRole = teamRole.trim();
@@ -263,16 +270,20 @@ router.post(
 
       await user.save();
 
-      // Send invitation email
-      const emailResult = await sendInvitationEmail(email, name, resetToken);
-
-      if (!emailResult.success) {
-        console.error("Failed to send invitation email:", emailResult.error);
-        // Don't fail the request, just log the error
+      let emailResult = { success: true };
+      
+      // Send invitation email only if requested
+      if (sendEmail && resetToken) {
+        emailResult = await sendInvitationEmail(email, name, resetToken);
+        
+        if (!emailResult.success) {
+          console.error("Failed to send invitation email:", emailResult.error);
+          // Don't fail the request, just log the error
+        }
       }
 
       res.status(201).json({
-        message: "Invitation sent successfully",
+        message: sendEmail ? "Invitation sent successfully" : "Member added successfully (no email sent)",
         user: {
           id: user._id,
           name: user.name,
@@ -282,8 +293,11 @@ router.post(
           department: user.department,
           year: user.year,
           teamYear: user.teamYear,
+          teamYears: user.teamYears,
+          isActive: user.isActive,
         },
-        emailSent: emailResult.success,
+        emailSent: emailResult.success && sendEmail,
+        success: true,
       });
     } catch (error) {
       console.error("Invite error:", error);

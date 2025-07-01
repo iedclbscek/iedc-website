@@ -6,6 +6,7 @@ import axios from 'axios';
 const TeamManagement = () => {
   const [loading, setLoading] = useState(false);
   const [teamMembers, setTeamMembers] = useState([]);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // Add year filter
   const [inviteForm, setInviteForm] = useState({
     name: '',
     email: '',
@@ -15,7 +16,8 @@ const TeamManagement = () => {
     year: '',
     phoneNumber: '',
     linkedin: '',
-    github: ''
+    github: '',
+    teamYears: [new Date().getFullYear()] // Default to current year
   });
   const [showInviteForm, setShowInviteForm] = useState(false);
 
@@ -37,6 +39,13 @@ const TeamManagement = () => {
     'Civil',
     'Other'
   ];
+
+  // Generate team years (from 2020 to current year + 1)
+  const currentYear = new Date().getFullYear();
+  const teamYears = [];
+  for (let year = 2020; year <= currentYear + 1; year++) {
+    teamYears.push(year);
+  }
 
   useEffect(() => {
     fetchTeamMembers();
@@ -69,22 +78,46 @@ const TeamManagement = () => {
     }));
   };
 
+  const handleTeamYearToggle = (year) => {
+    setInviteForm(prev => ({
+      ...prev,
+      teamYears: prev.teamYears.includes(year)
+        ? prev.teamYears.filter(y => y !== year)
+        : [...prev.teamYears, year]
+    }));
+  };
+
   const handleInviteSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate team years selection
+    if (inviteForm.teamYears.length === 0) {
+      toast.error('Please select at least one team year');
+      return;
+    }
+    
     setLoading(true);
 
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/auth/invite`,
-        inviteForm,
+        {
+          ...inviteForm,
+          sendEmail: inviteForm.teamYears.includes(currentYear) // Only send email if current year is selected
+        },
         {
           headers: { Authorization: `Bearer ${token}` }
         }
       );
 
       if (response.data.success) {
-        toast.success('Invitation sent successfully!');
+        const isCurrentYearIncluded = inviteForm.teamYears.includes(currentYear);
+        if (isCurrentYearIncluded) {
+          toast.success('Member added successfully! Invitation email sent.');
+        } else {
+          toast.success('Member added successfully! (No email sent - not in current year)');
+        }
         setInviteForm({
           name: '',
           email: '',
@@ -94,7 +127,8 @@ const TeamManagement = () => {
           year: '',
           phoneNumber: '',
           linkedin: '',
-          github: ''
+          github: '',
+          teamYears: [new Date().getFullYear()]
         });
         setShowInviteForm(false);
         fetchTeamMembers(); // Refresh the list
@@ -166,7 +200,21 @@ const TeamManagement = () => {
             Manage team members, send invitations, and control access.
           </p>
         </div>
-        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none flex gap-3">
+          {/* Year Filter */}
+          <select
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+            className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+          >
+            <option value="">All Years</option>
+            {teamYears.map(year => (
+              <option key={year} value={year}>
+                {year} {year === currentYear ? '(Current)' : ''}
+              </option>
+            ))}
+          </select>
+          
           <button
             type="button"
             onClick={() => setShowInviteForm(!showInviteForm)}
@@ -330,6 +378,33 @@ const TeamManagement = () => {
               </div>
             </div>
 
+            {/* Team Years Selection */}
+            <div className="mt-6">
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Team Years * (Select at least one year)
+              </label>
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                {teamYears.map(year => (
+                  <label key={year} className="relative flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={inviteForm.teamYears.includes(year)}
+                      onChange={() => handleTeamYearToggle(year)}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">{year}</span>
+                    {year === currentYear && (
+                      <span className="ml-1 text-xs text-blue-600 font-medium">(Current)</span>
+                    )}
+                  </label>
+                ))}
+              </div>
+              <p className="mt-2 text-sm text-gray-500">
+                💡 Only members added to the current year ({currentYear}) will receive email invitations. 
+                Others will be created as inactive members for historical records.
+              </p>
+            </div>
+
             <div className="flex justify-end space-x-3">
               <button
                 type="button"
@@ -353,7 +428,9 @@ const TeamManagement = () => {
       {/* Team Members List */}
       <div className="bg-white shadow rounded-lg">
         <div className="px-4 py-5 sm:p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Team Members</h2>
+          <h2 className="text-lg font-medium text-gray-900 mb-4">
+            Team Members {selectedYear ? `- ${selectedYear}` : '(All Years)'}
+          </h2>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -363,6 +440,9 @@ const TeamManagement = () => {
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Role
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Team Years
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
@@ -376,7 +456,13 @@ const TeamManagement = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {teamMembers.map((member) => (
+                {teamMembers
+                  .filter(member => {
+                    if (!selectedYear) return true;
+                    return member.teamYears?.includes(selectedYear) || 
+                           (member.teamYear && parseInt(member.teamYear) === selectedYear);
+                  })
+                  .map((member) => (
                   <tr key={member._id}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -400,6 +486,23 @@ const TeamManagement = () => {
                       {member.teamRole && (
                         <div className="text-sm text-gray-500">{member.teamRole}</div>
                       )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex flex-wrap gap-1">
+                        {(member.teamYears || [parseInt(member.teamYear || new Date().getFullYear())]).map(year => (
+                          <span 
+                            key={year}
+                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                              year === currentYear 
+                                ? 'bg-blue-100 text-blue-800' 
+                                : 'bg-gray-100 text-gray-800'
+                            }`}
+                          >
+                            {year}
+                            {year === currentYear && ' (Current)'}
+                          </span>
+                        ))}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
