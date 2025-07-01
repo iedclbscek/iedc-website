@@ -33,11 +33,12 @@ const TeamManagement = () => {
   ];
 
   const departments = [
-    'Computer Science',
-    'Electronics',
-    'Electrical',
-    'Mechanical',
-    'Civil',
+    'Computer Science and Engineering',
+    'Electronics and Communication Engineering',
+    'Electrical and Electronics Engineering',
+    'Mechanical Engineering',
+    'Civil Engineering',
+    'Information Technology',
     'Other'
   ];
 
@@ -311,39 +312,6 @@ const TeamManagement = () => {
               </div>
 
               <div>
-                <label htmlFor="role" className="block text-sm font-medium text-gray-700">
-                  System Role *
-                </label>
-                <select
-                  name="role"
-                  id="role"
-                  required
-                  value={inviteForm.role}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                >
-                  {roles.map(role => (
-                    <option key={role.value} value={role.value}>{role.label}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label htmlFor="teamRole" className="block text-sm font-medium text-gray-700">
-                  Team Role (Optional)
-                </label>
-                <input
-                  type="text"
-                  name="teamRole"
-                  id="teamRole"
-                  value={inviteForm.teamRole}
-                  onChange={handleInputChange}
-                  placeholder="e.g., Technical Lead, Marketing Head"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                />
-              </div>
-
-              <div>
                 <label htmlFor="department" className="block text-sm font-medium text-gray-700">
                   Department (Optional)
                 </label>
@@ -358,25 +326,6 @@ const TeamManagement = () => {
                   {departments.map(dept => (
                     <option key={dept} value={dept}>{dept}</option>
                   ))}
-                </select>
-              </div>
-
-              <div>
-                <label htmlFor="year" className="block text-sm font-medium text-gray-700">
-                  Academic Year (Optional)
-                </label>
-                <select
-                  name="year"
-                  id="year"
-                  value={inviteForm.year}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                >
-                  <option value="">Select Year</option>
-                  <option value="1">1st Year</option>
-                  <option value="2">2nd Year</option>
-                  <option value="3">3rd Year</option>
-                  <option value="4">4th Year</option>
                 </select>
               </div>
 
@@ -466,7 +415,7 @@ const TeamManagement = () => {
                       <h4 className="text-sm font-medium text-gray-900 mb-3">
                         {year} {year === currentYear && '(Current Year)'}
                       </h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
                           <label className="block text-xs font-medium text-gray-700 mb-1">
                             System Role
@@ -492,6 +441,22 @@ const TeamManagement = () => {
                             placeholder="e.g., Technical Lead, Marketing Head"
                             className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
                           />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                            Academic Year (Optional)
+                          </label>
+                          <select
+                            value={inviteForm.yearlyRoles[year]?.academicYear || ''}
+                            onChange={(e) => handleYearlyRoleChange(year, 'academicYear', e.target.value)}
+                            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                          >
+                            <option value="">Select Year</option>
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+                          </select>
                         </div>
                       </div>
                     </div>
