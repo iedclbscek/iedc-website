@@ -1,12 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
-import { FaTrash, FaToggleOn, FaToggleOff } from 'react-icons/fa';
+import { FaTrash, FaToggleOn, FaToggleOff, FaSave } from 'react-icons/fa';
 import axios from 'axios';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import SortableTeamMember from './ui/SortableTeamMember';
 
 const TeamManagement = () => {
   const [loading, setLoading] = useState(false);
   const [teamMembers, setTeamMembers] = useState([]);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // Add year filter
+  const [sortedMembers, setSortedMembers] = useState([]);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [inviteForm, setInviteForm] = useState({
     name: '',
     email: '',
@@ -49,9 +66,23 @@ const TeamManagement = () => {
     teamYears.push(year);
   }
 
+  // Drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
   useEffect(() => {
     fetchTeamMembers();
   }, []);
+
+  // Update sorted members when team members change
+  useEffect(() => {
+    const sorted = [...teamMembers].sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+    setSortedMembers(sorted);
+  }, [teamMembers]);
 
   // Initialize yearly roles when component mounts
   useEffect(() => {
@@ -172,8 +203,6 @@ const TeamManagement = () => {
         requestPayload.github = inviteForm.github.trim();
       }
       
-      console.log('📧 Sending invite request:', requestPayload);
-      
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/auth/invite`,
         requestPayload,
@@ -284,6 +313,57 @@ const TeamManagement = () => {
       } else {
         toast.error(error.response?.data?.message || 'Failed to delete member');
       }
+    }
+  };
+
+  // Handle drag end
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+
+    if (active.id !== over?.id) {
+      setSortedMembers((items) => {
+        const oldIndex = items.findIndex(item => item._id === active.id);
+        const newIndex = items.findIndex(item => item._id === over.id);
+        
+        const newOrder = arrayMove(items, oldIndex, newIndex);
+        setHasUnsavedChanges(true);
+        return newOrder;
+      });
+    }
+  };
+
+  // Save the new order to backend
+  const saveOrder = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      
+      const updates = sortedMembers.map((member, index) => ({
+        userId: member._id,
+        displayOrder: index
+      }));
+
+      await axios.patch(
+        `${import.meta.env.VITE_API_URL}/api/users/update-order`,
+        { updates },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      // Update local state
+      setTeamMembers(sortedMembers.map((member, index) => ({
+        ...member,
+        displayOrder: index
+      })));
+      
+      setHasUnsavedChanges(false);
+      toast.success('Team order saved successfully!');
+    } catch (error) {
+      console.error('Error saving order:', error);
+      toast.error('Failed to save team order');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -537,170 +617,114 @@ const TeamManagement = () => {
       {/* Team Members List */}
       <div className="bg-white shadow rounded-lg">
         <div className="px-4 py-5 sm:p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">
-            Team Members {selectedYear ? `- ${selectedYear}` : '(All Years)'}
-          </h2>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Name
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Role
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Team Years
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Email
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {teamMembers
-                  .filter(member => {
-                    if (!selectedYear) return true;
-                    return member.teamYears?.includes(selectedYear) || 
-                           (member.teamYear && parseInt(member.teamYear) === selectedYear);
-                  })
-                  .map((member) => (
-                  <tr key={member._id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="h-10 w-10 flex-shrink-0">
-                          <img
-                            className="h-10 w-10 rounded-full"
-                            src={member.profilePicture 
-                              ? `${import.meta.env.VITE_API_URL}${member.profilePicture}` 
-                              : `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=random`}
-                            alt=""
-                          />
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{member.name}</div>
-                          <div className="text-sm text-gray-500">@{member.username || 'Not set'}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {selectedYear ? (
-                        // Show role for specific year
-                        <div>
-                          {member.yearlyRoles?.find(yr => yr.year === selectedYear) ? (
-                            <>
-                              <div className="text-sm text-gray-900">
-                                {member.yearlyRoles.find(yr => yr.year === selectedYear).role}
-                              </div>
-                              {member.yearlyRoles.find(yr => yr.year === selectedYear).teamRole && (
-                                <div className="text-sm text-gray-500">
-                                  {member.yearlyRoles.find(yr => yr.year === selectedYear).teamRole}
-                                </div>
-                              )}
-                            </>
-                          ) : (
-                            // Fallback to general role if no yearly role found
-                            <>
-                              <div className="text-sm text-gray-900">{member.role}</div>
-                              {member.teamRole && (
-                                <div className="text-sm text-gray-500">{member.teamRole}</div>
-                              )}
-                            </>
-                          )}
-                        </div>
-                      ) : (
-                        // Show all yearly roles when no year filter
-                        <div className="space-y-1">
-                          {member.yearlyRoles && member.yearlyRoles.length > 0 ? (
-                            member.yearlyRoles.map(yearRole => (
-                              <div key={yearRole.year} className="text-xs">
-                                <span className="font-medium">{yearRole.year}:</span>
-                                <span className="ml-1">{yearRole.role}</span>
-                                {yearRole.teamRole && (
-                                  <span className="text-gray-500 ml-1">({yearRole.teamRole})</span>
-                                )}
-                              </div>
-                            ))
-                          ) : (
-                            // Fallback to general role
-                            <>
-                              <div className="text-sm text-gray-900">{member.role}</div>
-                              {member.teamRole && (
-                                <div className="text-sm text-gray-500">{member.teamRole}</div>
-                              )}
-                            </>
-                          )}
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex flex-wrap gap-1">
-                        {(member.teamYears || [parseInt(member.teamYear || new Date().getFullYear())]).map(year => (
-                          <span 
-                            key={year}
-                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              year === currentYear 
-                                ? 'bg-blue-100 text-blue-800' 
-                                : 'bg-gray-100 text-gray-800'
-                            }`}
-                          >
-                            {year}
-                            {year === currentYear && ' (Current)'}
-                          </span>
-                        ))}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        member.isActive 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {member.isActive ? 'Active' : 'Inactive'}
-                      </span>
-                      {!member.password && (
-                        <span className="ml-2 inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                          Pending
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {member.email}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex items-center space-x-3">
-                        <button
-                          onClick={() => toggleUserStatus(member._id, member.isActive)}
-                          className={`inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded ${
-                            member.isActive
-                              ? 'text-red-700 bg-red-100 hover:bg-red-200'
-                              : 'text-green-700 bg-green-100 hover:bg-green-200'
-                          } transition-colors`}
-                        >
-                          {member.isActive ? <FaToggleOff className="mr-1" /> : <FaToggleOn className="mr-1" />}
-                          {member.isActive ? 'Deactivate' : 'Activate'}
-                        </button>
-                        <button
-                          onClick={() => deleteMember(member._id, member.name)}
-                          className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-red-700 bg-red-100 hover:bg-red-200 transition-colors"
-                        >
-                          <FaTrash className="mr-1" />
-                          Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h2 className="text-lg font-medium text-gray-900">
+                Team Members {selectedYear ? `- ${selectedYear}` : '(All Years)'}
+              </h2>
+              <p className="text-sm text-gray-500 mt-1">
+                Drag and drop to reorder team members. This will affect how they appear on the public team page.
+              </p>
+            </div>
+            <div className="flex items-center space-x-4">
+              {/* Year Filter */}
+              <div>
+                <label htmlFor="yearFilter" className="block text-sm font-medium text-gray-700 mb-1">
+                  Filter by Year
+                </label>
+                <select
+                  id="yearFilter"
+                  value={selectedYear || ''}
+                  onChange={(e) => setSelectedYear(e.target.value ? parseInt(e.target.value) : null)}
+                  className="block w-32 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                >
+                  <option value="">All Years</option>
+                  {teamYears.map(year => (
+                    <option key={year} value={year}>
+                      {year} {year === currentYear ? '(Current)' : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              {hasUnsavedChanges && (
+                <button
+                  onClick={saveOrder}
+                  disabled={loading}
+                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                >
+                  <FaSave className="mr-2" />
+                  {loading ? 'Saving...' : 'Save Order'}
+                </button>
+              )}
+            </div>
           </div>
+          
+          <DndContext 
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Name
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Category
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Role
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Team Years
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Email
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  <SortableContext 
+                    items={sortedMembers
+                      .filter(member => {
+                        if (!selectedYear) return true;
+                        return member.teamYears?.includes(selectedYear) || 
+                               (member.teamYear && parseInt(member.teamYear) === selectedYear);
+                      })
+                      .map(member => member._id)
+                    }
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {sortedMembers
+                      .filter(member => {
+                        if (!selectedYear) return true;
+                        return member.teamYears?.includes(selectedYear) || 
+                               (member.teamYear && parseInt(member.teamYear) === selectedYear);
+                      })
+                      .map((member) => (
+                        <SortableTeamMember
+                          key={member._id}
+                          member={member}
+                          selectedYear={selectedYear}
+                          onToggleStatus={toggleUserStatus}
+                          onDelete={deleteMember}
+                        />
+                      ))
+                    }
+                  </SortableContext>
+                </tbody>
+              </table>
+            </div>
+          </DndContext>
         </div>
       </div>
     </div>

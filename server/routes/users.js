@@ -136,9 +136,7 @@ router.get("/public-team", async (req, res) => {
   try {
     const { year } = req.query; // Optional year filter
 
-    console.log(`📊 Fetching public team members for year: ${year || "all"}`);
-
-    // Base query - get all non-admin users (temporarily including inactive for debugging)
+    // Base query - get all non-admin users
     let query = {
       role: { $ne: "admin" }, // Exclude admin users from public display
     };
@@ -153,8 +151,6 @@ router.get("/public-team", async (req, res) => {
       ];
     }
 
-    console.log("📊 MongoDB query:", JSON.stringify(query, null, 2));
-
     const users = await User.find(query)
       .sort({
         displayOrder: 1, // Sort by display order first
@@ -165,23 +161,8 @@ router.get("/public-team", async (req, res) => {
         "name teamRole role department year teamYear teamYears yearlyRoles profilePicture linkedin github bio email isActive displayOrder"
       );
 
-    console.log(`📊 Found ${users.length} team members`);
-    if (users.length > 0) {
-      console.log("📊 Sample user data:", {
-        name: users[0].name,
-        role: users[0].role,
-        isActive: users[0].isActive,
-        teamYears: users[0].teamYears,
-        yearlyRoles: users[0].yearlyRoles,
-      });
-    }
-
     // Return all users (both active and inactive) for public team display
     // This allows viewing historical team data
-    console.log(
-      `📊 Returning all ${users.length} users (including inactive for historical data)`
-    );
-
     res.status(200).json({
       success: true,
       users: users, // Return all users instead of filtering by isActive
@@ -198,6 +179,45 @@ router.get("/public-team", async (req, res) => {
     });
   }
 });
+
+// @route   PATCH /api/users/update-order
+// @desc    Update team members display order (admin/nodal_officer only)
+// @access  Private
+router.patch(
+  "/update-order",
+  authenticateToken,
+  authorizeRoles("admin", "nodal_officer"),
+  async (req, res) => {
+    try {
+      const { updates } = req.body; // Array of {userId, displayOrder}
+
+      if (!Array.isArray(updates)) {
+        return res.status(400).json({
+          success: false,
+          message: "Updates must be an array",
+        });
+      }
+
+      // Update each user's display order
+      const updatePromises = updates.map(({ userId, displayOrder }) =>
+        User.findByIdAndUpdate(userId, { displayOrder }, { new: true })
+      );
+
+      await Promise.all(updatePromises);
+
+      res.status(200).json({
+        success: true,
+        message: "Team member order updated successfully",
+      });
+    } catch (error) {
+      console.error("Update team order error:", error);
+      res.status(500).json({
+        success: false,
+        message: "An error occurred while updating team order",
+      });
+    }
+  }
+);
 
 // @route   GET /api/users/:id
 // @desc    Get user by ID
@@ -489,50 +509,5 @@ router.get("/profile", authenticateToken, async (req, res) => {
     });
   }
 });
-
-// @route   PATCH /api/users/update-order
-// @desc    Update team members display order (admin/nodal_officer only)
-// @access  Private
-router.patch(
-  "/update-order",
-  authenticateToken,
-  authorizeRoles("admin", "nodal_officer"),
-  async (req, res) => {
-    try {
-      const { updates } = req.body; // Array of {userId, displayOrder}
-
-      console.log("📊 Updating team member order:", updates);
-
-      if (!Array.isArray(updates)) {
-        return res.status(400).json({
-          success: false,
-          message: "Updates must be an array",
-        });
-      }
-
-      // Update each user's display order
-      const updatePromises = updates.map(({ userId, displayOrder }) =>
-        User.findByIdAndUpdate(
-          userId,
-          { displayOrder },
-          { new: true }
-        )
-      );
-
-      await Promise.all(updatePromises);
-
-      res.status(200).json({
-        success: true,
-        message: "Team member order updated successfully",
-      });
-    } catch (error) {
-      console.error("Update team order error:", error);
-      res.status(500).json({
-        success: false,
-        message: "An error occurred while updating team order",
-      });
-    }
-  }
-);
 
 export default router;

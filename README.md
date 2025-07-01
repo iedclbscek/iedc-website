@@ -1,124 +1,77 @@
-# IEDC Dashboard Setup Guide
+# IEDC LBS College of Engineering Website
 
-## 🚀 Quick Deployment to Render
+A modern, responsive website for the Innovation and Entrepreneurship Development Cell (IEDC) at LBS College of Engineering, Kerala.
 
-For production deployment, see [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed instructions.
+## About
 
-### Quick Deploy Steps:
-
-1. Push your code to GitHub
-2. Connect repository to Render
-3. Configure environment variables
-4. Deploy using `render.yaml`
-
-## Prerequisites
-
-### 1. Install MongoDB
-
-- **Windows**: Download from https://www.mongodb.com/try/download/community
-- **MacOS**: `brew install mongodb-community`
-- **Linux**: Follow official MongoDB installation guide
-
-### 2. Start MongoDB
-
-```bash
-# Windows (if installed as service)
-net start MongoDB
-
-# MacOS/Linux
-mongod
-```
-
-### 3. Install Dependencies
-
-#### Backend
-
-```bash
-cd server
-npm install
-```
-
-#### Frontend
-
-```bash
-cd client
-npm install
-```
-
-## Configuration
-
-1. Copy `server/config/.env` and update the values as needed
-2. The default admin credentials are:
-   - Email: admin@iedc.lbscek.ac.in
-   - Password: admin123
-
-## Running the Application
-
-### 1. Seed the Database (First time only)
-
-```bash
-cd server
-npm run seed
-```
-
-### 2. Start the Backend Server
-
-```bash
-cd server
-npm run dev
-```
-
-Server will run on http://localhost:5000
-
-### 3. Start the Frontend (in a new terminal)
-
-```bash
-cd client
-npm run dev
-```
-
-Client will run on http://localhost:5173
-
-## Test Credentials
-
-After seeding the database, you can use these credentials to test:
-
-- **Admin**: admin@iedc.lbscek.ac.in / admin123
-- **Moderator**: moderator@iedc.lbscek.ac.in / mod123456
-- **Member**: member@iedc.lbscek.ac.in / member123
+This is a full-stack web application built for IEDC LBS CEK to showcase their activities, team members, events, and provide a comprehensive platform for innovation and entrepreneurship initiatives.
 
 ## Features
 
-- ✅ User Authentication (Login/Logout)
-- ✅ Role-based Access Control (Admin, Moderator, Member)
-- ✅ JWT Token Management
-- ✅ Password Hashing
-- ✅ Input Validation
-- ✅ Rate Limiting
-- ✅ Responsive Design
-- ✅ Toast Notifications
+### 🌐 Public Website
 
-## API Endpoints
+- ✅ Modern, responsive homepage with hero section
+- ✅ About section with mission and vision
+- ✅ Team showcase with year-wise filtering
+- ✅ Events and activities display
+- ✅ Communities and initiatives section
+- ✅ Contact information and social links
 
-### Authentication
+### 👥 Team Management
 
-- POST `/api/auth/login` - User login
-- POST `/api/auth/register` - User registration (admin only)
-- GET `/api/auth/me` - Get current user
-- POST `/api/auth/logout` - User logout
+- ✅ Dynamic team member profiles
+- ✅ Year-wise team organization (2020-present)
+- ✅ Role-based categorization (Faculty, Core Team, Members)
+- ✅ Drag-and-drop team ordering for admins
+- ✅ Profile pictures and social media links
+- ✅ Multi-year membership support
 
-### Users
+### 🔐 Admin Dashboard
 
-- GET `/api/users` - Get all users (admin/moderator only)
-- GET `/api/users/:id` - Get user by ID
-- PUT `/api/users/:id` - Update user
-- DELETE `/api/users/:id` - Delete user (admin only)
+- ✅ User Authentication and Authorization
+- ✅ Role-based Access Control (Admin, Nodal Officer, Members)
+- ✅ Team member invitation system
+- ✅ User status management (Active/Inactive)
+- ✅ Profile management with photo uploads
+- ✅ Bulk operations and filtering
 
-## Next Steps
+### 🛠 Technical Features
 
-1. Add more dashboard features (user management, analytics, etc.)
-2. Implement email verification
-3. Add password reset functionality
-4. Create role-specific dashboards
-5. Add file upload capabilities
-6. Implement real-time notifications
+- ✅ JWT-based authentication
+- ✅ Secure password hashing
+- ✅ Input validation and sanitization
+- ✅ Rate limiting for API security
+- ✅ Responsive design for all devices
+- ✅ Toast notifications for user feedback
+- ✅ RESTful API architecture
+
+## Technology Stack
+
+**Frontend:**
+
+- React.js with Vite
+- Tailwind CSS for styling
+- React Router for navigation
+- Axios for API calls
+- React Hot Toast for notifications
+- DND Kit for drag-and-drop functionality
+
+**Backend:**
+
+- Node.js with Express.js
+- MongoDB with Mongoose ODM
+- JWT for authentication
+- bcryptjs for password hashing
+- Multer for file uploads
+- Express Rate Limit for security
+
+## Project Structure
+
+```
+iedc-website/
+├── client/          # React frontend application
+├── server/          # Node.js backend API
+└── README.md        # Project documentation
+```
+
+This application serves as a comprehensive digital presence for IEDC LBSCEK, enabling effective communication with students, showcasing achievements, and providing administrative tools for team management.
