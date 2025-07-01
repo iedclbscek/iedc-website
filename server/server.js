@@ -21,6 +21,9 @@ import userRoutes from "./routes/users.js";
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Trust proxy for Render deployment
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(
   helmet({
@@ -88,10 +91,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Database connection
 mongoose
-  .connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(process.env.MONGODB_URI)
   .then(() => console.log("📊 MongoDB connected successfully"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
