@@ -46,12 +46,8 @@ const inviteValidation = [
     .isEmail()
     .normalizeEmail()
     .withMessage("Please provide a valid email address"),
-  body("teamRole")
-    .optional()
-    .trim()
-    .isLength({ min: 2 })
-    .withMessage("Team role must be at least 2 characters if provided"),
   body("role")
+    .optional()
     .isIn([
       "admin",
       "nodal_officer",
@@ -62,6 +58,11 @@ const inviteValidation = [
       "member",
     ])
     .withMessage("Invalid role specified"),
+  body("teamRole")
+    .optional()
+    .trim()
+    .isLength({ min: 2 })
+    .withMessage("Team role must be at least 2 characters if provided"),
   body("department")
     .optional()
     .trim()
@@ -83,6 +84,30 @@ const inviteValidation = [
     .optional({ checkFalsy: true })
     .isURL()
     .withMessage("Please provide a valid GitHub URL if provided"),
+  body("yearlyRoles")
+    .optional()
+    .isArray()
+    .withMessage("yearlyRoles must be an array if provided"),
+  body("yearlyRoles.*.year")
+    .optional()
+    .isInt({ min: 2020, max: 2030 })
+    .withMessage("Year must be between 2020 and 2030"),
+  body("yearlyRoles.*.role")
+    .optional()
+    .isIn([
+      "admin",
+      "nodal_officer",
+      "ceo",
+      "lead",
+      "co_lead",
+      "coordinator",
+      "member",
+    ])
+    .withMessage("Invalid role specified in yearlyRoles"),
+  body("teamYears")
+    .optional()
+    .isArray()
+    .withMessage("teamYears must be an array if provided"),
 ];
 
 const setPasswordValidation = [
@@ -241,7 +266,7 @@ router.post(
       const userData = {
         name,
         email,
-        role: role, // Keep primary role for backward compatibility
+        role: role || yearlyRoles[0]?.role || "member", // Use first yearly role as primary role, fallback to member
         teamYear: teamYears[0]?.toString() || "2025", // Keep first year for backward compatibility
         teamYears: teamYears, // Store all team years
         yearlyRoles:

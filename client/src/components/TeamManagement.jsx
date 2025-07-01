@@ -145,16 +145,26 @@ const TeamManagement = () => {
       const yearlyRolesArray = inviteForm.teamYears.map(year => ({
         year: year,
         role: inviteForm.yearlyRoles[year]?.role || 'member',
-        teamRole: inviteForm.yearlyRoles[year]?.teamRole || ''
+        teamRole: inviteForm.yearlyRoles[year]?.teamRole || '',
+        academicYear: inviteForm.yearlyRoles[year]?.academicYear || ''
       }));
+      
+      // Create clean request payload without conflicting fields
+      const requestPayload = {
+        name: inviteForm.name,
+        email: inviteForm.email,
+        department: inviteForm.department,
+        phoneNumber: inviteForm.phoneNumber,
+        linkedin: inviteForm.linkedin,
+        github: inviteForm.github,
+        teamYears: inviteForm.teamYears,
+        yearlyRoles: yearlyRolesArray,
+        sendEmail: inviteForm.teamYears.includes(currentYear) // Only send email if current year is selected
+      };
       
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/auth/invite`,
-        {
-          ...inviteForm,
-          yearlyRoles: yearlyRolesArray,
-          sendEmail: inviteForm.teamYears.includes(currentYear) // Only send email if current year is selected
-        },
+        requestPayload,
         {
           headers: { Authorization: `Bearer ${token}` }
         }
