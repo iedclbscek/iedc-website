@@ -3,6 +3,11 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App'
 
+// Environment variable debug
+console.log('🌍 Environment Check:');
+console.log('VITE_API_URL:', import.meta.env.VITE_API_URL);
+console.log('Full API URL:', `${import.meta.env.VITE_API_URL}/api`);
+
 // Remove App.css reference since we're using Tailwind
 
 createRoot(document.getElementById('root')).render(

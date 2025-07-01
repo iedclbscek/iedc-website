@@ -9,6 +9,7 @@ Since Render is requesting payment information, here are several **completely fr
 **Skip the Blueprint, create services manually:**
 
 1. **Create Backend Service (FREE)**:
+
    - Go to [render.com](https://dashboard.render.com)
    - Click "New" → "Web Service"
    - Connect your GitHub repository
@@ -31,6 +32,7 @@ Since Render is requesting payment information, here are several **completely fr
 ### Option 2: Vercel + Railway (COMPLETELY FREE)
 
 #### Frontend on Vercel (FREE Forever):
+
 ```bash
 # Install Vercel CLI
 npm i -g vercel
@@ -49,6 +51,7 @@ vercel
 ```
 
 #### Backend on Railway (FREE Tier):
+
 1. Go to [railway.app](https://railway.app)
 2. "Start a new project" → "Deploy from GitHub repo"
 3. Select your repository
@@ -59,6 +62,7 @@ vercel
 ### Option 3: Netlify + Render (FREE)
 
 #### Frontend on Netlify (FREE):
+
 1. Go to [netlify.com](https://netlify.com)
 2. "Add new site" → "Import an existing project"
 3. Connect GitHub
@@ -67,11 +71,13 @@ vercel
 6. Deploy
 
 #### Backend on Render (FREE):
+
 - Single service deployment (no blueprint needed)
 
 ### Option 4: Complete Free Stack
 
 #### Use these FREE services:
+
 - **Frontend**: Vercel or Netlify (FREE forever)
 - **Backend**: Railway or Render (FREE tier)
 - **Database**: MongoDB Atlas (FREE 512MB)
@@ -106,11 +112,13 @@ vercel env add VITE_API_URL
 3. **"New Project" → "Deploy from GitHub repo"**
 4. **Select your iedc-website repository**
 5. **Configure**:
+
    - **Root Directory**: `/server`
    - **Start Command**: `npm start`
    - **Build Command**: `npm install`
 
 6. **Add Environment Variables**:
+
    ```
    NODE_ENV=production
    MONGODB_URI=mongodb+srv://...
@@ -137,13 +145,13 @@ vercel --prod
 
 ## 🆓 FREE Tier Limitations
 
-| Service | Free Tier Limits |
-|---------|------------------|
-| **Vercel** | 100GB bandwidth/month, 6000 build minutes |
-| **Railway** | $5 credit/month, 512MB RAM, 1GB disk |
-| **Netlify** | 100GB bandwidth/month, 300 build minutes |
-| **MongoDB Atlas** | 512MB storage, shared clusters |
-| **Cloudinary** | 25GB storage, 25GB bandwidth |
+| Service           | Free Tier Limits                          |
+| ----------------- | ----------------------------------------- |
+| **Vercel**        | 100GB bandwidth/month, 6000 build minutes |
+| **Railway**       | $5 credit/month, 512MB RAM, 1GB disk      |
+| **Netlify**       | 100GB bandwidth/month, 300 build minutes  |
+| **MongoDB Atlas** | 512MB storage, shared clusters            |
+| **Cloudinary**    | 25GB storage, 25GB bandwidth              |
 
 ## 🛠️ Quick Free Deployment Script
 
@@ -183,6 +191,7 @@ echo "✅ Frontend deployed! Backend instructions provided."
 ## 🎯 Best Free Combination
 
 **Recommended Setup**:
+
 - **Frontend**: Vercel (fastest, reliable)
 - **Backend**: Railway (easy setup, good free tier)
 - **Database**: MongoDB Atlas (industry standard)
@@ -193,10 +202,42 @@ echo "✅ Frontend deployed! Backend instructions provided."
 ## 🚀 One-Click Deploy Options
 
 ### Deploy to Vercel:
+
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-username/iedc-website&project-name=iedc-website&root-directory=client)
 
 ### Deploy to Railway:
+
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/your-username/iedc-website&plugins=mongodb&envs=JWT_SECRET,EMAIL_USER,EMAIL_PASS)
+
+---
+
+## ✅ **DEPLOYMENT SUCCESS - RENDER + VERCEL**
+
+**🎉 Your IEDC website is now deployed for FREE!**
+
+### Deployed URLs:
+
+- **Frontend (Vercel)**: https://iedclbscek-paq9kbe2w-umar-al-mukhtar-s-projects.vercel.app
+- **Backend (Render)**: https://iedclbscekapi.onrender.com
+- **API Health**: https://iedclbscekapi.onrender.com/api/health
+- **Team API**: https://iedclbscekapi.onrender.com/api/users/public-team
+
+### Configuration Applied:
+
+- ✅ Frontend deployed to Vercel (FREE tier)
+- ✅ Backend deployed to Render (FREE tier)
+- ✅ Environment variables configured properly
+- ✅ CORS configured for Vercel domain
+- ✅ API endpoints working perfectly
+- ✅ MongoDB connected successfully
+- ✅ Server running on port 5000
+
+### Render vs Railway:
+
+- ✅ Render worked immediately with better configuration
+- ✅ More reliable free tier deployment
+- ✅ Better logging and debugging
+- ✅ Automatic SSL certificates
 
 ---
 

@@ -43,7 +43,7 @@ const allowedOrigins = [
   process.env.FRONTEND_URL || "http://localhost:5173",
   "http://localhost:5173",
   "http://localhost:3000",
-  "https://iedclbscek.onrender.com", // Expected frontend URL on Render
+  "https://iedclbscekapi.onrender.com", // Expected frontend URL on Render
   "https://das-nabvuax2d-umar-al-mukhtar-s-projects.vercel.app", // Your Vercel frontend
   /\.onrender\.com$/, // Allow any onrender.com subdomain
   /\.vercel\.app$/, // Allow any Vercel subdomain
