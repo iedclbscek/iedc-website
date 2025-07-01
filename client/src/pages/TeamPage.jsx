@@ -46,23 +46,26 @@ const TeamPage = () => {
   // Organize members by category and filter based on search query
   useEffect(() => {
     const organizeMembersByCategory = (members) => {
-      // Ensure members is an array
+      // Ensure members is an array and filter out admin users
       if (!Array.isArray(members)) {
         return { facultyMembers: [], coreTeam: [], teamMembers: [] };
       }
       
-      const facultyMembers = members.filter(member => 
+      // Filter out admin users from public display
+      const publicMembers = members.filter(member => member.role !== 'admin');
+      
+      const facultyMembers = publicMembers.filter(member => 
         member.role === 'nodal_officer' || 
         (member.teamRole && member.teamRole.toLowerCase().includes('faculty'))
       );
       
-      const coreTeam = members.filter(member => 
-        ['admin', 'ceo', 'lead'].includes(member.role) ||
+      const coreTeam = publicMembers.filter(member => 
+        ['ceo', 'lead'].includes(member.role) ||
         (member.teamRole && ['President', 'Vice President', 'Secretary', 'Treasurer'].includes(member.teamRole))
       );
       
-      const teamMembersFiltered = members.filter(member => 
-        !['admin', 'ceo', 'lead', 'nodal_officer'].includes(member.role) &&
+      const teamMembersFiltered = publicMembers.filter(member => 
+        !['ceo', 'lead', 'nodal_officer'].includes(member.role) &&
         !(member.teamRole && ['President', 'Vice President', 'Secretary', 'Treasurer', 'Faculty'].some(role => 
           member.teamRole.toLowerCase().includes(role.toLowerCase())
         ))
@@ -77,12 +80,13 @@ const TeamPage = () => {
     }
     
     const query = searchQuery.toLowerCase();
-    // Ensure teamMembers is an array before filtering
+    // Ensure teamMembers is an array before filtering and exclude admin users
     const filtered = Array.isArray(teamMembers) ? teamMembers.filter(
       member => 
-        member.name?.toLowerCase().includes(query) || 
+        member.role !== 'admin' && // Exclude admin users from search results too
+        (member.name?.toLowerCase().includes(query) || 
         member.role?.toLowerCase().includes(query) ||
-        member.teamRole?.toLowerCase().includes(query)
+        member.teamRole?.toLowerCase().includes(query))
     ) : [];
     
     setFilteredMembers(organizeMembersByCategory(filtered));
@@ -145,7 +149,7 @@ const TeamPage = () => {
                   <h2 className="text-2xl font-bold text-text-dark mb-6 text-center">Faculty Members</h2>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                     {filteredMembers.facultyMembers.map(member => (
-                      <TeamCard key={member.id} member={member} />
+                      <TeamCard key={member._id || member.id} member={member} />
                     ))}
                   </div>
                 </div>
@@ -157,7 +161,7 @@ const TeamPage = () => {
                   <h2 className="text-2xl font-bold text-text-dark mb-6 text-center">Core Team</h2>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                     {filteredMembers.coreTeam.map(member => (
-                      <TeamCard key={member.id} member={member} />
+                      <TeamCard key={member._id || member.id} member={member} />
                     ))}
                   </div>
                 </div>
@@ -169,7 +173,7 @@ const TeamPage = () => {
                   <h2 className="text-2xl font-bold text-text-dark mb-6 text-center">Team Members</h2>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                     {filteredMembers.teamMembers.map(member => (
-                      <TeamCard key={member.id} member={member} />
+                      <TeamCard key={member._id || member.id} member={member} />
                     ))}
                   </div>
                 </div>

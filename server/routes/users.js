@@ -134,14 +134,14 @@ router.get(
 // @access  Public
 router.get("/public-team", async (req, res) => {
   try {
-    // Only get active users with basic public information
+    // Only get active users with basic public information, excluding admin users
     const users = await User.find({
       isActive: true,
+      role: { $ne: "admin" }, // Exclude admin users from public display
       $or: [
         {
           role: {
             $in: [
-              "admin",
               "nodal_officer",
               "ceo",
               "lead",

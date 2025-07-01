@@ -49,7 +49,9 @@ const TeamManagement = () => {
       });
       
       if (response.data.success) {
-        setTeamMembers(response.data.users);
+        // Filter out admin users from team management display
+        const nonAdminUsers = response.data.users.filter(user => user.role !== 'admin');
+        setTeamMembers(nonAdminUsers);
       }
     } catch (error) {
       console.error('Error fetching team members:', error);

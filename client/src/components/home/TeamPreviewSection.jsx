@@ -26,13 +26,15 @@ const TeamPreviewSection = () => {
     fetchTeamMembers();
   }, []);
   
-  // Get top team members for preview (leaders and key roles)
+  // Get top team members for preview (leaders and key roles, excluding admin)
   const displayMembers = teamMembers
     .filter(member => 
-      ['admin', 'ceo', 'lead', 'nodal_officer'].includes(member.role) ||
-      (member.teamRole && ['President', 'Vice President', 'Secretary', 'Treasurer', 'Faculty'].some(role => 
-        member.teamRole.toLowerCase().includes(role.toLowerCase())
-      ))
+      member.role !== 'admin' && ( // Exclude admin users
+        ['ceo', 'lead', 'nodal_officer'].includes(member.role) ||
+        (member.teamRole && ['President', 'Vice President', 'Secretary', 'Treasurer', 'Faculty'].some(role => 
+          member.teamRole.toLowerCase().includes(role.toLowerCase())
+        ))
+      )
     )
     .slice(0, 3); // Show top 3 team members
   
@@ -62,13 +64,13 @@ const TeamPreviewSection = () => {
         <div className="flex flex-wrap justify-center gap-8 mb-12">
           {displayMembers.map((member, index) => (
             <motion.div
-              key={member?.id || index}
+              key={member?._id || member?.id || index}
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.15 }}
               viewport={{ once: true, margin: "-100px" }}
               className="relative"
-              onMouseEnter={() => setHovered(member?.id || index)}
+              onMouseEnter={() => setHovered(member?._id || member?.id || index)}
               onMouseLeave={() => setHovered(null)}
             >
               <div className="w-48 h-48 md:w-56 md:h-56 rounded-full overflow-hidden">
@@ -86,7 +88,7 @@ const TeamPreviewSection = () => {
               <motion.div 
                 className="text-center mt-4"
                 animate={{ 
-                  y: hovered === (member?.id || index) ? -5 : 0,
+                  y: hovered === (member?._id || member?.id || index) ? -5 : 0,
                 }}
                 transition={{ duration: 0.3 }}
               >
