@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
+
+// Context
+import { AuthProvider } from './contexts/AuthContext';
 
 // Components
 import Navbar from './components/layout/Navbar';
@@ -14,6 +18,9 @@ import EventsPage from './pages/EventsPage';
 import TeamPage from './pages/TeamPage';
 import CommunitiesPage from './pages/CommunitiesPage';
 import CommunityPage from './pages/CommunityPage';
+import LoginPage from './pages/LoginPage';
+import SetPasswordPage from './pages/SetPasswordPage';
+import DashboardPage from './pages/DashboardPage';
 
 // Placeholder page component
 const PlaceholderPage = ({ title }) => (
@@ -39,13 +46,28 @@ const AppContent = () => {
     if (location.pathname !== '/') {
       setLoading(false);
     }
-    // Preload any assets if needed
-    return () => {
-      // Cleanup if needed
-    };
-  }, [location.pathname]);  // Only show loader on home page
+  }, [location.pathname]);
+
+  // Only show loader on home page
   if (loading && location.pathname === '/') {
     return <Loader onComplete={handleLoadComplete} />;
+  }
+
+  // Dashboard routes don't need navbar/footer
+  const isDashboardRoute = location.pathname.startsWith('/dashboard') || 
+                           location.pathname === '/login' || 
+                           location.pathname.startsWith('/set-password');
+
+  if (isDashboardRoute) {
+    return (
+      <div className="min-h-screen">
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/set-password/:token" element={<SetPasswordPage />} />
+          <Route path="/dashboard/*" element={<DashboardPage />} />
+        </Routes>
+      </div>
+    );
   }
 
   return (
@@ -59,8 +81,6 @@ const AppContent = () => {
           <Route path="/team" element={<TeamPage />} />
           <Route path="/communities" element={<CommunitiesPage />} />
           <Route path="/communities/:id" element={<CommunityPage />} />
-          <Route path="/login" element={<PlaceholderPage title="Dashboard Login" />} />
-          <Route path="/dashboard/*" element={<PlaceholderPage title="Dashboard" />} />
           <Route path="*" element={<PlaceholderPage title="Page Not Found" />} />
         </Routes>
       </main>
@@ -70,12 +90,35 @@ const AppContent = () => {
 };
 
 function App() {
-  // Using BrowserRouter for clean URLs (requires proper server configuration)
   return (
-    <BrowserRouter>
-      <ScrollToTop />
-      <AppContent />
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <ScrollToTop />
+        <AppContent />
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: '#363636',
+              color: '#fff',
+            },
+            success: {
+              duration: 3000,
+              theme: {
+                primary: '#4ade80',
+              },
+            },
+            error: {
+              duration: 4000,
+              theme: {
+                primary: '#ef4444',
+              },
+            },
+          }}
+        />
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 

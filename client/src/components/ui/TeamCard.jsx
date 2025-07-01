@@ -26,7 +26,9 @@ const TeamCard = ({ member }) => {
       <div className="relative mx-auto mb-3">
         <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-lg overflow-hidden mx-auto shadow-md">
           <img
-            src={member.image || defaultImage}
+            src={member.profilePicture 
+              ? `${import.meta.env.VITE_API_URL}${member.profilePicture}` 
+              : defaultImage}
             alt={member.name || 'Team Member'}
             className="w-full h-full object-cover"
             onError={(e) => {
