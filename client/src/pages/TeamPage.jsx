@@ -90,14 +90,16 @@ const TeamPage = () => {
       
       const coreTeam = publicMembers.filter(member => {
         const memberRole = getRoleForYear(member, selectedYear);
-        return ['ceo', 'lead'].includes(memberRole.role) ||
-               (memberRole.teamRole && ['President', 'Vice President', 'Secretary', 'Treasurer'].includes(memberRole.teamRole));
+        return ['ceo', 'lead', 'co_lead', 'coordinator'].includes(memberRole.role) ||
+               (memberRole.teamRole && ['CEO', 'Lead', 'Co-Lead', 'Coordinator'].some(role => 
+                 memberRole.teamRole.toLowerCase().includes(role.toLowerCase())
+               ));
       });
       
       const teamMembersFiltered = publicMembers.filter(member => {
         const memberRole = getRoleForYear(member, selectedYear);
-        return !['ceo', 'lead', 'nodal_officer'].includes(memberRole.role) &&
-               !(memberRole.teamRole && ['President', 'Vice President', 'Secretary', 'Treasurer', 'Faculty'].some(role => 
+        return !['ceo', 'lead', 'co_lead', 'coordinator', 'nodal_officer'].includes(memberRole.role) &&
+               !(memberRole.teamRole && ['President', 'Vice President', 'Secretary', 'Treasurer', 'Faculty', 'CEO', 'Lead', 'Co-Lead', 'Coordinator'].some(role => 
                  memberRole.teamRole.toLowerCase().includes(role.toLowerCase())
                ));
       });

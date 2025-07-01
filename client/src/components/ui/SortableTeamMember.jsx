@@ -41,8 +41,8 @@ const SortableTeamMember = ({ member, selectedYear, enableSorting, onToggleStatu
     if (role === 'nodal_officer' || (teamRole && teamRole.toLowerCase().includes('faculty'))) {
       return 'Faculty';
     }
-    if (['ceo', 'lead', 'co_lead'].includes(role) || 
-        (teamRole && ['President', 'Vice President', 'Secretary', 'Treasurer', 'CEO', 'Lead', 'Co-Lead'].some(r => 
+    if (['ceo', 'lead', 'co_lead', 'coordinator'].includes(role) || 
+        (teamRole && ['President', 'Vice President', 'Secretary', 'Treasurer', 'CEO', 'Lead', 'Co-Lead', 'Coordinator'].some(r => 
           teamRole.toLowerCase().includes(r.toLowerCase())))) {
       return 'Core Team';
     }
