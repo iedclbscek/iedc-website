@@ -251,10 +251,107 @@ router.post(
 
       // Check if user already exists
       const existingUser = await User.findOne({ email });
+
       if (existingUser) {
-        return res.status(400).json({
-          error: "User already exists",
-          message: "A user with this email already exists",
+        console.log(
+          "📧 User exists, updating their yearly roles and team years..."
+        );
+
+        // Get existing data
+        const existingYears = existingUser.teamYears || [];
+        const existingYearlyRoles = [...(existingUser.yearlyRoles || [])];
+
+        // Merge team years (always add new years)
+        const updatedTeamYears = [...new Set([...existingYears, ...teamYears])];
+
+        // Update or add yearly roles
+        yearlyRoles.forEach((newRole) => {
+          const existingRoleIndex = existingYearlyRoles.findIndex(
+            (yr) => yr.year === newRole.year
+          );
+          if (existingRoleIndex !== -1) {
+            // Update existing yearly role
+            console.log(`📧 Updating existing role for year ${newRole.year}`);
+            existingYearlyRoles[existingRoleIndex] = {
+              ...existingYearlyRoles[existingRoleIndex],
+              ...newRole,
+            };
+          } else {
+            // Add new yearly role
+            console.log(`📧 Adding new role for year ${newRole.year}`);
+            existingYearlyRoles.push(newRole);
+          }
+        });
+
+        // Update user with new/updated years and roles
+        const updateData = {
+          teamYears: updatedTeamYears,
+          yearlyRoles: existingYearlyRoles,
+        };
+
+        // Update name if provided (in case of name changes)
+        if (name && name.trim()) {
+          updateData.name = name.trim();
+        }
+
+        // Update other optional fields if provided
+        if (department && department.trim()) {
+          updateData.department = department.trim();
+        }
+        if (phoneNumber && phoneNumber.trim()) {
+          updateData.phoneNumber = phoneNumber.trim();
+        }
+        if (linkedin && linkedin.trim()) {
+          updateData.linkedin = linkedin.trim();
+        }
+        if (github && github.trim()) {
+          updateData.github = github.trim();
+        }
+
+        // Generate reset token and send email if current year is included and user doesn't have password
+        let emailResult = { success: true };
+        const shouldSendEmail = sendEmail && !existingUser.password;
+
+        if (shouldSendEmail) {
+          const resetToken = generateResetToken();
+          const hashedToken = hashResetToken(resetToken);
+
+          updateData.passwordResetToken = hashedToken;
+          updateData.passwordResetExpires = new Date(
+            Date.now() + 24 * 60 * 60 * 1000
+          );
+          updateData.isActive = true; // Activate user when sending email
+
+          emailResult = await sendInvitationEmail(email, name, resetToken);
+        }
+
+        // Update the existing user
+        const updatedUser = await User.findByIdAndUpdate(
+          existingUser._id,
+          updateData,
+          { new: true, runValidators: true }
+        );
+
+        return res.status(200).json({
+          message: shouldSendEmail
+            ? "Years added to existing member and invitation sent"
+            : "Years added to existing member successfully",
+          user: {
+            id: updatedUser._id,
+            name: updatedUser.name,
+            email: updatedUser.email,
+            teamRole: updatedUser.teamRole,
+            role: updatedUser.role,
+            department: updatedUser.department,
+            year: updatedUser.year,
+            teamYear: updatedUser.teamYear,
+            teamYears: updatedUser.teamYears,
+            yearlyRoles: updatedUser.yearlyRoles,
+            isActive: updatedUser.isActive,
+          },
+          emailSent: emailResult.success && shouldSendEmail,
+          success: true,
+          updated: true, // Flag to indicate this was an update, not a new user
         });
       }
 

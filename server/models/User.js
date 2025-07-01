@@ -75,8 +75,17 @@ const userSchema = new mongoose.Schema(
           type: String,
           trim: true,
         },
+        order: {
+          type: Number,
+          default: 0,
+        },
       },
     ],
+    // Global order for team display (fallback)
+    displayOrder: {
+      type: Number,
+      default: 0,
+    },
     teamRole: {
       type: String,
       trim: true,

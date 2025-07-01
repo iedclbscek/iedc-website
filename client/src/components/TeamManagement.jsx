@@ -153,14 +153,26 @@ const TeamManagement = () => {
       const requestPayload = {
         name: inviteForm.name,
         email: inviteForm.email,
-        department: inviteForm.department,
-        phoneNumber: inviteForm.phoneNumber,
-        linkedin: inviteForm.linkedin,
-        github: inviteForm.github,
         teamYears: inviteForm.teamYears,
         yearlyRoles: yearlyRolesArray,
         sendEmail: inviteForm.teamYears.includes(currentYear) // Only send email if current year is selected
       };
+      
+      // Only add optional fields if they have values
+      if (inviteForm.department && inviteForm.department.trim()) {
+        requestPayload.department = inviteForm.department.trim();
+      }
+      if (inviteForm.phoneNumber && inviteForm.phoneNumber.trim()) {
+        requestPayload.phoneNumber = inviteForm.phoneNumber.trim();
+      }
+      if (inviteForm.linkedin && inviteForm.linkedin.trim()) {
+        requestPayload.linkedin = inviteForm.linkedin.trim();
+      }
+      if (inviteForm.github && inviteForm.github.trim()) {
+        requestPayload.github = inviteForm.github.trim();
+      }
+      
+      console.log('📧 Sending invite request:', requestPayload);
       
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/auth/invite`,
@@ -172,10 +184,24 @@ const TeamManagement = () => {
 
       if (response.data.success) {
         const isCurrentYearIncluded = inviteForm.teamYears.includes(currentYear);
-        if (isCurrentYearIncluded) {
-          toast.success('Member added successfully! Invitation email sent.');
+        const isUpdate = response.data.updated;
+        
+        if (isUpdate) {
+          // Handle existing user update
+          if (isCurrentYearIncluded && response.data.emailSent) {
+            toast.success('Years added to existing member and invitation email sent!');
+          } else if (isCurrentYearIncluded) {
+            toast.success('Years added to existing member successfully!');
+          } else {
+            toast.success('Years added to existing member (no email sent - not in current year)');
+          }
         } else {
-          toast.success('Member added successfully! (No email sent - not in current year)');
+          // Handle new user creation
+          if (isCurrentYearIncluded) {
+            toast.success('Member added successfully! Invitation email sent.');
+          } else {
+            toast.success('Member added successfully! (No email sent - not in current year)');
+          }
         }
         setInviteForm({
           name: '',
@@ -195,7 +221,17 @@ const TeamManagement = () => {
       }
     } catch (error) {
       console.error('Error sending invitation:', error);
-      toast.error(error.response?.data?.message || 'Failed to send invitation');
+      console.error('Response data:', error.response?.data);
+      
+      const errorMessage = error.response?.data?.message || 'Failed to send invitation';
+      const errorDetails = error.response?.data?.details;
+      
+      if (errorDetails && Array.isArray(errorDetails)) {
+        console.error('Validation errors:', errorDetails);
+        toast.error(`Validation Error: ${errorDetails.map(err => err.msg).join(', ')}`);
+      } else {
+        toast.error(errorMessage);
+      }
     } finally {
       setLoading(false);
     }

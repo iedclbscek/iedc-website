@@ -157,33 +157,35 @@ router.get("/public-team", async (req, res) => {
 
     const users = await User.find(query)
       .sort({
-        role: 1, // Sort by role priority
-        createdAt: -1,
+        displayOrder: 1, // Sort by display order first
+        role: 1, // Then by role priority
+        createdAt: -1, // Finally by creation date
       })
       .select(
-        "name teamRole role department year teamYear teamYears yearlyRoles profilePicture linkedin github bio email isActive"
+        "name teamRole role department year teamYear teamYears yearlyRoles profilePicture linkedin github bio email isActive displayOrder"
       );
 
     console.log(`📊 Found ${users.length} team members`);
     if (users.length > 0) {
-      console.log('📊 Sample user data:', {
+      console.log("📊 Sample user data:", {
         name: users[0].name,
         role: users[0].role,
         isActive: users[0].isActive,
         teamYears: users[0].teamYears,
-        yearlyRoles: users[0].yearlyRoles
+        yearlyRoles: users[0].yearlyRoles,
       });
     }
 
-    // Filter to only return active users in the response
-    const activeUsers = users.filter(user => user.isActive);
-    console.log(`📊 Active users: ${activeUsers.length} out of ${users.length}`);
+    // Return all users (both active and inactive) for public team display
+    // This allows viewing historical team data
+    console.log(
+      `📊 Returning all ${users.length} users (including inactive for historical data)`
+    );
 
     res.status(200).json({
       success: true,
-      users: activeUsers,
-      count: activeUsers.length,
-      totalFound: users.length,
+      users: users, // Return all users instead of filtering by isActive
+      count: users.length,
       year: year ? parseInt(year) : null,
     });
   } catch (error) {
@@ -487,5 +489,50 @@ router.get("/profile", authenticateToken, async (req, res) => {
     });
   }
 });
+
+// @route   PATCH /api/users/update-order
+// @desc    Update team members display order (admin/nodal_officer only)
+// @access  Private
+router.patch(
+  "/update-order",
+  authenticateToken,
+  authorizeRoles("admin", "nodal_officer"),
+  async (req, res) => {
+    try {
+      const { updates } = req.body; // Array of {userId, displayOrder}
+
+      console.log("📊 Updating team member order:", updates);
+
+      if (!Array.isArray(updates)) {
+        return res.status(400).json({
+          success: false,
+          message: "Updates must be an array",
+        });
+      }
+
+      // Update each user's display order
+      const updatePromises = updates.map(({ userId, displayOrder }) =>
+        User.findByIdAndUpdate(
+          userId,
+          { displayOrder },
+          { new: true }
+        )
+      );
+
+      await Promise.all(updatePromises);
+
+      res.status(200).json({
+        success: true,
+        message: "Team member order updated successfully",
+      });
+    } catch (error) {
+      console.error("Update team order error:", error);
+      res.status(500).json({
+        success: false,
+        message: "An error occurred while updating team order",
+      });
+    }
+  }
+);
 
 export default router;
