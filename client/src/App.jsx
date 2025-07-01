@@ -81,6 +81,9 @@ const AppContent = () => {
           <Route path="/team" element={<TeamPage />} />
           <Route path="/communities" element={<CommunitiesPage />} />
           <Route path="/communities/:id" element={<CommunityPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/set-password/:token" element={<SetPasswordPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="*" element={<PlaceholderPage title="Page Not Found" />} />
         </Routes>
       </main>
