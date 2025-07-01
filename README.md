@@ -1,5 +1,15 @@
 # IEDC Dashboard Setup Guide
 
+## 🚀 Quick Deployment to Render
+
+For production deployment, see [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed instructions.
+
+### Quick Deploy Steps:
+1. Push your code to GitHub
+2. Connect repository to Render
+3. Configure environment variables
+4. Deploy using `render.yaml`
+
 ## Prerequisites
 
 ### 1. Install MongoDB

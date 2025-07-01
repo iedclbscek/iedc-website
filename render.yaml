@@ -1,13 +1,43 @@
 services:
+  # Backend API Server
+  - type: web
+    name: iedc-api-server
+    runtime: node
+    plan: starter
+    buildCommand: cd server && npm install
+    startCommand: cd server && npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: FRONTEND_URL
+        fromService:
+          type: web
+          name: iedc-website
+          property: url
+    # Add your environment variables in Render dashboard:
+    # - MONGODB_URI
+    # - JWT_SECRET
+    # - EMAIL_USER
+    # - EMAIL_PASS
+    
+  # Frontend Static Site  
   - type: web
     name: iedc-website
     runtime: static
+    plan: starter
     buildCommand: cd client && npm install && npm run build
     staticPublishPath: ./client/dist
     routes:
       - type: rewrite
         source: /*
         destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: iedc-api-server
+          property: url
     headers:
       - path: /*
         name: Cache-Control
