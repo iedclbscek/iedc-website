@@ -217,6 +217,7 @@ router.post(
         year,
         teamYear = "2025",
         teamYears = [2025], // Default to current year if not provided
+        yearlyRoles = [], // Array of {year, role, teamRole} objects
         phoneNumber,
         linkedin,
         github,
@@ -236,13 +237,18 @@ router.post(
       const resetToken = sendEmail ? generateResetToken() : null;
       const hashedToken = resetToken ? hashResetToken(resetToken) : null;
 
-      // Create user data object with only defined fields  
+      // Create user data object with only defined fields
       const userData = {
         name,
         email,
-        role,
+        role: role, // Keep primary role for backward compatibility
         teamYear: teamYears[0]?.toString() || "2025", // Keep first year for backward compatibility
         teamYears: teamYears, // Store all team years
+        yearlyRoles: yearlyRoles.length > 0 ? yearlyRoles : teamYears.map(year => ({
+          year: year,
+          role: role || "member",
+          teamRole: teamRole || ""
+        })), // Create yearly roles from team years if not provided
         isActive: sendEmail, // Only active if email is sent (current year members)
         isEmailVerified: false,
       };
@@ -250,7 +256,9 @@ router.post(
       // Add password reset fields only if email will be sent
       if (sendEmail) {
         userData.passwordResetToken = hashedToken;
-        userData.passwordResetExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+        userData.passwordResetExpires = new Date(
+          Date.now() + 24 * 60 * 60 * 1000
+        ); // 24 hours
       }
 
       // Add optional fields only if they are provided
@@ -271,11 +279,11 @@ router.post(
       await user.save();
 
       let emailResult = { success: true };
-      
+
       // Send invitation email only if requested
       if (sendEmail && resetToken) {
         emailResult = await sendInvitationEmail(email, name, resetToken);
-        
+
         if (!emailResult.success) {
           console.error("Failed to send invitation email:", emailResult.error);
           // Don't fail the request, just log the error
@@ -283,7 +291,9 @@ router.post(
       }
 
       res.status(201).json({
-        message: sendEmail ? "Invitation sent successfully" : "Member added successfully (no email sent)",
+        message: sendEmail
+          ? "Invitation sent successfully"
+          : "Member added successfully (no email sent)",
         user: {
           id: user._id,
           name: user.name,

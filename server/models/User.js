@@ -51,6 +51,30 @@ const userSchema = new mongoose.Schema(
       ],
       default: "member",
     },
+    // Year-specific roles for multi-year members
+    yearlyRoles: [{
+      year: {
+        type: Number,
+        required: true
+      },
+      role: {
+        type: String,
+        enum: [
+          "admin",
+          "nodal_officer", 
+          "ceo",
+          "lead",
+          "co_lead",
+          "coordinator",
+          "member",
+        ],
+        required: true
+      },
+      teamRole: {
+        type: String,
+        trim: true
+      }
+    }],
     teamRole: {
       type: String,
       trim: true,
@@ -70,15 +94,15 @@ const userSchema = new mongoose.Schema(
     },
     teamYears: {
       type: [Number],
-      default: function() {
+      default: function () {
         return [new Date().getFullYear()];
       },
       validate: {
-        validator: function(v) {
+        validator: function (v) {
           return v && v.length > 0;
         },
-        message: 'Team member must be associated with at least one year'
-      }
+        message: "Team member must be associated with at least one year",
+      },
     },
     phoneNumber: {
       type: String,

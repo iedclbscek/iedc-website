@@ -17,7 +17,8 @@ const TeamManagement = () => {
     phoneNumber: '',
     linkedin: '',
     github: '',
-    teamYears: [new Date().getFullYear()] // Default to current year
+    teamYears: [new Date().getFullYear()], // Default to current year
+    yearlyRoles: {} // Object with year as key and {role, teamRole} as value
   });
   const [showInviteForm, setShowInviteForm] = useState(false);
 
@@ -51,6 +52,17 @@ const TeamManagement = () => {
     fetchTeamMembers();
   }, []);
 
+  // Initialize yearly roles when component mounts
+  useEffect(() => {
+    const currentYear = new Date().getFullYear();
+    setInviteForm(prev => ({
+      ...prev,
+      yearlyRoles: {
+        [currentYear]: { role: 'member', teamRole: '' }
+      }
+    }));
+  }, []);
+
   const fetchTeamMembers = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -79,11 +91,38 @@ const TeamManagement = () => {
   };
 
   const handleTeamYearToggle = (year) => {
+    setInviteForm(prev => {
+      const newTeamYears = prev.teamYears.includes(year)
+        ? prev.teamYears.filter(y => y !== year)
+        : [...prev.teamYears, year];
+      
+      // Remove role for unchecked years, add default role for new years
+      const newYearlyRoles = { ...prev.yearlyRoles };
+      if (!newTeamYears.includes(year)) {
+        delete newYearlyRoles[year];
+      } else if (!prev.teamYears.includes(year)) {
+        // New year added, set default role
+        newYearlyRoles[year] = { role: 'member', teamRole: '' };
+      }
+      
+      return {
+        ...prev,
+        teamYears: newTeamYears,
+        yearlyRoles: newYearlyRoles
+      };
+    });
+  };
+
+  const handleYearlyRoleChange = (year, field, value) => {
     setInviteForm(prev => ({
       ...prev,
-      teamYears: prev.teamYears.includes(year)
-        ? prev.teamYears.filter(y => y !== year)
-        : [...prev.teamYears, year]
+      yearlyRoles: {
+        ...prev.yearlyRoles,
+        [year]: {
+          ...prev.yearlyRoles[year],
+          [field]: value
+        }
+      }
     }));
   };
 
@@ -100,10 +139,19 @@ const TeamManagement = () => {
 
     try {
       const token = localStorage.getItem('token');
+      
+      // Convert yearlyRoles object to array format expected by backend
+      const yearlyRolesArray = inviteForm.teamYears.map(year => ({
+        year: year,
+        role: inviteForm.yearlyRoles[year]?.role || 'member',
+        teamRole: inviteForm.yearlyRoles[year]?.teamRole || ''
+      }));
+      
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/auth/invite`,
         {
           ...inviteForm,
+          yearlyRoles: yearlyRolesArray,
           sendEmail: inviteForm.teamYears.includes(currentYear) // Only send email if current year is selected
         },
         {
@@ -128,7 +176,8 @@ const TeamManagement = () => {
           phoneNumber: '',
           linkedin: '',
           github: '',
-          teamYears: [new Date().getFullYear()]
+          teamYears: [new Date().getFullYear()],
+          yearlyRoles: {}
         });
         setShowInviteForm(false);
         fetchTeamMembers(); // Refresh the list
@@ -405,6 +454,55 @@ const TeamManagement = () => {
               </p>
             </div>
 
+            {/* Yearly Roles Configuration */}
+            {inviteForm.teamYears.length > 0 && (
+              <div className="mt-6">
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Role Configuration for Selected Years
+                </label>
+                <div className="space-y-4">
+                  {inviteForm.teamYears.sort().map(year => (
+                    <div key={year} className="bg-gray-50 p-4 rounded-lg">
+                      <h4 className="text-sm font-medium text-gray-900 mb-3">
+                        {year} {year === currentYear && '(Current Year)'}
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                            System Role
+                          </label>
+                          <select
+                            value={inviteForm.yearlyRoles[year]?.role || 'member'}
+                            onChange={(e) => handleYearlyRoleChange(year, 'role', e.target.value)}
+                            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                          >
+                            {roles.map(role => (
+                              <option key={role.value} value={role.value}>{role.label}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                            Team Role (Optional)
+                          </label>
+                          <input
+                            type="text"
+                            value={inviteForm.yearlyRoles[year]?.teamRole || ''}
+                            onChange={(e) => handleYearlyRoleChange(year, 'teamRole', e.target.value)}
+                            placeholder="e.g., Technical Lead, Marketing Head"
+                            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-2 text-sm text-gray-500">
+                  ℹ️ Configure different roles for each year. The member can have different responsibilities across years.
+                </p>
+              </div>
+            )}
+
             <div className="flex justify-end space-x-3">
               <button
                 type="button"
@@ -482,9 +580,53 @@ const TeamManagement = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{member.role}</div>
-                      {member.teamRole && (
-                        <div className="text-sm text-gray-500">{member.teamRole}</div>
+                      {selectedYear ? (
+                        // Show role for specific year
+                        <div>
+                          {member.yearlyRoles?.find(yr => yr.year === selectedYear) ? (
+                            <>
+                              <div className="text-sm text-gray-900">
+                                {member.yearlyRoles.find(yr => yr.year === selectedYear).role}
+                              </div>
+                              {member.yearlyRoles.find(yr => yr.year === selectedYear).teamRole && (
+                                <div className="text-sm text-gray-500">
+                                  {member.yearlyRoles.find(yr => yr.year === selectedYear).teamRole}
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            // Fallback to general role if no yearly role found
+                            <>
+                              <div className="text-sm text-gray-900">{member.role}</div>
+                              {member.teamRole && (
+                                <div className="text-sm text-gray-500">{member.teamRole}</div>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      ) : (
+                        // Show all yearly roles when no year filter
+                        <div className="space-y-1">
+                          {member.yearlyRoles && member.yearlyRoles.length > 0 ? (
+                            member.yearlyRoles.map(yearRole => (
+                              <div key={yearRole.year} className="text-xs">
+                                <span className="font-medium">{yearRole.year}:</span>
+                                <span className="ml-1">{yearRole.role}</span>
+                                {yearRole.teamRole && (
+                                  <span className="text-gray-500 ml-1">({yearRole.teamRole})</span>
+                                )}
+                              </div>
+                            ))
+                          ) : (
+                            // Fallback to general role
+                            <>
+                              <div className="text-sm text-gray-900">{member.role}</div>
+                              {member.teamRole && (
+                                <div className="text-sm text-gray-500">{member.teamRole}</div>
+                              )}
+                            </>
+                          )}
+                        </div>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
