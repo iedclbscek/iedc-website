@@ -43,6 +43,8 @@ const allowedOrigins = [
   process.env.FRONTEND_URL || "http://localhost:5173",
   "http://localhost:5173",
   "http://localhost:3000",
+  "https://iedclbscek.onrender.com", // Expected frontend URL on Render
+  /\.onrender\.com$/, // Allow any onrender.com subdomain
 ];
 
 app.use(
@@ -50,10 +52,21 @@ app.use(
     origin: function (origin, callback) {
       // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
-      
-      if (allowedOrigins.indexOf(origin) !== -1) {
+
+      // Check if the origin is in the allowed origins array or matches regex
+      const isAllowed = allowedOrigins.some((allowedOrigin) => {
+        if (typeof allowedOrigin === "string") {
+          return allowedOrigin === origin;
+        } else if (allowedOrigin instanceof RegExp) {
+          return allowedOrigin.test(origin);
+        }
+        return false;
+      });
+
+      if (isAllowed) {
         callback(null, true);
       } else {
+        console.warn(`CORS blocked origin: ${origin}`);
         callback(new Error("Not allowed by CORS"));
       }
     },

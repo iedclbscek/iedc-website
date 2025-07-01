@@ -5,6 +5,7 @@
 For production deployment, see [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed instructions.
 
 ### Quick Deploy Steps:
+
 1. Push your code to GitHub
 2. Connect repository to Render
 3. Configure environment variables
