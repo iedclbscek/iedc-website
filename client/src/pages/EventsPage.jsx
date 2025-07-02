@@ -1,18 +1,19 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Calendar, MapPin, Users, Search } from 'lucide-react';
 import axios from 'axios';
 import Loader from '../components/ui/Loader';
-import EventDetailModal from '../components/ui/EventDetailModal';
+import ProposeEventModal from '../components/ui/ProposeEventModal';
 
 const EventsPage = () => {
+  const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState('All');
   const [events, setEvents] = useState([]);
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [pastEvents, setPastEvents] = useState([]);
-  const [selectedEvent, setSelectedEvent] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState(['All']);
+  const [showProposeModal, setShowProposeModal] = useState(false);
 
   // Fetch events from API
   useEffect(() => {
@@ -72,8 +73,7 @@ const EventsPage = () => {
   }, [events, activeFilter]);
 
   const openEventDetail = (event) => {
-    setSelectedEvent(event);
-    setIsModalOpen(true);
+    navigate(`/events/${event._id}`);
   };
 
   if (loading) return <Loader />;
@@ -239,18 +239,20 @@ const EventsPage = () => {
             <p className="text-text-light mb-8">
               If you have an idea for an event or want to collaborate with IEDC LBSCEK, we'd love to hear from you!
             </p>
-            <button className="px-8 py-3 bg-cta text-white rounded-lg hover:bg-cta-hover transition-colors shadow-sm">
+            <button 
+              onClick={() => setShowProposeModal(true)}
+              className="px-8 py-3 bg-cta text-white rounded-lg hover:bg-cta-hover transition-colors shadow-sm"
+            >
               Propose an Event
             </button>
           </div>
         </div>
       </section>
 
-      {/* Event Detail Modal */}
-      <EventDetailModal 
-        event={selectedEvent}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+      {/* Propose Event Modal */}
+      <ProposeEventModal 
+        isOpen={showProposeModal}
+        onClose={() => setShowProposeModal(false)}
       />
     </div>
   );

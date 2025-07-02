@@ -352,9 +352,15 @@ const TeamManagement = () => {
         displayOrder: index
       }));
 
+      // Include the selected year in the request
+      const payload = { 
+        updates,
+        year: selectedYear // This ensures the backend knows which year to update
+      };
+
       await axios.patch(
         `${import.meta.env.VITE_API_URL}/api/users/update-order`,
-        { updates },
+        payload,
         {
           headers: { Authorization: `Bearer ${token}` }
         }
@@ -367,7 +373,7 @@ const TeamManagement = () => {
       })));
       
       setHasUnsavedChanges(false);
-      toast.success('Team order saved successfully!');
+      toast.success(`Team order for ${selectedYear} saved successfully!`);
     } catch (error) {
       console.error('Error saving order:', error);
       toast.error('Failed to save team order');

@@ -81,6 +81,14 @@ const userSchema = new mongoose.Schema(
         },
       },
     ],
+    // Year-specific display orders for different years
+    yearlyDisplayOrders: {
+      type: Map,
+      of: Number,
+      default: function () {
+        return new Map();
+      },
+    },
     // Global order for team display (fallback)
     displayOrder: {
       type: Number,
@@ -151,6 +159,10 @@ const userSchema = new mongoose.Schema(
       maxlength: [500, "Bio cannot exceed 500 characters"],
     },
     profilePicture: {
+      type: String,
+      default: "",
+    },
+    profilePicturePublicId: {
       type: String,
       default: "",
     },
