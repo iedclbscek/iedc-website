@@ -26,17 +26,58 @@ const TeamPreviewSection = () => {
     fetchTeamMembers();
   }, []);
   
-  // Get top team members for preview (leaders and key roles, excluding admin)
-  const displayMembers = teamMembers
-    .filter(member => 
-      member.role !== 'admin' && ( // Exclude admin users
-        ['ceo', 'lead', 'nodal_officer'].includes(member.role) ||
-        (member.teamRole && ['President', 'Vice President', 'Secretary', 'Treasurer', 'Faculty'].some(role => 
-          member.teamRole.toLowerCase().includes(role.toLowerCase())
-        ))
-      )
-    )
-    .slice(0, 3); // Show top 3 team members
+  // Get top team members for preview - only first nodal officer and CEOs of current year
+  const currentYear = new Date().getFullYear();
+  
+  // Helper function to get role for current year
+  const getRoleForCurrentYear = (member) => {
+    const yearlyRole = member.yearlyRoles?.find(yr => yr.year === currentYear);
+    if (yearlyRole) {
+      return {
+        role: yearlyRole.role,
+        teamRole: yearlyRole.teamRole
+      };
+    }
+    // Fallback to general role if no yearly role found
+    return {
+      role: member.role,
+      teamRole: member.teamRole
+    };
+  };
+  
+  // Filter members for current year only
+  const currentYearMembers = teamMembers.filter(member => {
+    // Check if member belongs to current year
+    return member.teamYears?.includes(currentYear) || 
+           (member.teamYear && parseInt(member.teamYear) === currentYear) ||
+           member.yearlyRoles?.some(yr => yr.year === currentYear);
+  });
+  
+  // Get first nodal officer and all CEOs for current year
+  const displayMembers = [];
+  
+  // Add first nodal officer
+  const firstNodalOfficer = currentYearMembers.find(member => {
+    const memberRole = getRoleForCurrentYear(member);
+    return member.role !== 'admin' && memberRole.role === 'nodal_officer';
+  });
+  
+  if (firstNodalOfficer) {
+    displayMembers.push(firstNodalOfficer);
+  }
+  
+  // Add CEOs
+  const ceos = currentYearMembers.filter(member => {
+    const memberRole = getRoleForCurrentYear(member);
+    return member.role !== 'admin' && 
+           (memberRole.role === 'ceo' || 
+            (memberRole.teamRole && memberRole.teamRole.toLowerCase().includes('ceo')));
+  });
+  
+  displayMembers.push(...ceos);
+  
+  // Limit to maximum 3 members total
+  const finalDisplayMembers = displayMembers.slice(0, 3);
   
   return (
     <section id="team" className="py-24 bg-primary/10 relative overflow-hidden">
@@ -62,7 +103,7 @@ const TeamPreviewSection = () => {
         </motion.div>
         
         <div className="flex flex-wrap justify-center gap-8 mb-12">
-          {displayMembers.map((member, index) => (
+          {finalDisplayMembers.map((member, index) => (
             <motion.div
               key={member?._id || member?.id || index}
               initial={{ opacity: 0, y: 50 }}
@@ -93,7 +134,7 @@ const TeamPreviewSection = () => {
                 transition={{ duration: 0.3 }}
               >
                 <h3 className="text-lg font-bold text-text-dark">{member?.name || 'Team Member'}</h3>
-                <p className="text-accent">{member?.teamRole || member?.role || 'Member'}</p>
+                <p className="text-accent">{getRoleForCurrentYear(member).teamRole || getRoleForCurrentYear(member).role || 'Member'}</p>
               </motion.div>
             </motion.div>
           ))}
