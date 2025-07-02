@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import TeamManagement from '../components/TeamManagement';
+import EventsManagementPage from './EventsManagementPage';
 import ProfilePage from './ProfilePage';
 
 const DashboardPage = () => {
@@ -16,6 +17,7 @@ const DashboardPage = () => {
 
   const tabs = [
     { id: 'overview', name: 'Overview', icon: '📊' },
+    { id: 'events', name: 'Events', icon: '📅' },
     ...(canManageTeam ? [{ id: 'team', name: 'Team Management', icon: '👥' }] : []),
     { id: 'profile', name: 'Profile', icon: '👤' },
   ];
@@ -77,6 +79,13 @@ const DashboardPage = () => {
                 )}
                 
                 <button
+                  onClick={() => setActiveTab('events')}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+                >
+                  📅 Manage Events
+                </button>
+                
+                <button
                   onClick={handleLogout}
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
                 >
@@ -86,6 +95,9 @@ const DashboardPage = () => {
             </div>
           </div>
         );
+      
+      case 'events':
+        return <EventsManagementPage />;
       
       case 'team':
         return canManageTeam ? <TeamManagement /> : null;

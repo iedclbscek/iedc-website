@@ -1,5 +1,5 @@
-import { motion, AnimatePresence } from 'framer-motion';
-import { FaMapMarkerAlt, FaClock, FaCalendarAlt, FaTimes, FaUser } from 'react-icons/fa';
+import { AnimatePresence } from 'framer-motion';
+import { X, MapPin, Clock, Calendar, User } from 'lucide-react';
 
 const EventDetailModal = ({ event, isOpen, onClose }) => {
   if (!event) return null;
@@ -7,17 +7,11 @@ const EventDetailModal = ({ event, isOpen, onClose }) => {
   return (
     <AnimatePresence>
       {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-text-dark/50 backdrop-blur-sm"
           onClick={onClose}
         >
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
+          <div 
             className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
             onClick={e => e.stopPropagation()}
           >
@@ -31,7 +25,7 @@ const EventDetailModal = ({ event, isOpen, onClose }) => {
                   className="text-text-light hover:text-accent p-1 rounded-full transition-colors"
                   onClick={onClose}
                 >
-                  <FaTimes size={20} />
+                  <X size={20} />
                 </button>
               </div>
               
@@ -39,16 +33,16 @@ const EventDetailModal = ({ event, isOpen, onClose }) => {
                 <span className="px-3 py-1 bg-primary text-text-light text-sm font-medium rounded-full">
                   {event.category}
                 </span>
-                <span className={`px-3 py-1 ${event.isPast ? 'bg-text-light/20' : 'bg-cta/20'} text-sm font-medium rounded-full`}>
-                  {event.isPast ? 'Past Event' : 'Upcoming'}
+                <span className={`px-3 py-1 ${new Date(event.endDate || event.startDate) < new Date() ? 'bg-text-light/20' : 'bg-cta/20'} text-sm font-medium rounded-full`}>
+                  {new Date(event.endDate || event.startDate) < new Date() ? 'Past Event' : 'Upcoming'}
                 </span>
               </div>
               
               {/* Event image */}
               <div className="mt-6 rounded-lg overflow-hidden bg-primary/20 h-48 flex items-center justify-center">
-                {event.image ? (
+                {event.images && event.images.length > 0 ? (
                   <img 
-                    src={event.image} 
+                    src={`${import.meta.env.VITE_API_URL}${event.images[0]}`}
                     alt={event.title} 
                     className="w-full h-full object-cover"
                     onError={(e) => {
@@ -57,7 +51,9 @@ const EventDetailModal = ({ event, isOpen, onClose }) => {
                     }}
                   />
                 ) : (
-                  <div className="text-text-light">No image available</div>
+                  <div className="flex items-center justify-center h-full w-full bg-primary/10">
+                    <Calendar size={48} className="text-primary" />
+                  </div>
                 )}
               </div>
               
@@ -65,25 +61,50 @@ const EventDetailModal = ({ event, isOpen, onClose }) => {
               <div className="mt-6 space-y-4">
                 {/* Date and Time */}
                 <div className="flex items-start gap-3">
-                  <FaCalendarAlt className="text-accent mt-1 flex-shrink-0" />
+                  <Calendar className="text-accent mt-1 flex-shrink-0" size={16} />
                   <div>
                     <h3 className="font-semibold text-text-dark">Date</h3>
-                    <p className="text-text-light">{formatDate(event.date)}</p>
+                    <p className="text-text-light">
+                      {new Date(event.startDate).toLocaleDateString('en-US', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })}
+                      {event.endDate && new Date(event.startDate).toDateString() !== new Date(event.endDate).toDateString() && (
+                        <> to {new Date(event.endDate).toLocaleDateString('en-US', { 
+                          weekday: 'long', 
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric' 
+                        })}</>
+                      )}
+                    </p>
                   </div>
                 </div>
                 
                 {/* Time */}
                 <div className="flex items-start gap-3">
-                  <FaClock className="text-accent mt-1 flex-shrink-0" />
+                  <Clock className="text-accent mt-1 flex-shrink-0" size={16} />
                   <div>
                     <h3 className="font-semibold text-text-dark">Time</h3>
-                    <p className="text-text-light">{event.time}</p>
+                    <p className="text-text-light">
+                      {event.startTime ? event.startTime : new Date(event.startDate).toLocaleTimeString('en-US', { 
+                        hour: '2-digit', 
+                        minute: '2-digit'
+                      })}
+                      {event.endTime && ` - ${event.endTime}`}
+                      {!event.endTime && event.endDate && ` - ${new Date(event.endDate).toLocaleTimeString('en-US', { 
+                        hour: '2-digit', 
+                        minute: '2-digit'
+                      })}`}
+                    </p>
                   </div>
                 </div>
                 
                 {/* Location */}
                 <div className="flex items-start gap-3">
-                  <FaMapMarkerAlt className="text-accent mt-1 flex-shrink-0" />
+                  <MapPin className="text-accent mt-1 flex-shrink-0" size={16} />
                   <div>
                     <h3 className="font-semibold text-text-dark">Location</h3>
                     <p className="text-text-light">{event.location}</p>
@@ -93,7 +114,7 @@ const EventDetailModal = ({ event, isOpen, onClose }) => {
                 {/* Speakers */}
                 {event.speakers && event.speakers.length > 0 && (
                   <div className="flex items-start gap-3">
-                    <FaUser className="text-accent mt-1 flex-shrink-0" />
+                    <User className="text-accent mt-1 flex-shrink-0" size={16} />
                     <div>
                       <h3 className="font-semibold text-text-dark">Speakers</h3>
                       <p className="text-text-light">{event.speakers.join(', ')}</p>
@@ -117,8 +138,8 @@ const EventDetailModal = ({ event, isOpen, onClose }) => {
                 </div>
               )}
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       )}
     </AnimatePresence>
   );
@@ -135,20 +156,14 @@ const getCategoryColor = (category) => {
       return 'bg-green-500';
     case 'Competition':
       return 'bg-accent';
-    case 'Talk':
+    case 'Seminar':
       return 'bg-yellow-500';
+    case 'Conference':
+      return 'bg-orange-500';
+    case 'Networking':
+      return 'bg-pink-500';
     default:
       return 'bg-gray-500';
-  }
-};
-
-// Helper function to format date
-const formatDate = (dateString) => {
-  const options = { year: 'numeric', month: 'long', day: 'numeric' };
-  try {
-    return new Date(dateString).toLocaleDateString(undefined, options);
-  } catch (e) {
-    return dateString; // Return original string if parsing fails
   }
 };
 

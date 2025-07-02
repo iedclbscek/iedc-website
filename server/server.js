@@ -17,6 +17,7 @@ dotenv.config({ path: path.join(__dirname, "config", ".env") });
 // Import routes
 import authRoutes from "./routes/auth.js";
 import userRoutes from "./routes/users.js";
+import eventRoutes from "./routes/events.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -98,6 +99,7 @@ mongoose
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/events", eventRoutes);
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {
