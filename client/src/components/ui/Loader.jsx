@@ -16,13 +16,11 @@ const Loader = ({ onComplete }) => {
       // Complete loading after text is fully displayed and a slight delay
       const timer = setTimeout(() => {
         setLoading(false);
-        if (onComplete) {
-          setTimeout(() => onComplete(), 600); // Allow fade-out animation to play
-        }
+        setTimeout(() => onComplete(), 600); // Allow fade-out animation to play
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [textIndex, text.length, onComplete]);
+  }, [textIndex, onComplete]);
   
   return (
     <div

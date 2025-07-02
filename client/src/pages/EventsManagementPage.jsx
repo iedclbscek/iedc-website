@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
 import { Plus, Calendar, Users, MapPin, Edit, Trash2, Eye, Camera, Clock, CheckCircle, XCircle, Filter, Search, UserCheck } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import EventFormModal from '../components/ui/EventFormModal';
@@ -10,7 +9,6 @@ import Loader from '../components/ui/Loader';
 
 const EventsManagementPage = () => {
   const { user, api } = useAuth();
-  const navigate = useNavigate();
   const [events, setEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -353,7 +351,7 @@ const EventsManagementPage = () => {
                 {/* Action Buttons */}
                 <div className="flex gap-2">
                   <button
-                    onClick={() => navigate(`/events/${event._id}`)}
+                    onClick={() => window.open(`/events/${event._id}`, '_blank')}
                     className="flex-1 bg-blue-50 text-blue-600 px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors flex items-center justify-center gap-1 text-sm"
                   >
                     <Eye size={16} />

@@ -72,7 +72,12 @@ const TeamManagement = () => {
 
   // Drag and drop sensors
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      // Require a more intentional drag to start
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -82,11 +87,39 @@ const TeamManagement = () => {
     fetchTeamMembers();
   }, []);
 
-  // Update sorted members when team members change
+  // Update sorted members when team members or selected year change
   useEffect(() => {
-    const sorted = [...teamMembers].sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+    // Filter team members for the selected year if any
+    const filteredMembers = teamMembers.filter(member => {
+      if (!selectedYear) return true;
+      return member.teamYears?.includes(selectedYear) || 
+             (member.teamYear && parseInt(member.teamYear) === selectedYear);
+    });
+    
+    // Sort by year-specific order if available, fallback to global order
+    const sorted = [...filteredMembers].sort((a, b) => {
+      if (selectedYear) {
+        // Try to use year-specific orders from the Map
+        if (a.yearlyDisplayOrders && b.yearlyDisplayOrders) {
+          const aYearOrder = a.yearlyDisplayOrders[selectedYear];
+          const bYearOrder = b.yearlyDisplayOrders[selectedYear];
+          
+          if (aYearOrder !== undefined && bYearOrder !== undefined) {
+            return aYearOrder - bYearOrder;
+          }
+          
+          // If only one has a year-specific order, prioritize that one
+          if (aYearOrder !== undefined) return -1;
+          if (bYearOrder !== undefined) return 1;
+        }
+      }
+      
+      // Fallback to global display order
+      return (a.displayOrder || 0) - (b.displayOrder || 0);
+    });
+    
     setSortedMembers(sorted);
-  }, [teamMembers]);
+  }, [teamMembers, selectedYear]);
 
   // Initialize yearly roles when component mounts
   useEffect(() => {
@@ -343,6 +376,11 @@ const TeamManagement = () => {
 
   // Save the new order to backend
   const saveOrder = async () => {
+    if (!selectedYear) {
+      toast.error('Please select a specific year before saving the order');
+      return;
+    }
+    
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
@@ -352,25 +390,38 @@ const TeamManagement = () => {
         displayOrder: index
       }));
 
-      // Include the selected year in the request
-      const payload = { 
-        updates,
-        year: selectedYear // This ensures the backend knows which year to update
-      };
-
       await axios.patch(
         `${import.meta.env.VITE_API_URL}/api/users/update-order`,
-        payload,
+        { 
+          updates,
+          year: selectedYear // Pass the selected year to update year-specific order
+        },
         {
           headers: { Authorization: `Bearer ${token}` }
         }
       );
 
-      // Update local state
-      setTeamMembers(sortedMembers.map((member, index) => ({
-        ...member,
-        displayOrder: index
-      })));
+      // Update local state to reflect the new ordering
+      setTeamMembers(prev => {
+        return prev.map(member => {
+          // Find this member in the sorted list
+          const sortedMember = sortedMembers.find(m => m._id === member._id);
+          if (!sortedMember) return member;
+          
+          // Get the index (new display order) of this member in sorted list
+          const newIndex = sortedMembers.indexOf(sortedMember);
+          
+          // Update the yearlyDisplayOrders map for this member
+          const yearlyDisplayOrders = member.yearlyDisplayOrders || {};
+          return {
+            ...member,
+            yearlyDisplayOrders: {
+              ...yearlyDisplayOrders,
+              [selectedYear]: newIndex
+            }
+          };
+        });
+      });
       
       setHasUnsavedChanges(false);
       toast.success(`Team order for ${selectedYear} saved successfully!`);
@@ -432,7 +483,7 @@ const TeamManagement = () => {
                   : 'bg-gray-600 text-white hover:bg-gray-500 focus-visible:outline-gray-600'
               }`}
             >
-              {enableSorting ? 'Sorting ON' : 'Enable Sort'}
+              {enableSorting ? `Sorting ${selectedYear} ON` : `Enable ${selectedYear} Sort`}
             </button>
           )}
           
@@ -690,11 +741,62 @@ const TeamManagement = () => {
             </div>
           </div>
           
-          <DndContext 
-            sensors={enableSorting && selectedYear ? sensors : []}
-            collisionDetection={closestCenter}
-            onDragEnd={enableSorting && selectedYear ? handleDragEnd : undefined}
-          >
+          {/* Team Members List Content */}
+          {enableSorting && selectedYear ? (
+            <DndContext 
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Name
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Category
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Role
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Team Years
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Email
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    <SortableContext 
+                      items={sortedMembers.map(member => member._id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      {sortedMembers.map((member) => (
+                        <SortableTeamMember
+                          key={member._id}
+                          member={member}
+                          selectedYear={selectedYear}
+                          enableSorting={enableSorting}
+                          onToggleStatus={toggleUserStatus}
+                          onDelete={deleteMember}
+                          onEdit={handleEditUser}
+                        />
+                      ))}
+                    </SortableContext>
+                  </tbody>
+                </table>
+              </div>
+            </DndContext>
+          ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -723,40 +825,99 @@ const TeamManagement = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  <SortableContext 
-                    items={sortedMembers
-                      .filter(member => {
-                        if (!selectedYear) return true;
-                        return member.teamYears?.includes(selectedYear) || 
-                               (member.teamYear && parseInt(member.teamYear) === selectedYear);
-                      })
-                      .map(member => member._id)
-                    }
-                    strategy={verticalListSortingStrategy}
-                  >
-                    {sortedMembers
-                      .filter(member => {
-                        if (!selectedYear) return true;
-                        return member.teamYears?.includes(selectedYear) || 
-                               (member.teamYear && parseInt(member.teamYear) === selectedYear);
-                      })
-                      .map((member) => (
-                        <SortableTeamMember
-                          key={member._id}
-                          member={member}
-                          selectedYear={selectedYear}
-                          enableSorting={enableSorting}
-                          onToggleStatus={toggleUserStatus}
-                          onDelete={deleteMember}
-                          onEdit={handleEditUser}
-                        />
-                      ))
-                    }
-                  </SortableContext>
+                  {sortedMembers
+                    .filter(member => {
+                      if (!selectedYear) return true;
+                      return member.teamYears?.includes(selectedYear) || 
+                             (member.teamYear && parseInt(member.teamYear) === selectedYear);
+                    })
+                    .map((member) => (
+                      <tr key={member._id}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="flex-shrink-0 h-10 w-10">
+                              {member.profilePicture ? (
+                                <img 
+                                  className="h-10 w-10 rounded-full object-cover"
+                                  src={`${import.meta.env.VITE_API_URL}/${member.profilePicture}`} 
+                                  alt={member.name}
+                                />
+                              ) : (
+                                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                  <span className="text-gray-500 font-medium">
+                                    {member.name.charAt(0).toUpperCase()}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900">{member.name}</div>
+                              <div className="text-sm text-gray-500">{member.department}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">
+                            {member.yearlyRoles?.find(yr => yr.year === selectedYear)?.teamRole || 
+                             member.teamRole || 'No role specified'}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                            {member.yearlyRoles?.find(yr => yr.year === selectedYear)?.role || member.role}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">
+                            {member.teamYears?.sort()?.join(', ') || member.teamYear || 'Not specified'}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            member.isActive 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-red-100 text-red-800'
+                          }`}>
+                            {member.isActive ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {member.email}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <div className="flex space-x-2 justify-end">
+                            <button
+                              onClick={() => toggleUserStatus(member._id, member.isActive)}
+                              className="text-indigo-600 hover:text-indigo-900"
+                              title={member.isActive ? 'Deactivate' : 'Activate'}
+                            >
+                              {member.isActive ? <FaToggleOn size={20} /> : <FaToggleOff size={20} />}
+                            </button>
+                            <button
+                              onClick={() => handleEditUser(member)}
+                              className="text-blue-600 hover:text-blue-900"
+                              title="Edit"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => deleteMember(member._id, member.name)}
+                              className="text-red-600 hover:text-red-900"
+                              title="Delete"
+                            >
+                              <FaTrash />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  }
                 </tbody>
               </table>
             </div>
-          </DndContext>
+          )}
         </div>
       </div>
 

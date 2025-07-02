@@ -5,13 +5,21 @@ import { fileURLToPath } from "url";
 import { authenticateToken, authorizeRoles } from "../middleware/auth.js";
 import User from "../models/User.js";
 import { body, validationResult } from "express-validator";
-import cloudinary from "../config/cloudinary.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Configure multer for memory storage (for Cloudinary)
-const storage = multer.memoryStorage();
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, "../uploads/profiles/"));
+  },
+  filename: function (req, file, cb) {
+    // Generate unique filename
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, "profile-" + uniqueSuffix + path.extname(file.originalname));
+  },
+});
 
 // File filter to accept only images
 const fileFilter = (req, file, cb) => {
@@ -145,82 +153,34 @@ router.get("/public-team", async (req, res) => {
     }
 
     const users = await User.find(query).select(
-      "name teamRole role department year teamYear teamYears yearlyRoles profilePicture linkedin github bio email isActive displayOrder yearlyDisplayOrders"
+      "name teamRole role department year teamYear teamYears yearlyRoles yearlyDisplayOrders profilePicture linkedin github bio email isActive displayOrder"
     );
 
-    // Sort users based on year-specific ordering if year is provided
-    let sortedUsers;
-    if (year) {
-      sortedUsers = users.sort((a, b) => {
-        // Get year-specific order, fallback to global displayOrder
-        const aOrder =
-          a.yearlyDisplayOrders?.get(year.toString()) ?? a.displayOrder ?? 0;
-        const bOrder =
-          b.yearlyDisplayOrders?.get(year.toString()) ?? b.displayOrder ?? 0;
+    // Sort users by year-specific order if available, fallback to global order
+    const sortedUsers = users.sort((a, b) => {
+      // If a specific year is provided and both users have year-specific orders, use those
+      if (year) {
+        const aYearOrder = a.yearlyDisplayOrders?.get(year.toString());
+        const bYearOrder = b.yearlyDisplayOrders?.get(year.toString());
 
-        if (aOrder !== bOrder) {
-          return aOrder - bOrder;
+        if (aYearOrder !== undefined && bYearOrder !== undefined) {
+          return aYearOrder - bYearOrder;
         }
 
-        // Secondary sort by role priority
-        const rolePriority = {
-          admin: 0,
-          nodal_officer: 1,
-          ceo: 2,
-          lead: 3,
-          co_lead: 4,
-          coordinator: 5,
-          member: 6,
-        };
+        // If only one user has a year-specific order, prioritize that user
+        if (aYearOrder !== undefined) return -1;
+        if (bYearOrder !== undefined) return 1;
+      }
 
-        const aRolePriority = rolePriority[a.role] ?? 6;
-        const bRolePriority = rolePriority[b.role] ?? 6;
-
-        if (aRolePriority !== bRolePriority) {
-          return aRolePriority - bRolePriority;
-        }
-
-        // Tertiary sort by creation date
-        return new Date(b.createdAt) - new Date(a.createdAt);
-      });
-    } else {
-      sortedUsers = users.sort((a, b) => {
-        // Use global displayOrder for all years view
-        const aOrder = a.displayOrder ?? 0;
-        const bOrder = b.displayOrder ?? 0;
-
-        if (aOrder !== bOrder) {
-          return aOrder - bOrder;
-        }
-
-        // Secondary sort by role priority
-        const rolePriority = {
-          admin: 0,
-          nodal_officer: 1,
-          ceo: 2,
-          lead: 3,
-          co_lead: 4,
-          coordinator: 5,
-          member: 6,
-        };
-
-        const aRolePriority = rolePriority[a.role] ?? 6;
-        const bRolePriority = rolePriority[b.role] ?? 6;
-
-        if (aRolePriority !== bRolePriority) {
-          return aRolePriority - bRolePriority;
-        }
-
-        // Tertiary sort by creation date
-        return new Date(b.createdAt) - new Date(a.createdAt);
-      });
-    }
+      // Fallback to global display order
+      return (a.displayOrder || 0) - (b.displayOrder || 0);
+    });
 
     // Return all users (both active and inactive) for public team display
     // This allows viewing historical team data
     res.status(200).json({
       success: true,
-      users: sortedUsers, // Return sorted users
+      users: sortedUsers, // Return the sorted users
       count: sortedUsers.length,
       year: year ? parseInt(year) : null,
     });
@@ -253,39 +213,39 @@ router.patch(
         });
       }
 
-      if (year) {
-        // Update year-specific ordering
-        const updatePromises = updates.map(async ({ userId, displayOrder }) => {
-          const user = await User.findById(userId);
-          if (user) {
-            // Initialize yearlyDisplayOrders if it doesn't exist
-            if (!user.yearlyDisplayOrders) {
-              user.yearlyDisplayOrders = new Map();
-            }
-            user.yearlyDisplayOrders.set(year.toString(), displayOrder);
-            return user.save();
-          }
-        });
+      // Update each user's display order (either global or year-specific)
+      const updatePromises = updates.map(async ({ userId, displayOrder }) => {
+        const user = await User.findById(userId);
+        if (!user) return null;
 
-        await Promise.all(updatePromises);
+        if (year) {
+          // Update year-specific display order using the Map
+          const yearlyOrders = user.yearlyDisplayOrders || new Map();
+          yearlyOrders.set(year.toString(), displayOrder);
 
-        res.status(200).json({
-          success: true,
-          message: `Team member order updated successfully for year ${year}`,
-        });
-      } else {
-        // Update global display order (fallback)
-        const updatePromises = updates.map(({ userId, displayOrder }) =>
-          User.findByIdAndUpdate(userId, { displayOrder }, { new: true })
-        );
+          return User.findByIdAndUpdate(
+            userId,
+            { yearlyDisplayOrders: yearlyOrders },
+            { new: true }
+          );
+        } else {
+          // Update global display order (fallback)
+          return User.findByIdAndUpdate(
+            userId,
+            { displayOrder },
+            { new: true }
+          );
+        }
+      });
 
-        await Promise.all(updatePromises);
+      await Promise.all(updatePromises);
 
-        res.status(200).json({
-          success: true,
-          message: "Team member order updated successfully",
-        });
-      }
+      res.status(200).json({
+        success: true,
+        message: year
+          ? `Team member order for year ${year} updated successfully`
+          : "Team member order updated successfully",
+      });
     } catch (error) {
       console.error("Update team order error:", error);
       res.status(500).json({
@@ -342,74 +302,33 @@ router.put(
   upload.single("profilePicture"),
   async (req, res) => {
     try {
-      const { name, department, phoneNumber, linkedin, github, bio } = req.body;
+      const {
+        name,
+        teamRole,
+        department,
+        year,
+        phoneNumber,
+        linkedin,
+        github,
+        bio,
+      } = req.body;
 
       // Build update object with only provided fields
       const updateData = {};
 
       if (name && name.trim()) updateData.name = name.trim();
+      if (teamRole !== undefined) updateData.teamRole = teamRole.trim();
       if (department !== undefined) updateData.department = department.trim();
+      if (year !== undefined) updateData.year = parseInt(year);
       if (phoneNumber !== undefined)
         updateData.phoneNumber = phoneNumber.trim();
       if (linkedin !== undefined) updateData.linkedin = linkedin.trim();
       if (github !== undefined) updateData.github = github.trim();
       if (bio !== undefined) updateData.bio = bio.trim();
 
-      // Handle profile picture upload to Cloudinary
+      // Handle profile picture upload
       if (req.file) {
-        try {
-          // Upload to Cloudinary
-          const uploadPromise = new Promise((resolve, reject) => {
-            cloudinary.uploader
-              .upload_stream(
-                {
-                  resource_type: "auto",
-                  folder: "iedc/profiles", // Organize files in folders
-                  public_id: `profile_${req.user._id}_${Date.now()}`, // Unique filename
-                  transformation: [
-                    { width: 400, height: 400, crop: "fill" }, // Auto-resize/crop
-                    { quality: "auto" }, // Auto-optimize quality
-                    { format: "webp" }, // Convert to WebP for better compression
-                  ],
-                },
-                (error, result) => {
-                  if (error) reject(error);
-                  else resolve(result);
-                }
-              )
-              .end(req.file.buffer);
-          });
-
-          const result = await uploadPromise;
-
-          // Get current user to check if they have an existing image to delete
-          const currentUser = await User.findById(req.user._id);
-
-          // If user has an existing image in Cloudinary, delete it to avoid accumulating unused images
-          if (currentUser && currentUser.profilePicturePublicId) {
-            try {
-              await cloudinary.uploader.destroy(
-                currentUser.profilePicturePublicId
-              );
-              console.log(
-                `Deleted old profile image: ${currentUser.profilePicturePublicId}`
-              );
-            } catch (deleteError) {
-              console.error("Error deleting old profile image:", deleteError);
-              // Continue even if deletion fails
-            }
-          }
-
-          // Update with new Cloudinary URL and public ID
-          updateData.profilePicture = result.secure_url;
-          updateData.profilePicturePublicId = result.public_id;
-        } catch (cloudinaryError) {
-          console.error("Cloudinary upload error:", cloudinaryError);
-          return res.status(500).json({
-            success: false,
-            message: "Error uploading profile picture to cloud storage",
-          });
-        }
+        updateData.profilePicture = `/uploads/profiles/${req.file.filename}`;
       }
 
       const user = await User.findByIdAndUpdate(req.user._id, updateData, {

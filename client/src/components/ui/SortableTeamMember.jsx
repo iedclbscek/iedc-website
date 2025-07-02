@@ -76,9 +76,7 @@ const SortableTeamMember = ({ member, selectedYear, enableSorting, onToggleStatu
             <div className="h-8 w-8 rounded-full overflow-hidden bg-gray-200 mr-3 flex-shrink-0">
               {member.profilePicture ? (
                 <img
-                  src={member.profilePicture.startsWith('http') 
-                    ? member.profilePicture 
-                    : `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}${member.profilePicture}`}
+                  src={`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}${member.profilePicture}`}
                   alt={member.name}
                   className="h-full w-full object-cover"
                 />

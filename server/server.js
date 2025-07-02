@@ -42,20 +42,31 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // CORS configuration
-const allowedOrigins = [
-  process.env.CLIENT_URL || "http://localhost:5173",
-  process.env.FRONTEND_URL || "http://localhost:5173",
-  "http://localhost:5173",
-  "http://localhost:3000",
-  "https://iedclbscekapi.onrender.com", // Expected frontend URL on Render
-  "https://das-nabvuax2d-umar-al-mukhtar-s-projects.vercel.app", // Your Vercel frontend
-  /\.onrender\.com$/, // Allow any onrender.com subdomain
-  /\.vercel\.app$/, // Allow any Vercel subdomain
-  /\.up\.railway\.app$/, // Allow Railway subdomains
-];
+let corsOptions;
 
-app.use(
-  cors({
+// In development, allow all origins
+if (process.env.NODE_ENV === "development") {
+  corsOptions = {
+    origin: true, // Allow all origins in development
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  };
+} else {
+  // In production, use a whitelist
+  const allowedOrigins = [
+    process.env.CLIENT_URL || "http://localhost:5173",
+    process.env.FRONTEND_URL || "http://localhost:5173",
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "https://iedclbscekapi.onrender.com",
+    "https://das-nabvuax2d-umar-al-mukhtar-s-projects.vercel.app",
+    /\.onrender\.com$/,
+    /\.vercel\.app$/,
+    /\.up\.railway\.app$/,
+  ];
+
+  corsOptions = {
     origin: function (origin, callback) {
       // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
@@ -80,8 +91,10 @@ app.use(
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+  };
+}
+
+app.use(cors(corsOptions));
 
 // Body parsing middleware
 app.use(express.json({ limit: "10mb" }));

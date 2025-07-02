@@ -1,5 +1,7 @@
 {
-  "watch": ["*.js", "routes/", "models/", "middleware/", "config/", "utils/"],
-  "ignore": ["uploads/", "node_modules/"],
+  "ignore": ["node_modules", "uploads/*"],
+  "env": {
+    "NODE_ENV": "development"
+  },
   "ext": "js,json"
 }

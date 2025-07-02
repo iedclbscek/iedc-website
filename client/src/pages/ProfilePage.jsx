@@ -11,7 +11,9 @@ const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
     name: '',
+    teamRole: '',
     department: '',
+    year: '',
     phoneNumber: '',
     linkedin: '',
     github: '',
@@ -40,7 +42,9 @@ const ProfilePage = () => {
     if (user) {
       setProfileData({
         name: user.name || '',
+        teamRole: user.teamRole || '',
         department: user.department || '',
+        year: user.year || '',
         phoneNumber: user.phoneNumber || '',
         linkedin: user.linkedin || '',
         github: user.github || '',
@@ -49,12 +53,7 @@ const ProfilePage = () => {
       });
       
       if (user.profilePicture) {
-        // Check if it's a Cloudinary URL (absolute) or relative path
-        const imageUrl = user.profilePicture.startsWith('http') 
-          ? user.profilePicture 
-          : `${import.meta.env.VITE_API_URL}${user.profilePicture}`;
-          
-        setPreviewUrl(imageUrl);
+        setPreviewUrl(`${import.meta.env.VITE_API_URL}${user.profilePicture}`);
       }
     }
   }, [user]);
@@ -315,98 +314,23 @@ const ProfilePage = () => {
               />
             </div>
 
-            {/* Read-only Information */}
-            <div className="col-span-2">
-              <h4 className="text-lg font-medium text-gray-900 mb-4">Organization Information</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
-                {/* Current Team Role - Read Only */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Current Team Role
-                  </label>
-                  <div className="mt-1 text-sm text-gray-900">
-                    {(() => {
-                      const currentYear = new Date().getFullYear();
-                      const currentYearRole = user?.yearlyRoles?.find(role => role.year === currentYear);
-                      if (currentYearRole && currentYearRole.teamRole) {
-                        return currentYearRole.teamRole;
-                      }
-                      return user?.teamRole || 'Not assigned';
-                    })()}
-                  </div>
-                </div>
-
-                {/* Academic Year - Read Only */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Academic Year
-                  </label>
-                  <div className="mt-1 text-sm text-gray-900">
-                    {user?.year ? `${user.year}${user.year === 1 ? 'st' : user.year === 2 ? 'nd' : user.year === 3 ? 'rd' : 'th'} Year` : 'Not specified'}
-                  </div>
-                </div>
-
-                {/* Current Role - Read Only */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Current Role
-                  </label>
-                  <div className="mt-1 text-sm text-gray-900">
-                    {(() => {
-                      const currentYear = new Date().getFullYear();
-                      const currentYearRole = user?.yearlyRoles?.find(role => role.year === currentYear);
-                      if (currentYearRole && currentYearRole.role) {
-                        return currentYearRole.role.charAt(0).toUpperCase() + currentYearRole.role.slice(1).replace('_', ' ');
-                      }
-                      return user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1).replace('_', ' ') : 'Member';
-                    })()}
-                  </div>
-                </div>
-
-                {/* Team Years - Read Only */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Team Years
-                  </label>
-                  <div className="mt-1 text-sm text-gray-900">
-                    {user?.teamYears && user.teamYears.length > 0 
-                      ? user.teamYears.sort((a, b) => b - a).join(', ')
-                      : (user?.teamYear || 'Not specified')
-                    }
-                  </div>
-                </div>
-
-                {/* Yearly Roles - Read Only */}
-                {user?.yearlyRoles && user.yearlyRoles.length > 0 && (
-                  <div className="col-span-2">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Role History
-                    </label>
-                    <div className="mt-1 space-y-2">
-                      {user.yearlyRoles
-                        .sort((a, b) => b.year - a.year) // Sort by year descending
-                        .map((roleData, index) => (
-                        <div key={index} className="flex items-center justify-between bg-white p-2 border border-gray-200 rounded">
-                          <div>
-                            <span className="font-medium text-gray-900">{roleData.year}</span>
-                            <span className="ml-2 text-gray-600">
-                              {roleData.role.charAt(0).toUpperCase() + roleData.role.slice(1).replace('_', ' ')}
-                            </span>
-                            {roleData.teamRole && (
-                              <span className="ml-2 text-blue-600">({roleData.teamRole})</span>
-                            )}
-                          </div>
-                          {roleData.year === new Date().getFullYear() && (
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                              Current
-                            </span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+            {/* Team Role */}
+            <div>
+              <label htmlFor="teamRole" className="block text-sm font-medium text-gray-700">
+                Team Role
+              </label>
+              <input
+                type="text"
+                name="teamRole"
+                id="teamRole"
+                value={profileData.teamRole}
+                onChange={handleInputChange}
+                disabled={!isEditing}
+                placeholder="e.g., Lead Developer, Marketing Head"
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm ${
+                  !isEditing ? 'bg-gray-50 cursor-not-allowed' : ''
+                }`}
+              />
             </div>
 
             {/* Department */}
@@ -428,6 +352,29 @@ const ProfilePage = () => {
                 {departments.map(dept => (
                   <option key={dept} value={dept}>{dept}</option>
                 ))}
+              </select>
+            </div>
+
+            {/* Year */}
+            <div>
+              <label htmlFor="year" className="block text-sm font-medium text-gray-700">
+                Academic Year
+              </label>
+              <select
+                name="year"
+                id="year"
+                value={profileData.year}
+                onChange={handleInputChange}
+                disabled={!isEditing}
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm ${
+                  !isEditing ? 'bg-gray-50 cursor-not-allowed' : ''
+                }`}
+              >
+                <option value="">Select Year</option>
+                <option value="1">1st Year</option>
+                <option value="2">2nd Year</option>
+                <option value="3">3rd Year</option>
+                <option value="4">4th Year</option>
               </select>
             </div>
 

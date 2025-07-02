@@ -3,7 +3,6 @@ import { useAuth } from '../contexts/AuthContext';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import TeamManagement from '../components/TeamManagement';
 import EventsManagementPage from './EventsManagementPage';
-import ProposedEventsPage from './ProposedEventsPage';
 import ProfilePage from './ProfilePage';
 
 const DashboardPage = () => {
@@ -19,7 +18,6 @@ const DashboardPage = () => {
   const tabs = [
     { id: 'overview', name: 'Overview', icon: '📊' },
     { id: 'events', name: 'Events', icon: '📅' },
-    { id: 'proposals', name: 'Proposed Events', icon: '📋' },
     ...(canManageTeam ? [{ id: 'team', name: 'Team Management', icon: '👥' }] : []),
     { id: 'profile', name: 'Profile', icon: '👤' },
   ];
@@ -100,9 +98,6 @@ const DashboardPage = () => {
       
       case 'events':
         return <EventsManagementPage />;
-      
-      case 'proposals':
-        return <ProposedEventsPage />;
       
       case 'team':
         return canManageTeam ? <TeamManagement /> : null;
