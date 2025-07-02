@@ -57,19 +57,21 @@ const Footer = () => {
             <ul className="space-y-3 text-text-light">
               <li className="flex items-center">
                 <FaEnvelope className="text-accent mr-2" />
-                <a href="mailto:iedc@lbscek.ac.in" className="hover:text-accent transition-colors">
+                <a href="mailto:iedc@lbscek.ac.in" target='_blank' className="hover:text-accent transition-colors">
                   iedc@lbscek.ac.in
                 </a>
               </li>
               <li className="flex items-center">
                 <FaPhone className="text-accent mr-2" />
-                <a href="tel:+1234567890" className="hover:text-accent transition-colors">
+                <a href="tel:+1234567890" target='_blank' className="hover:text-accent transition-colors">
                   +91 (123) 456-7890
                 </a>
               </li>
               <li className="flex items-start">
                 <FaMapMarkerAlt className="text-accent mt-1 mr-2" />
-                <span>LBS College of Engineering, Kasaragod, Kerala</span>
+                <a href="https://www.google.com/maps?q=LBS+College+of+Engineering,+Kasaragod,+Kerala" target='_blank' className="hover:text-accent transition-colors">
+                  LBS College of Engineering, Kasaragod, Kerala
+                </a>
               </li>
             </ul>
             
