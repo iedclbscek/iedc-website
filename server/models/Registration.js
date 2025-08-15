@@ -36,8 +36,8 @@ const registrationSchema = new mongoose.Schema(
     // Academic Information
     admissionNo: {
       type: String,
-      required: [true, "Admission number is required"],
       unique: true,
+      sparse: true,
       trim: true,
       uppercase: true,
     },

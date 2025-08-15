@@ -85,12 +85,7 @@ const EventRegistrationModal = ({ isOpen, onClose, event, onSuccess }) => {
       submitData.append('email', formData.email);
       submitData.append('phone', formData.phone || '');
       
-      // Debug form data
-      console.log('Registration form data:', {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone
-      });
+
 
       // Add custom fields
       const customFieldsArray = [];
@@ -106,8 +101,7 @@ const EventRegistrationModal = ({ isOpen, onClose, event, onSuccess }) => {
       // Important: Stringify the customFields array
       submitData.append('customFields', JSON.stringify(customFieldsArray));
       
-      // Log complete form data for debugging
-      console.log('Custom fields array:', customFieldsArray);
+
       
       // Create a simple test to check if basic registration works
       const testData = new URLSearchParams();
@@ -116,7 +110,7 @@ const EventRegistrationModal = ({ isOpen, onClose, event, onSuccess }) => {
       testData.append('phone', formData.phone || '');
       testData.append('customFields', JSON.stringify([]));
 
-      console.log('Submitting registration form...');
+
       
       // Try with direct data submission for debugging
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/events/${event._id}/register`, {

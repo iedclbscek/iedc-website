@@ -100,8 +100,12 @@ const RegistrationPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Referral code validation
+    if (formData.referralCode.trim().toUpperCase() !== 'DREAMITDOIT') {
+      toast.error('Wrong referral code. Please enter DREAMITDOIT.');
+      return;
+    }
     setIsSubmitting(true);
-    
     try {
       // Prepare data for MongoDB (temporarily without photo URLs)
       const registrationData = {
@@ -119,19 +123,15 @@ const RegistrationPage = () => {
         motivation: formData.motivation,
         linkedin: formData.linkedin,
         github: formData.github,
-        portfolio: formData.portfolio
-        ,
+        portfolio: formData.portfolio,
         referralCode: formData.referralCode
       };
-
       // Submit to MongoDB via API
       toast.loading('Submitting application...');
       await submitRegistration(registrationData);
       toast.dismiss();
-
       // Success message
       toast.success('Application submitted successfully! We will review it and get back to you soon.');
-      
       // Reset form
       setFormData({
         firstName: '',
@@ -153,7 +153,6 @@ const RegistrationPage = () => {
         profilePhoto: null,
         idPhoto: null
       });
-
     } catch (error) {
       toast.dismiss();
       console.error('Registration error:', error);
@@ -249,16 +248,15 @@ const RegistrationPage = () => {
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-text-dark mb-2">
-                    Admission No *
+                    Admission No (Optional)
                   </label>
                   <input
                     type="text"
                     name="admissionNo"
                     value={formData.admissionNo}
                     onChange={handleInputChange}
-                    required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
-                    placeholder="Enter your admission number"
+                    placeholder="Enter your admission number (optional)"
                   />
                 </div>
                 <div>
@@ -538,7 +536,7 @@ const RegistrationPage = () => {
             <div className="pt-6">
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || formData.referralCode.trim().toUpperCase() !== 'DREAMITDOIT'}
                 className="w-full bg-accent text-white py-4 px-8 rounded-lg font-semibold text-lg hover:bg-accent-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? 'Submitting...' : 'Submit Application'}

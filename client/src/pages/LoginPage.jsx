@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaEye, FaEyeSlash, FaSpinner } from 'react-icons/fa';
+import { FaEye, FaEyeSlash, FaSpinner, FaUser, FaLock } from 'react-icons/fa';
 import { useAuth } from '../contexts/AuthContext';
 
 const LoginPage = () => {
@@ -10,10 +10,9 @@ const LoginPage = () => {
     password: ''
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, loading, clearAuthData } = useAuth();
   const navigate = useNavigate();
 
   // Redirect if already authenticated
@@ -42,12 +41,10 @@ const LoginPage = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.username) {
+    if (!formData.username.trim()) {
       newErrors.username = 'Username is required';
     } else if (formData.username.length < 3) {
       newErrors.username = 'Username must be at least 3 characters';
-    } else if (!/^[a-z0-9_]+$/.test(formData.username)) {
-      newErrors.username = 'Username can only contain lowercase letters, numbers, and underscores';
     }
 
     if (!formData.password) {
@@ -65,13 +62,11 @@ const LoginPage = () => {
     
     if (!validateForm()) return;
 
-    setLoading(true);
     const result = await login(formData.username, formData.password);
     
     if (result.success) {
       navigate('/dashboard');
     }
-    setLoading(false);
   };
 
   const inputVariants = {
@@ -82,6 +77,7 @@ const LoginPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-accent/10 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
@@ -103,6 +99,7 @@ const LoginPage = () => {
           </p>
         </motion.div>
 
+        {/* Login Form */}
         <motion.form
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
@@ -110,11 +107,15 @@ const LoginPage = () => {
           className="mt-8 space-y-6 bg-white p-8 rounded-2xl shadow-xl"
           onSubmit={handleSubmit}
         >
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="username" className="block text-sm font-medium text-text-dark mb-2">
-                Username
-              </label>
+          {/* Username Field */}
+          <div>
+            <label htmlFor="username" className="block text-sm font-medium text-text-dark mb-2">
+              Username
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <FaUser className="h-5 w-5 text-gray-400" />
+              </div>
               <motion.input
                 variants={inputVariants}
                 whileFocus="focus"
@@ -124,65 +125,70 @@ const LoginPage = () => {
                 autoComplete="username"
                 value={formData.username}
                 onChange={handleChange}
-                className={`appearance-none relative block w-full px-4 py-3 border ${
+                className={`appearance-none relative block w-full pl-10 pr-4 py-3 border ${
                   errors.username ? 'border-red-500' : 'border-gray-300'
                 } placeholder-gray-500 text-text-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all duration-200`}
                 placeholder="Enter your username"
               />
-              {errors.username && (
-                <motion.p
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mt-1 text-sm text-red-500"
-                >
-                  {errors.username}
-                </motion.p>
-              )}
             </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-text-dark mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <motion.input
-                  variants={inputVariants}
-                  whileFocus="focus"
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="current-password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className={`appearance-none relative block w-full px-4 py-3 pr-12 border ${
-                    errors.password ? 'border-red-500' : 'border-gray-300'
-                  } placeholder-gray-500 text-text-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all duration-200`}
-                  placeholder="Enter your password"
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <FaEyeSlash className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  ) : (
-                    <FaEye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  )}
-                </button>
-              </div>
-              {errors.password && (
-                <motion.p
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mt-1 text-sm text-red-500"
-                >
-                  {errors.password}
-                </motion.p>
-              )}
-            </div>
+            {errors.username && (
+              <motion.p
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-1 text-sm text-red-500"
+              >
+                {errors.username}
+              </motion.p>
+            )}
           </div>
 
+          {/* Password Field */}
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-text-dark mb-2">
+              Password
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <FaLock className="h-5 w-5 text-gray-400" />
+              </div>
+              <motion.input
+                variants={inputVariants}
+                whileFocus="focus"
+                id="password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
+                value={formData.password}
+                onChange={handleChange}
+                className={`appearance-none relative block w-full pl-10 pr-12 py-3 border ${
+                  errors.password ? 'border-red-500' : 'border-gray-300'
+                } placeholder-gray-500 text-text-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all duration-200`}
+                placeholder="Enter your password"
+              />
+              <button
+                type="button"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? (
+                  <FaEyeSlash className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                ) : (
+                  <FaEye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                )}
+              </button>
+            </div>
+            {errors.password && (
+              <motion.p
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-1 text-sm text-red-500"
+              >
+                {errors.password}
+              </motion.p>
+            )}
+          </div>
+
+          {/* Submit Button */}
           <div>
             <motion.button
               whileHover={{ scale: 1.02 }}
@@ -199,6 +205,7 @@ const LoginPage = () => {
             </motion.button>
           </div>
 
+          {/* Links */}
           <div className="text-center space-y-2">
             <Link
               to="/forgot-password"
@@ -214,6 +221,7 @@ const LoginPage = () => {
             </p>
           </div>
 
+          {/* Back to Home */}
           <div className="text-center pt-4 border-t border-gray-200">
             <Link
               to="/"
@@ -222,6 +230,8 @@ const LoginPage = () => {
               ← Back to Homepage
             </Link>
           </div>
+
+
         </motion.form>
       </div>
     </div>

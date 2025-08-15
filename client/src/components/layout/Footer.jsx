@@ -75,15 +75,15 @@ const Footer = () => {
               </li>
             </ul>
             
-            {/* Join Us Button */}
+            {/* Login to Dashboard Button */}
             <Link 
-              to="/register"
+              to="/login"
               className="flex items-center justify-center mt-6 px-4 py-2 bg-cta hover:bg-cta-hover text-white rounded transition-colors"
             >
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7h5m0 0v5m0-5l-6 6m-2 4H6a2 2 0 01-2-2V7a2 2 0 012-2h6" />
               </svg>
-              Join Us
+              Login to Dashboard
             </Link>
           </div>
         </div>

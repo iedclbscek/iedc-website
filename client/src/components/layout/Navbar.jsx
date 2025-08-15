@@ -68,21 +68,14 @@ const Navbar = () => {
             ))}
             
             {/* Auth Link */}
-            {user ? (
-              <Link
-                to="/dashboard"
-                className="px-4 py-2 bg-accent text-white rounded-md font-medium transition-colors duration-200 hover:bg-accent-dark"
-              >
-                Dashboard
-              </Link>
-            ) : (
+            
               <Link
                 to="/register"
                 className="px-4 py-2 bg-accent text-white rounded-md font-medium transition-colors duration-200 hover:bg-accent-dark"
               >
                 Join Us
               </Link>
-            )}
+            
           </div>
 
           {/* Mobile Menu Button */}
@@ -117,23 +110,13 @@ const Navbar = () => {
             ))}
             
             {/* Mobile Auth Link */}
-            {user ? (
-              <Link
-                to="/dashboard"
-                className="block px-4 py-2 text-accent font-medium border-t border-gray-200 mt-2 pt-3"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Dashboard
-              </Link>
-            ) : (
-              <Link
+            <Link
                 to="/register"
                 className="block px-4 py-2 text-accent font-medium border-t border-gray-200 mt-2 pt-3"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Join Us
               </Link>
-            )}
           </div>
         )}
       </div>

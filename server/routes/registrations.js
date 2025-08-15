@@ -23,9 +23,10 @@ const validateRegistration = [
     .isMobilePhone("any")
     .withMessage("Valid phone number is required"),
   body("admissionNo")
+    .optional({ nullable: true, checkFalsy: true })
     .trim()
     .isLength({ min: 1 })
-    .withMessage("Admission number is required"),
+    .withMessage("Admission number must not be empty if provided"),
   body("referralCode")
     .trim()
     .isLength({ min: 1, max: 50 })
@@ -99,15 +100,17 @@ router.post("/", validateRegistration, async (req, res) => {
       });
     }
 
-    // Check if admission number already exists
-    const existingAdmission = await Registration.findOne({
-      admissionNo: req.body.admissionNo,
-    });
-    if (existingAdmission) {
-      return res.status(400).json({
-        success: false,
-        message: "Admission number already registered",
+    // Check if admission number already exists (only if provided)
+    if (req.body.admissionNo) {
+      const existingAdmission = await Registration.findOne({
+        admissionNo: req.body.admissionNo,
       });
+      if (existingAdmission) {
+        return res.status(400).json({
+          success: false,
+          message: "Admission number already registered",
+        });
+      }
     }
 
     // Create new registration
