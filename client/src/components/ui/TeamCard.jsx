@@ -27,7 +27,13 @@ const TeamCard = ({ member, selectedYear }) => {
   const { role, teamRole } = getRoleForYear(member, selectedYear);
   
   // Default image if member image is not available
-  const defaultImage = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name || 'User')}&background=random`;
+const defaultImage = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name || 'User')}&background=random`;
+
+const imageSrc = member.image
+  ? member.image.startsWith('/')
+    ? member.image
+    : member.image
+  : defaultImage;
 
   return (
     <motion.div
@@ -44,16 +50,14 @@ const TeamCard = ({ member, selectedYear }) => {
       <div className="relative mx-auto mb-3">
         <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-lg overflow-hidden mx-auto shadow-md">
           <img
-            src={member.profilePicture 
-              ? `${import.meta.env.VITE_API_URL}${member.profilePicture}` 
-              : defaultImage}
-            alt={member.name || 'Team Member'}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = defaultImage;
-            }}
-          />
+  src={imageSrc}
+  alt={member.name || 'Team Member'}
+  className="w-full h-full object-cover"
+  onError={e => {
+    e.target.onerror = null;
+    e.target.src = defaultImage;
+  }}
+/>
         </div>
         
         {/* Social links overlay on hover */}
