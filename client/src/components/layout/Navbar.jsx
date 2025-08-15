@@ -1,16 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
 const Navbar = () => {
   const { user } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const location = useLocation();
-
-  // Pages with dark backgrounds at the top
-  const darkBackgroundPages = ['/about', '/events'];
-  const isDarkPage = darkBackgroundPages.includes(location.pathname);
 
   const navLinks = [
     { name: 'Home', path: '/' },
@@ -82,10 +77,10 @@ const Navbar = () => {
               </Link>
             ) : (
               <Link
-                to="/login"
+                to="/register"
                 className="px-4 py-2 bg-accent text-white rounded-md font-medium transition-colors duration-200 hover:bg-accent-dark"
               >
-                Login
+                Join Us
               </Link>
             )}
           </div>
@@ -132,11 +127,11 @@ const Navbar = () => {
               </Link>
             ) : (
               <Link
-                to="/login"
+                to="/register"
                 className="block px-4 py-2 text-accent font-medium border-t border-gray-200 mt-2 pt-3"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Login
+                Join Us
               </Link>
             )}
           </div>

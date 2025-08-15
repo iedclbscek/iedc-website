@@ -14,10 +14,30 @@ const __dirname = path.dirname(__filename);
 // Load environment variables
 dotenv.config({ path: path.join(__dirname, "config", ".env") });
 
+// Debug: Check if environment variables are loaded
+console.log("🔍 Environment Variables Check:");
+console.log(
+  "CLOUDINARY_CLOUD_NAME:",
+  process.env.CLOUDINARY_CLOUD_NAME ? "✅ Set" : "❌ Not Set"
+);
+console.log(
+  "CLOUDINARY_API_KEY:",
+  process.env.CLOUDINARY_API_KEY ? "✅ Set" : "❌ Not Set"
+);
+console.log(
+  "CLOUDINARY_API_SECRET:",
+  process.env.CLOUDINARY_API_SECRET ? "✅ Set" : "❌ Not Set"
+);
+console.log("MONGODB_URI:", process.env.MONGODB_URI ? "✅ Set" : "❌ Not Set");
+console.log("JWT_SECRET:", process.env.JWT_SECRET ? "✅ Set" : "❌ Not Set");
+console.log("---");
+
 // Import routes
 import authRoutes from "./routes/auth.js";
 import userRoutes from "./routes/users.js";
 import eventRoutes from "./routes/events.js";
+import registrationRoutes from "./routes/registrations.js";
+import uploadRoutes from "./routes/upload.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -113,6 +133,8 @@ mongoose
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/events", eventRoutes);
+app.use("/api/registrations", registrationRoutes);
+app.use("/api/upload", uploadRoutes);
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {

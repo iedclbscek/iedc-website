@@ -58,12 +58,10 @@ const HeroSection = () => {
               <Link to="/events" className="px-8 py-3.5 bg-cta text-white font-medium rounded-full hover:bg-cta-hover transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-1">
                 Explore Programs
               </Link>
-              <a href="https://www.whatsapp.com/channel/0029VaAYL1D2f3EAIot5Yl2N" 
-                target="_blank" 
-                rel="noopener noreferrer" 
+              <Link to="/register" 
                 className="px-8 py-3.5 border-2 border-accent text-accent font-medium rounded-full hover:bg-accent hover:text-white transition-all shadow-sm hover:shadow-md transform hover:-translate-y-1">
                 Join Us
-              </a>
+              </Link>
             </motion.div>
             
             {/* Scroll indicator */}

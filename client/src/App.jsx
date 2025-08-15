@@ -26,6 +26,7 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import SetPasswordPage from './pages/SetPasswordPage';
 import DashboardPage from './pages/DashboardPage';
+import RegistrationPage from './pages/RegistrationPage';
 
 // Placeholder page component
 const PlaceholderPage = ({ title }) => (
@@ -74,6 +75,7 @@ const AppContent = () => {
           <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
           <Route path="/set-password/:token" element={<SetPasswordPage />} />
           <Route path="/dashboard/*" element={<DashboardPage />} />
+          <Route path="/register" element={<RegistrationPage />} />
         </Routes>
       </div>
     );
@@ -93,6 +95,7 @@ const AppContent = () => {
           <Route path="/communities" element={<CommunitiesPage />} />
           <Route path="/communities/:id" element={<CommunityPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegistrationPage />} />
           <Route path="/set-password/:token" element={<SetPasswordPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="*" element={<PlaceholderPage title="Page Not Found" />} />
