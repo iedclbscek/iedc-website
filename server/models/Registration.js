@@ -41,28 +41,35 @@ const registrationSchema = new mongoose.Schema(
       trim: true,
       uppercase: true,
     },
+    referralCode: {
+      type: String,
+      required: [true, "Referral code is required"],
+      trim: true,
+      maxlength: [50, "Referral code cannot exceed 50 characters"],
+    },
     department: {
       type: String,
       required: [true, "Department is required"],
       enum: {
         values: [
-          "Computer Science & Engineering",
-          "Electronics & Communication Engineering",
-          "Electrical & Electronics Engineering",
+          "Computer Science and Engineering",
+          "Computer Science and Business Systems",
+          "Computer Science and Engineering(AI & Data Science)",
+          "Electrical and Electronics Engineering",
+          "Electronics and Communication Engineering",
+          "Information Technology",
           "Mechanical Engineering",
           "Civil Engineering",
-          "Applied Science",
-          "Other",
         ],
         message: "Please select a valid department",
       },
     },
-    year: {
+    yearOfJoining: {
       type: String,
-      required: [true, "Year of study is required"],
+      required: [true, "Year of joining is required"],
       enum: {
-        values: ["1st Year", "2nd Year", "3rd Year", "4th Year"],
-        message: "Please select a valid year",
+        values: ["2022", "2023", "2024", "2025"],
+        message: "Please select a valid year of joining",
       },
     },
     semester: {
@@ -204,9 +211,48 @@ const registrationSchema = new mongoose.Schema(
   }
 );
 
+// Membership ID: IEDC + last two of yearOfJoining + dept code + sequence per (yearOfJoining, dept)
+const departmentCodeMap = {
+  "Computer Science and Engineering": "CS",
+  "Computer Science and Business Systems": "CSBS",
+  "Computer Science and Engineering(AI & Data Science)": "AI",
+  "Electrical and Electronics Engineering": "EE",
+  "Electronics and Communication Engineering": "EC",
+  "Information Technology": "IT",
+  "Mechanical Engineering": "ME",
+  "Civil Engineering": "CE",
+};
+
+registrationSchema.add({
+  membershipId: {
+    type: String,
+    unique: true,
+    index: true,
+  },
+});
+
+registrationSchema.pre("save", async function (next) {
+  if (this.membershipId) return next();
+  try {
+    const year = this.yearOfJoining?.toString() || "";
+    const yearSuffix = year.slice(-2);
+    const deptCode = departmentCodeMap[this.department] || "XX";
+
+    // Count existing docs for same year+dept to generate next sequence
+    const count = await this.constructor.countDocuments({
+      yearOfJoining: this.yearOfJoining,
+      department: this.department,
+    });
+    const seq = String(count + 1).padStart(3, "0");
+    this.membershipId = `IEDC${yearSuffix}${deptCode}${seq}`;
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
+
 // Index for efficient queries
-registrationSchema.index({ email: 1 });
-registrationSchema.index({ admissionNo: 1 });
+// Rely on unique constraints defined in schema for email and admissionNo to avoid duplicate index warnings
 registrationSchema.index({ status: 1 });
 registrationSchema.index({ submittedAt: -1 });
 

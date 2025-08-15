@@ -19,25 +19,34 @@ const validateRegistration = [
     .isEmail()
     .normalizeEmail()
     .withMessage("Valid email is required"),
-  body("phone").isMobilePhone().withMessage("Valid phone number is required"),
+  body("phone")
+    .isMobilePhone("any")
+    .withMessage("Valid phone number is required"),
   body("admissionNo")
     .trim()
     .isLength({ min: 1 })
     .withMessage("Admission number is required"),
+  body("referralCode")
+    .trim()
+    .isLength({ min: 1, max: 50 })
+    .withMessage(
+      "Referral code is required and must be less than 50 characters"
+    ),
   body("department")
     .isIn([
-      "Computer Science & Engineering",
-      "Electronics & Communication Engineering",
-      "Electrical & Electronics Engineering",
+      "Computer Science and Engineering",
+      "Computer Science and Business Systems",
+      "Computer Science and Engineering(AI & Data Science)",
+      "Electrical and Electronics Engineering",
+      "Electronics and Communication Engineering",
+      "Information Technology",
       "Mechanical Engineering",
       "Civil Engineering",
-      "Applied Science",
-      "Other",
     ])
     .withMessage("Valid department is required"),
-  body("year")
-    .isIn(["1st Year", "2nd Year", "3rd Year", "4th Year"])
-    .withMessage("Valid year is required"),
+  body("yearOfJoining")
+    .isIn(["2022", "2023", "2024", "2025"])
+    .withMessage("Valid year of joining is required"),
   body("semester")
     .isIn([
       "1st Semester",
@@ -110,6 +119,7 @@ router.post("/", validateRegistration, async (req, res) => {
       message: "Registration submitted successfully",
       data: {
         id: registration._id,
+        membershipId: registration.membershipId,
         status: registration.status,
         submittedAt: registration.submittedAt,
       },

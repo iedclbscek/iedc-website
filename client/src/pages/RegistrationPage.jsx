@@ -11,7 +11,7 @@ const RegistrationPage = () => {
     phone: '',
     admissionNo: '',
     department: '',
-    year: '',
+    yearOfJoining: '',
     semester: '',
     interests: [],
     nonTechInterests: '',
@@ -20,6 +20,7 @@ const RegistrationPage = () => {
     linkedin: '',
     github: '',
     portfolio: '',
+    referralCode: '',
     profilePhoto: null,
     idPhoto: null
   });
@@ -27,16 +28,17 @@ const RegistrationPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const departments = [
-    'Computer Science & Engineering',
-    'Electronics & Communication Engineering',
-    'Electrical & Electronics Engineering',
+    'Computer Science and Engineering',
+    'Computer Science and Business Systems',
+    'Computer Science and Engineering(AI & Data Science)',
+    'Electrical and Electronics Engineering',
+    'Electronics and Communication Engineering',
+    'Information Technology',
     'Mechanical Engineering',
-    'Civil Engineering',
-    'Applied Science',
-    'Other'
+    'Civil Engineering'
   ];
 
-  const years = ['1st Year', '2nd Year', '3rd Year', '4th Year'];
+  const joiningYears = ['2022', '2023', '2024', '2025'];
   const semesters = ['1st Semester', '2nd Semester', '3rd Semester', '4th Semester', '5th Semester', '6th Semester', '7th Semester', '8th Semester'];
 
   const interestAreas = [
@@ -109,7 +111,7 @@ const RegistrationPage = () => {
         phone: formData.phone,
         admissionNo: formData.admissionNo,
         department: formData.department,
-        year: formData.year,
+        yearOfJoining: formData.yearOfJoining,
         semester: formData.semester,
         interests: formData.interests,
         nonTechInterests: formData.nonTechInterests,
@@ -118,6 +120,8 @@ const RegistrationPage = () => {
         linkedin: formData.linkedin,
         github: formData.github,
         portfolio: formData.portfolio
+        ,
+        referralCode: formData.referralCode
       };
 
       // Submit to MongoDB via API
@@ -136,7 +140,7 @@ const RegistrationPage = () => {
         phone: '',
         admissionNo: '',
         department: '',
-        year: '',
+        yearOfJoining: '',
         semester: '',
         interests: [],
         nonTechInterests: '',
@@ -145,6 +149,7 @@ const RegistrationPage = () => {
         linkedin: '',
         github: '',
         portfolio: '',
+        referralCode: '',
         profilePhoto: null,
         idPhoto: null
       });
@@ -258,6 +263,32 @@ const RegistrationPage = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-text-dark mb-2">
+                    Referral Code *
+                  </label>
+                  <input
+                    type="text"
+                    name="referralCode"
+                    value={formData.referralCode}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
+                    placeholder="Enter referral code"
+                  />
+                  <p className="text-xs text-text-light mt-2">
+                    Don't have one? Get the referral code by joining our
+                    <a
+                      className="ml-1 text-accent underline"
+                      href={import.meta.env.VITE_WHATSAPP_CHANNEL_URL || '#'}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      WhatsApp channel
+                    </a>
+                    .
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-text-dark mb-2">
                     Department *
                   </label>
                   <select
@@ -275,18 +306,18 @@ const RegistrationPage = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-text-dark mb-2">
-                    Year of Study *
+                    Year of Joining *
                   </label>
                   <select
-                    name="year"
-                    value={formData.year}
+                    name="yearOfJoining"
+                    value={formData.yearOfJoining}
                     onChange={handleInputChange}
                     required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
                   >
-                    <option value="">Select your year</option>
-                    {years.map(year => (
-                      <option key={year} value={year}>{year}</option>
+                    <option value="">Select your year of joining</option>
+                    {joiningYears.map(y => (
+                      <option key={y} value={y}>{y}</option>
                     ))}
                   </select>
                 </div>
@@ -346,7 +377,7 @@ const RegistrationPage = () => {
             </div>
 
             {/* Photo Uploads (temporarily disabled) */}
-            {false && (<div>
+            {Boolean(import.meta.env.VITE_ENABLE_UPLOADS === 'true') && (<div>
               <h3 className="text-xl font-semibold text-text-dark mb-4">Photo Uploads</h3>
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
