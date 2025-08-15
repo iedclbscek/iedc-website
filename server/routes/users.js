@@ -328,7 +328,7 @@ router.put(
 
       // Handle profile picture upload
       if (req.file) {
-        updateData.profilePicture = `/uploads/profiles/${req.file.filename}`;
+        updateData.profilePicture = `uploads/profiles/${req.file.filename}`;
       }
 
       const user = await User.findByIdAndUpdate(req.user._id, updateData, {
@@ -639,7 +639,7 @@ router.put(
 
       // Handle profile picture upload
       if (req.file) {
-        updateData.profilePicture = `/uploads/profiles/${req.file.filename}`;
+        updateData.profilePicture = `uploads/profiles/${req.file.filename}`;
       }
 
       const user = await User.findByIdAndUpdate(id, updateData, {

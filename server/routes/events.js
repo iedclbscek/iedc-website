@@ -1,7 +1,8 @@
 import express from "express";
 import Event from "../models/Event.js";
+import EventProposal from "../models/EventProposal.js";
 import User from "../models/User.js";
-import { authenticateToken as auth } from "../middleware/auth.js";
+import { authenticateToken as auth, authorizeRoles } from "../middleware/auth.js";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -629,6 +630,334 @@ router.delete("/:id", auth, async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Error deleting event",
+      error: error.message,
+    });
+  }
+});
+
+// EVENT PROPOSAL ROUTES
+
+// POST /api/events/propose - Submit new event proposal
+router.post("/propose", auth, async (req, res) => {
+  try {
+    const proposalData = {
+      ...req.body,
+      proposedBy: req.user._id,
+      proposerName: req.user.name,
+      proposerEmail: req.user.email,
+    };
+
+    const proposal = new EventProposal(proposalData);
+    await proposal.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Event proposal submitted successfully",
+      proposal: proposal,
+    });
+  } catch (error) {
+    console.error("Error creating proposal:", error);
+    res.status(400).json({
+      success: false,
+      message: error.message || "Error submitting proposal",
+      error: error.message,
+    });
+  }
+});
+
+// GET /api/events/proposals - Get event proposals
+router.get("/proposals", auth, async (req, res) => {
+  try {
+    const { status, category, proposedBy, page = 1, limit = 10 } = req.query;
+    const isAdmin = req.user.role === 'admin' || req.user.role === 'nodal_officer';
+    
+    // Build query
+    const query = {};
+    
+    // Non-admin users can only see their own proposals unless they're viewing all
+    if (!isAdmin) {
+      query.proposedBy = req.user._id;
+    } else if (proposedBy === 'me') {
+      query.proposedBy = req.user._id;
+    }
+    
+    if (status && status !== 'all') {
+      query.status = status;
+    }
+    
+    if (category && category !== 'all') {
+      query.category = category;
+    }
+
+    const proposals = await EventProposal.find(query)
+      .populate('proposedBy', 'name email role')
+      .populate('reviewedBy', 'name email')
+      .sort({ createdAt: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+
+    const total = await EventProposal.countDocuments(query);
+
+    res.json({
+      success: true,
+      proposals,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching proposals:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching proposals",
+      error: error.message,
+    });
+  }
+});
+
+// GET /api/events/proposals/:id - Get specific proposal
+router.get("/proposals/:id", auth, async (req, res) => {
+  try {
+    const proposal = await EventProposal.findById(req.params.id)
+      .populate('proposedBy', 'name email role')
+      .populate('reviewedBy', 'name email');
+
+    if (!proposal) {
+      return res.status(404).json({
+        success: false,
+        message: "Proposal not found",
+      });
+    }
+
+    // Check if user has permission to view this proposal
+    const isAdmin = req.user.role === 'admin' || req.user.role === 'nodal_officer';
+    const isOwner = proposal.proposedBy._id.toString() === req.user._id.toString();
+    
+    if (!isAdmin && !isOwner) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied",
+      });
+    }
+
+    res.json({
+      success: true,
+      proposal,
+    });
+  } catch (error) {
+    console.error("Error fetching proposal:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching proposal",
+      error: error.message,
+    });
+  }
+});
+
+// PATCH /api/events/proposals/:id/status - Update proposal status (admin only)
+router.patch("/proposals/:id/status", auth, authorizeRoles("admin", "nodal_officer"), async (req, res) => {
+  try {
+    const { status, reviewNotes, priority } = req.body;
+    
+    const proposal = await EventProposal.findById(req.params.id);
+    if (!proposal) {
+      return res.status(404).json({
+        success: false,
+        message: "Proposal not found",
+      });
+    }
+
+    proposal.status = status;
+    proposal.reviewedBy = req.user._id;
+    proposal.reviewedAt = new Date();
+    
+    if (reviewNotes) {
+      proposal.reviewNotes = reviewNotes;
+    }
+    
+    if (priority) {
+      proposal.priority = priority;
+    }
+
+    await proposal.save();
+
+    res.json({
+      success: true,
+      message: `Proposal ${status} successfully`,
+      proposal,
+    });
+  } catch (error) {
+    console.error("Error updating proposal status:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error updating proposal status",
+      error: error.message,
+    });
+  }
+});
+
+// PUT /api/events/proposals/:id - Update proposal (owner only)
+router.put("/proposals/:id", auth, async (req, res) => {
+  try {
+    const proposal = await EventProposal.findById(req.params.id);
+    
+    if (!proposal) {
+      return res.status(404).json({
+        success: false,
+        message: "Proposal not found",
+      });
+    }
+
+    // Check if user is the owner
+    if (proposal.proposedBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. You can only edit your own proposals.",
+      });
+    }
+
+    // Only allow editing if proposal is pending or rejected
+    if (!['pending', 'rejected'].includes(proposal.status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot edit proposal in current status",
+      });
+    }
+
+    // Update proposal
+    Object.assign(proposal, req.body);
+    
+    // If it was rejected and now being updated, reset status to pending
+    if (proposal.status === 'rejected') {
+      proposal.status = 'pending';
+      proposal.reviewNotes = '';
+      proposal.reviewedBy = undefined;
+      proposal.reviewedAt = undefined;
+    }
+
+    await proposal.save();
+
+    res.json({
+      success: true,
+      message: "Proposal updated successfully",
+      proposal,
+    });
+  } catch (error) {
+    console.error("Error updating proposal:", error);
+    res.status(400).json({
+      success: false,
+      message: "Error updating proposal",
+      error: error.message,
+    });
+  }
+});
+
+// DELETE /api/events/proposals/:id - Delete proposal
+router.delete("/proposals/:id", auth, async (req, res) => {
+  try {
+    const proposal = await EventProposal.findById(req.params.id);
+    
+    if (!proposal) {
+      return res.status(404).json({
+        success: false,
+        message: "Proposal not found",
+      });
+    }
+
+    // Check permissions
+    const isAdmin = req.user.role === 'admin' || req.user.role === 'nodal_officer';
+    const isOwner = proposal.proposedBy.toString() === req.user._id.toString();
+    
+    if (!isAdmin && !isOwner) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied",
+      });
+    }
+
+    // Only allow deletion if proposal is pending or rejected
+    if (!['pending', 'rejected'].includes(proposal.status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot delete proposal in current status",
+      });
+    }
+
+    await EventProposal.findByIdAndDelete(req.params.id);
+
+    res.json({
+      success: true,
+      message: "Proposal deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting proposal:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error deleting proposal",
+      error: error.message,
+    });
+  }
+});
+
+// POST /api/events/proposals/:id/implement - Convert proposal to actual event (admin only)
+router.post("/proposals/:id/implement", auth, authorizeRoles("admin", "nodal_officer"), async (req, res) => {
+  try {
+    const proposal = await EventProposal.findById(req.params.id);
+    
+    if (!proposal) {
+      return res.status(404).json({
+        success: false,
+        message: "Proposal not found",
+      });
+    }
+
+    if (proposal.status !== 'approved') {
+      return res.status(400).json({
+        success: false,
+        message: "Only approved proposals can be implemented",
+      });
+    }
+
+    // Create event from proposal
+    const eventData = {
+      title: proposal.title,
+      description: proposal.description,
+      shortDescription: proposal.shortDescription,
+      category: proposal.category,
+      targetAudience: proposal.targetAudience,
+      date: proposal.proposedDate,
+      venue: proposal.venue,
+      duration: proposal.estimatedDuration,
+      maxParticipants: proposal.estimatedParticipants,
+      organizer: proposal.proposedBy,
+      isPublic: true,
+      status: 'draft',
+      tags: proposal.tags || [],
+      ...req.body // Allow additional event-specific data from request
+    };
+
+    const event = new Event(eventData);
+    await event.save();
+
+    // Update proposal status
+    proposal.status = 'implemented';
+    proposal.implementedEventId = event._id;
+    await proposal.save();
+
+    res.json({
+      success: true,
+      message: "Proposal implemented as event successfully",
+      event,
+      proposal,
+    });
+  } catch (error) {
+    console.error("Error implementing proposal:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error implementing proposal",
       error: error.message,
     });
   }

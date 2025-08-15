@@ -17,6 +17,7 @@ import AboutPage from './pages/AboutPage';
 import EventsPage from './pages/EventsPage';
 import EventPage from './pages/EventPage';
 import EventsManagementPage from './pages/EventsManagementPage';
+import ProposedEventsPage from './pages/ProposedEventsPage';
 import TeamPage from './pages/TeamPage';
 import CommunitiesPage from './pages/CommunitiesPage';
 import CommunityPage from './pages/CommunityPage';
@@ -87,6 +88,7 @@ const AppContent = () => {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/events" element={<EventsPage />} />
           <Route path="/events/:id" element={<EventPage />} />
+          <Route path="/proposed-events" element={<ProposedEventsPage />} />
           <Route path="/team" element={<TeamPage />} />
           <Route path="/communities" element={<CommunitiesPage />} />
           <Route path="/communities/:id" element={<CommunityPage />} />

@@ -1,11 +1,16 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, MapPin, Users } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Loader from '../components/ui/Loader';
 import EventDetailModal from '../components/ui/EventDetailModal';
+import ProposeEventModal from '../components/ui/ProposeEventModal';
+import { useAuth } from '../contexts/AuthContext';
 
 const EventsPage = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState('All');
   const [events, setEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]);
@@ -13,6 +18,7 @@ const EventsPage = () => {
   const [pastEvents, setPastEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showProposeModal, setShowProposeModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState(['All']);
 
@@ -78,6 +84,11 @@ const EventsPage = () => {
   const openEventDetail = (event) => {
     setSelectedEvent(event);
     setIsModalOpen(true);
+  };
+
+  const handleProposalSubmitted = () => {
+    setShowProposeModal(false);
+    // Optional: Could show a success message or redirect to proposed events page
   };
 
   return (
@@ -181,18 +192,18 @@ const EventsPage = () => {
                     
                     <div className="space-y-2 mb-4">
                       <div className="flex items-center text-text-light text-sm">
-                        <FaCalendarAlt className="mr-2 text-accent" />
+                        <Calendar className="mr-2 text-accent w-4 h-4" />
                         {formatDate(event.date)}
                       </div>
                       <div className="flex items-center text-text-light text-sm">
-                        <FaMapMarkerAlt className="mr-2 text-accent" />
+                        <MapPin className="mr-2 text-accent w-4 h-4" />
                         {event.location}
                       </div>
                     </div>
                     
                     <div className="flex justify-end">
                       <button 
-                        onClick={() => openEventDetail(event)}
+                        onClick={() => navigate(`/events/${event._id}`)}
                         className="text-cta hover:text-cta-dark font-medium transition-colors"
                       >
                         Learn more →
@@ -263,7 +274,10 @@ const EventsPage = () => {
             <p className="text-text-light mb-8">
               If you have an idea for an event or want to collaborate with IEDC LBSCEK, we'd love to hear from you!
             </p>
-            <button className="px-8 py-3 bg-cta text-white rounded-lg hover:bg-cta-hover transition-colors shadow-sm">
+            <button 
+              onClick={() => setShowProposeModal(true)}
+              className="px-8 py-3 bg-cta text-white rounded-lg hover:bg-cta-hover transition-colors shadow-sm"
+            >
               Propose an Event
             </button>
           </motion.div>
@@ -275,6 +289,13 @@ const EventsPage = () => {
         event={selectedEvent}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+      />
+
+      {/* Propose Event Modal */}
+      <ProposeEventModal
+        isOpen={showProposeModal}
+        onClose={() => setShowProposeModal(false)}
+        onProposalSubmitted={handleProposalSubmitted}
       />
     </div>
   );
@@ -303,7 +324,7 @@ const formatDate = (dateString) => {
   const options = { year: 'numeric', month: 'long', day: 'numeric' };
   try {
     return new Date(dateString).toLocaleDateString(undefined, options);
-  } catch (e) {
+  } catch {
     return dateString; // Return original string if parsing fails
   }
 };
