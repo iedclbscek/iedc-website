@@ -36,8 +36,6 @@ const registrationSchema = new mongoose.Schema(
     // Academic Information
     admissionNo: {
       type: String,
-      unique: true,
-      sparse: true,
       trim: true,
       uppercase: true,
     },

@@ -113,8 +113,8 @@ router.post("/", validateRegistration, async (req, res) => {
       }
     }
 
-    // Remove empty admissionNo to avoid duplicate key error
-    if (req.body.admissionNo === "") {
+    // Remove empty or null admissionNo to avoid duplicate key error
+    if (req.body.admissionNo === "" || req.body.admissionNo == null) {
       delete req.body.admissionNo;
     }
     // Create new registration
