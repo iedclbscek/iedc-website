@@ -100,6 +100,11 @@ const RegistrationPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Phone number validation
+    if (!/^\d{10}$/.test(formData.phone.trim())) {
+      toast.error('Phone number must be exactly 10 digits.');
+      return;
+    }
     // Referral code validation
     if (formData.referralCode.trim().toUpperCase() !== 'DREAMITDOIT') {
       toast.error('Wrong referral code. Please enter DREAMITDOIT.');
