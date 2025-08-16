@@ -27,3 +27,4 @@ yarn-error.log*
 RENDER_INSTRUCTIONS.md
 server/ping.js
 server/dropAdmissionNoIndex.js
+server/listRegistrationIndexes.js
