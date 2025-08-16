@@ -105,6 +105,11 @@ const RegistrationPage = () => {
       toast.error('Phone number must be exactly 10 digits.');
       return;
     }
+    // Experience length validation
+    if (formData.experience && formData.experience.length > 1000) {
+      toast.error('Experience description cannot exceed 1000 characters.');
+      return;
+    }
     // Referral code validation
     if (formData.referralCode.trim().toUpperCase() !== 'DREAMITDOIT') {
       toast.error('Wrong referral code. Please enter DREAMITDOIT.');
