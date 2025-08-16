@@ -113,6 +113,10 @@ router.post("/", validateRegistration, async (req, res) => {
       }
     }
 
+    // Remove empty admissionNo to avoid duplicate key error
+    if (req.body.admissionNo === "") {
+      delete req.body.admissionNo;
+    }
     // Create new registration
     const registration = new Registration(req.body);
     await registration.save();
