@@ -238,7 +238,7 @@ export const sendPasswordResetEmail = async (email, name, resetToken) => {
           <div class="container">
             <div class="header">
               <h1 style="color: #e74c3c; margin: 0;">IEDC LBSCEK</h1>
-              <p style="margin: 5px 0 0 0; color: #666;">Innovation and Entrepreneurship Development Cell</p>
+              <p style="margin: 5px 0 0 0; color: #666;">Innovation and Entrepreneurship Development Centre</p>
             </div>
             
             <div class="content">
