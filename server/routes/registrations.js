@@ -3,6 +3,27 @@ import { body, validationResult } from "express-validator";
 import Registration from "../models/Registration.js";
 import { authenticateToken, authorizeRoles } from "../middleware/auth.js";
 import { sendMembershipIdEmail } from "../utils/emailService.js";
+import mongoose from "mongoose";
+
+// Execom Call Schema (if not already defined)
+const execomCallSchema = new mongoose.Schema({
+  membershipId: String,
+  q1: String,
+  q2: String,
+  q3: String,
+  motivation: String,
+  role: String,
+  skills: String,
+  experience: String,
+  area: String,
+  time: String,
+  vision: String,
+  status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
+  reviewedAt: Date,
+  reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  submittedAt: { type: Date, default: Date.now },
+});
+const ExecomCall = mongoose.models.ExecomCall || mongoose.model("ExecomCall", execomCallSchema, "execomCall");
 
 const router = express.Router();
 
@@ -163,6 +184,85 @@ router.post("/", validateRegistration, async (req, res) => {
   }
 });
 
+// POST /api/execom-call - Save Execom Call form
+router.post("/execom-call", async (req, res) => {
+  try {
+    const data = req.body;
+    if (!data.membershipId) {
+      return res.status(400).json({ success: false, message: "Membership ID is required" });
+    }
+    const doc = new ExecomCall(data);
+    await doc.save();
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+// PUT /api/registrations/execom-call/:membershipId/approve - Approve Execom Call response
+router.put("/execom-call/:membershipId/approve", authenticateToken, authorizeRoles("admin"), async (req, res) => {
+  try {
+    const { membershipId } = req.params;
+    const updated = await ExecomCall.findOneAndUpdate(
+      { membershipId: membershipId.toUpperCase() },
+      { 
+        status: 'approved',
+        reviewedAt: new Date(),
+        reviewedBy: req.user._id
+      },
+      { new: true }
+    );
+    
+    if (!updated) {
+      return res.status(404).json({ success: false, message: "Response not found" });
+    }
+    
+    res.json({ success: true, message: "Response approved successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+// PUT /api/registrations/execom-call/:membershipId/reject - Reject Execom Call response
+router.put("/execom-call/:membershipId/reject", authenticateToken, authorizeRoles("admin"), async (req, res) => {
+  try {
+    const { membershipId } = req.params;
+    const updated = await ExecomCall.findOneAndUpdate(
+      { membershipId: membershipId.toUpperCase() },
+      { 
+        status: 'rejected',
+        reviewedAt: new Date(),
+        reviewedBy: req.user._id
+      },
+      { new: true }
+    );
+    
+    if (!updated) {
+      return res.status(404).json({ success: false, message: "Response not found" });
+    }
+    
+    res.json({ success: true, message: "Response rejected successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+// DELETE /api/registrations/execom-call/:membershipId - Delete Execom Call response
+router.delete("/execom-call/:membershipId", authenticateToken, authorizeRoles("admin"), async (req, res) => {
+  try {
+    const { membershipId } = req.params;
+    const deleted = await ExecomCall.findOneAndDelete({ membershipId: membershipId.toUpperCase() });
+    
+    if (!deleted) {
+      return res.status(404).json({ success: false, message: "Response not found" });
+    }
+    
+    res.json({ success: true, message: "Response deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
 // GET /api/registrations - Get all registrations (admin only)
 router.get(
   "/",
@@ -213,6 +313,84 @@ router.get(
     }
   }
 );
+
+// GET /api/registrations/execom-call-responses - Admin: Get all execom call responses with registration info
+router.get("/execom-call-responses", authenticateToken, authorizeRoles("admin"), async (req, res) => {
+  try {
+    // Use aggregation to join execomCall with registrations
+    const responses = await mongoose.connection.collection("execomCall").aggregate([
+      {
+        $lookup: {
+          from: "registrations",
+          localField: "membershipId",
+          foreignField: "membershipId",
+          as: "registrationInfo"
+        }
+      },
+      {
+        $unwind: {
+          path: "$registrationInfo",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $project: {
+          membershipId: 1,
+          q1: 1,
+          q2: 1,
+          q3: 1,
+          motivation: 1,
+          role: 1,
+          skills: 1,
+          experience: 1,
+          area: 1,
+          time: 1,
+          vision: 1,
+          submittedAt: 1,
+          firstName: "$registrationInfo.firstName",
+          email: "$registrationInfo.email",
+          department: "$registrationInfo.department"
+        }
+      },
+      { $sort: { submittedAt: -1 } }
+    ]).toArray();
+    res.json({ success: true, data: responses });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+// PUBLIC: GET /api/registrations/public-lookup?membershipId=... - Public lookup for eligibility
+router.get("/public-lookup", async (req, res) => {
+  const { membershipId } = req.query;
+  if (!membershipId) {
+    return res.status(400).json({ success: false, message: "Membership ID is required" });
+  }
+  try {
+    const reg = await Registration.findOne({ membershipId: membershipId.toUpperCase() })
+      .select("membershipId firstName lastName yearOfJoining department status");
+    if (!reg) {
+      return res.status(404).json({ success: false, message: "No member found with this Membership ID" });
+    }
+    res.json({ success: true, data: reg });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+// PUBLIC: GET /api/registrations/execom-call-check?membershipId=... - Check if already submitted
+router.get("/execom-call-check", async (req, res) => {
+  const { membershipId } = req.query;
+  if (!membershipId) {
+    return res.status(400).json({ success: false, message: "Membership ID is required" });
+  }
+  try {
+    const existing = await ExecomCall.findOne({ membershipId: membershipId.toUpperCase() });
+    res.json({ success: true, exists: !!existing });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
 
 // GET /api/registrations/:id - Get specific registration (admin only)
 router.get(
@@ -335,5 +513,7 @@ router.delete(
 );
 
 export default router;
+
+
 
 
