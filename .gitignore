@@ -25,3 +25,4 @@ yarn-debug.log*
 yarn-error.log*
 
 RENDER_INSTRUCTIONS.md
+server/ping.js
