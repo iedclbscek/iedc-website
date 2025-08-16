@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 // Create axios instance with default config
 const api = axios.create({
@@ -20,13 +20,27 @@ api.interceptors.request.use((config) => {
 });
 
 /**
- * Fetch all registrations for admin dashboard
- * @returns {Promise<Array>} - Array of registration data
+ * Fetch all registrations for admin dashboard with pagination
+ * @param {Object} params - Pagination and filter parameters
+ * @param {number} params.page - Page number (default: 1)
+ * @param {number} params.limit - Items per page (default: 10)
+ * @param {string} params.status - Filter by status
+ * @param {string} params.department - Filter by department
+ * @param {string} params.search - Search term
+ * @returns {Promise<Object>} - Object containing data and pagination info
  */
-export const fetchRegistrations = async () => {
+export const fetchRegistrations = async (params = {}) => {
   try {
-    const response = await api.get("/registrations");
-    return response.data.data; // The backend returns { success: true, data: [...] }
+    const queryParams = new URLSearchParams();
+
+    if (params.page) queryParams.append("page", params.page);
+    if (params.limit) queryParams.append("limit", params.limit);
+    if (params.status) queryParams.append("status", params.status);
+    if (params.department) queryParams.append("department", params.department);
+    if (params.search) queryParams.append("search", params.search);
+
+    const response = await api.get(`/registrations?${queryParams.toString()}`);
+    return response.data; // Returns { success: true, data: [...], pagination: {...} }
   } catch (error) {
     if (error.response) {
       throw new Error(

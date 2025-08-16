@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { 
   FaEye, 
   FaCheck, 
@@ -22,23 +21,100 @@ const RegistrationManagement = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [departmentFilter, setDepartmentFilter] = useState('all');
   const [selectedRegistration, setSelectedRegistration] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+
+  // Statistics state
+  const [stats, setStats] = useState({
+    total: 0,
+    pending: 0,
+    approved: 0,
+    rejected: 0
+  });
 
   useEffect(() => {
     loadRegistrations();
-  }, []);
+  }, [currentPage, itemsPerPage, statusFilter, departmentFilter]);
+
+  // Debounced search effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchTerm !== undefined) {
+        loadRegistrations();
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   const loadRegistrations = async () => {
     try {
       setLoading(true);
-      const data = await fetchRegistrations();
-      setRegistrations(data);
+      const params = {
+        page: currentPage,
+        limit: itemsPerPage,
+        status: statusFilter !== 'all' ? statusFilter : undefined,
+        department: departmentFilter !== 'all' ? departmentFilter : undefined,
+        search: searchTerm || undefined
+      };
+      
+      const response = await fetchRegistrations(params);
+      setRegistrations(response.data);
+      setTotalItems(response.pagination.totalItems);
+      setTotalPages(response.pagination.totalPages);
+      
+      // Calculate statistics for current filtered results
+      const filteredStats = {
+        total: response.pagination.totalItems,
+        pending: response.data.filter(r => r.status === 'pending').length,
+        approved: response.data.filter(r => r.status === 'approved').length,
+        rejected: response.data.filter(r => r.status === 'rejected').length
+      };
+      setStats(filteredStats);
     } catch (error) {
       toast.error(error.message);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Reset pagination when filters change
+  const resetPagination = () => {
+    setCurrentPage(1);
+  };
+
+  // Handle search with debouncing
+  const handleSearch = (value) => {
+    setSearchTerm(value);
+    resetPagination();
+  };
+
+  // Handle status filter change
+  const handleStatusFilterChange = (value) => {
+    setStatusFilter(value);
+    resetPagination();
+  };
+
+  // Handle department filter change
+  const handleDepartmentFilterChange = (value) => {
+    setDepartmentFilter(value);
+    resetPagination();
+  };
+
+  // Reset all filters
+  const resetFilters = () => {
+    setSearchTerm('');
+    setStatusFilter('all');
+    setDepartmentFilter('all');
+    setCurrentPage(1);
+    setItemsPerPage(10);
   };
 
   const handleStatusUpdate = async (id, newStatus) => {
@@ -120,22 +196,23 @@ const RegistrationManagement = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+      <div
         className="bg-gradient-to-r from-accent to-accent-dark rounded-lg p-6 text-white"
       >
         <h1 className="text-2xl font-bold mb-2">Registration Management</h1>
         <p className="text-accent-light">
           Manage and review all IEDC member registrations
         </p>
-      </motion.div>
+        {loading && (
+          <div className="mt-2 flex items-center gap-2">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+            <span className="text-sm">Loading...</span>
+          </div>
+        )}
+      </div>
 
       {/* Controls */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
+      <div
         className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
       >
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
@@ -147,7 +224,7 @@ const RegistrationManagement = () => {
                  type="text"
                  placeholder="Search by name, email, admission number, or membership ID..."
                  value={searchTerm}
-                 onChange={(e) => setSearchTerm(e.target.value)}
+                 onChange={(e) => handleSearch(e.target.value)}
                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
                />
             </div>
@@ -157,13 +234,51 @@ const RegistrationManagement = () => {
               <FaFilter className="text-gray-400" />
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                onChange={(e) => handleStatusFilterChange(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
               >
                 <option value="all">All Status</option>
                 <option value="pending">Pending</option>
                 <option value="approved">Approved</option>
                 <option value="rejected">Rejected</option>
+              </select>
+            </div>
+
+            {/* Department Filter */}
+            <div className="flex items-center gap-2">
+              <FaFilter className="text-gray-400" />
+              <select
+                value={departmentFilter}
+                onChange={(e) => handleDepartmentFilterChange(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
+              >
+                <option value="all">All Departments</option>
+                <option value="Computer Science and Engineering">Computer Science and Engineering</option>
+                <option value="Computer Science and Business Systems">Computer Science and Business Systems</option>
+                <option value="Computer Science and Engineering(AI & Data Science)">Computer Science and Engineering(AI & Data Science)</option>
+                <option value="Electrical and Electronics Engineering">Electrical and Electronics Engineering</option>
+                <option value="Electronics and Communication Engineering">Electronics and Communication Engineering</option>
+                <option value="Information Technology">Information Technology</option>
+                <option value="Mechanical Engineering">Mechanical Engineering</option>
+                <option value="Civil Engineering">Civil Engineering</option>
+              </select>
+            </div>
+
+            {/* Items Per Page */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">Show:</span>
+              <select
+                value={itemsPerPage}
+                onChange={(e) => {
+                  setItemsPerPage(Number(e.target.value));
+                  setCurrentPage(1); // Reset to first page when changing items per page
+                }}
+                className="px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-accent focus:border-transparent"
+              >
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
               </select>
             </div>
           </div>
@@ -176,22 +291,42 @@ const RegistrationManagement = () => {
             <FaDownload />
             Export CSV
           </button>
+
+          {/* View All Button */}
+          <button
+            onClick={() => {
+              setItemsPerPage(1000);
+              setCurrentPage(1);
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <FaEye />
+            View All
+          </button>
+
+          {/* Reset Filters Button */}
+          {(searchTerm || statusFilter !== 'all' || departmentFilter !== 'all') && (
+            <button
+              onClick={resetFilters}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+            >
+              <FaFilter />
+              Reset Filters
+            </button>
+          )}
         </div>
-      </motion.div>
+      </div>
 
       {/* Statistics */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
+      <div
         className="grid grid-cols-1 md:grid-cols-4 gap-6"
       >
         {[
-          { label: 'Total', value: registrations.length, color: 'bg-blue-500' },
-          { label: 'Pending', value: registrations.filter(r => r.status === 'pending').length, color: 'bg-yellow-500' },
-          { label: 'Approved', value: registrations.filter(r => r.status === 'approved').length, color: 'bg-green-500' },
-          { label: 'Rejected', value: registrations.filter(r => r.status === 'rejected').length, color: 'bg-red-500' }
-        ].map((stat, index) => (
+          { label: 'Total', value: stats.total, color: 'bg-blue-500' },
+          { label: 'Pending', value: stats.pending, color: 'bg-yellow-500' },
+          { label: 'Approved', value: stats.approved, color: 'bg-green-500' },
+          { label: 'Rejected', value: stats.rejected, color: 'bg-red-500' }
+        ].map((stat) => (
           <div key={stat.label} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -204,15 +339,31 @@ const RegistrationManagement = () => {
             </div>
           </div>
         ))}
-      </motion.div>
+      </div>
 
       {/* Registrations Table */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
+      <div
         className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
       >
+        {/* Table Summary */}
+        <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-sm text-gray-700">
+              <span className="font-medium">{totalItems}</span> registration{totalItems !== 1 ? 's' : ''} found
+              {(searchTerm || statusFilter !== 'all' || departmentFilter !== 'all') && (
+                <span className="text-gray-500 ml-2">
+                  (filtered results)
+                </span>
+              )}
+            </div>
+            {totalPages > 1 && (
+              <div className="text-sm text-gray-500 mt-2 sm:mt-0">
+                Page {currentPage} of {totalPages}
+              </div>
+            )}
+          </div>
+        </div>
+
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -335,14 +486,95 @@ const RegistrationManagement = () => {
             <FaUser className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-2 text-sm font-medium text-gray-900">No registrations found</h3>
             <p className="mt-1 text-sm text-gray-500">
-              {searchTerm || statusFilter !== 'all' 
+              {searchTerm || statusFilter !== 'all' || departmentFilter !== 'all'
                 ? 'Try adjusting your search or filter criteria.'
                 : 'No registrations have been submitted yet.'
               }
             </p>
           </div>
         )}
-      </motion.div>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="bg-white px-6 py-3 border-t border-gray-200 sm:px-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center text-sm text-gray-700">
+                <span>
+                  Showing{' '}
+                  <span className="font-medium">
+                    {Math.min((currentPage - 1) * itemsPerPage + 1, totalItems)}
+                  </span>{' '}
+                  to{' '}
+                  <span className="font-medium">
+                    {Math.min(currentPage * itemsPerPage, totalItems)}
+                  </span>{' '}
+                  of{' '}
+                  <span className="font-medium">{totalItems}</span>{' '}
+                  results
+                </span>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                {/* Previous Page Button */}
+                <button
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                  className={`relative inline-flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                    currentPage === 1
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      : 'bg-white text-gray-500 hover:bg-gray-50 border border-gray-300'
+                  }`}
+                >
+                  Previous
+                </button>
+
+                {/* Page Numbers */}
+                <div className="flex items-center space-x-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = currentPage - 2 + i;
+                    }
+
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={`relative inline-flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                          currentPage === pageNum
+                            ? 'bg-accent text-white'
+                            : 'bg-white text-gray-500 hover:bg-gray-50 border border-gray-300'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Next Page Button */}
+                <button
+                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                  disabled={currentPage === totalPages}
+                  className={`relative inline-flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                    currentPage === totalPages
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      : 'bg-white text-gray-500 hover:bg-gray-50 border border-gray-300'
+                  }`}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Registration Detail Modal */}
       {showModal && selectedRegistration && (
