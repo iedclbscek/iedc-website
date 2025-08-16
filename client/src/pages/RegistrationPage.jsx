@@ -100,6 +100,11 @@ const RegistrationPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Admission number validation
+    if (!formData.admissionNo.trim()) {
+      toast.error('Admission number is required.');
+      return;
+    }
     // Phone number validation
     if (!/^\d{10}$/.test(formData.phone.trim())) {
       toast.error('Phone number must be exactly 10 digits.');
@@ -258,15 +263,16 @@ const RegistrationPage = () => {
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-text-dark mb-2">
-                    Admission No (Optional)
+                    Admission No *
                   </label>
                   <input
                     type="text"
                     name="admissionNo"
                     value={formData.admissionNo}
                     onChange={handleInputChange}
+                    required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
-                    placeholder="Enter your admission number (optional)"
+                    placeholder="Enter your admission number"
                   />
                 </div>
                 <div>
