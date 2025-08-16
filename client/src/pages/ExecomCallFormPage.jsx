@@ -234,15 +234,16 @@ const ExecomCallFormPage = () => {
                 disabled={loading}
               />
               <div className="mb-4 text-sm text-gray-600">
-                Don't have an IEDC membership?{" "}
+                Not a registered member? Click{" "}
                 <a 
                   href="https://iedclbscek.vercel.app/register" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="text-accent hover:text-accent-dark underline font-medium"
                 >
-                  Click Here to register
-                </a>
+                  here
+                </a>{" "}
+                to register
               </div>
               <div className="flex justify-end">
                 <button
