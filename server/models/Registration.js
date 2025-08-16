@@ -38,7 +38,8 @@ const registrationSchema = new mongoose.Schema(
       type: String,
       trim: true,
       uppercase: true,
-      required: false,
+      required: [true, "Admission number is required"],
+      // No unique or index constraint
     },
     referralCode: {
       type: String,

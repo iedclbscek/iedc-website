@@ -9,7 +9,7 @@ const RegistrationPage = () => {
     lastName: '',
     email: '',
     phone: '',
-    admissionNo: '',
+    admissionNo: '', // required
     department: '',
     yearOfJoining: '',
     semester: '',
@@ -26,6 +26,7 @@ const RegistrationPage = () => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const departments = [
     'Computer Science and Engineering',
@@ -98,24 +99,46 @@ const RegistrationPage = () => {
     }
   };
 
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.firstName.trim()) newErrors.firstName = "First name is required";
+    if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
+    if (!formData.email.trim()) newErrors.email = "Email is required";
+    if (!formData.phone.trim()) newErrors.phone = "Phone number is required";
+    if (!formData.admissionNo.trim()) newErrors.admissionNo = "Admission number is required";
+    if (!formData.referralCode.trim()) newErrors.referralCode = "Referral code is required";
+    if (!formData.department.trim()) newErrors.department = "Department is required";
+    if (!formData.yearOfJoining.trim()) newErrors.yearOfJoining = "Year of joining is required";
+    if (!formData.semester.trim()) newErrors.semester = "Semester is required";
+    if (!formData.motivation.trim()) newErrors.motivation = "Motivation is required";
+    return newErrors;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-  // Admission number is optional
+    
+    const validationErrors = validateForm();
+    setErrors(validationErrors);
+    if (Object.keys(validationErrors).length > 0) return;
+
     // Phone number validation
     if (!/^\d{10}$/.test(formData.phone.trim())) {
       toast.error('Phone number must be exactly 10 digits.');
       return;
     }
+    
     // Experience length validation
     if (formData.experience && formData.experience.length > 1000) {
       toast.error('Experience description cannot exceed 1000 characters.');
       return;
     }
+    
     // Referral code validation
     if (formData.referralCode.trim().toUpperCase() !== 'DREAMITDOIT') {
       toast.error('Wrong referral code. Please enter DREAMITDOIT.');
       return;
     }
+    
     setIsSubmitting(true);
     try {
       // Prepare data for MongoDB (temporarily without photo URLs)
@@ -137,12 +160,15 @@ const RegistrationPage = () => {
         portfolio: formData.portfolio,
         referralCode: formData.referralCode
       };
+      
       // Submit to MongoDB via API
       toast.loading('Submitting application...');
       await submitRegistration(registrationData);
       toast.dismiss();
+      
       // Success message
       toast.success('Application submitted successfully! We will review it and get back to you soon.');
+      
       // Reset form
       setFormData({
         firstName: '',
@@ -259,15 +285,16 @@ const RegistrationPage = () => {
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-text-dark mb-2">
-                    Admission No (Optional)
+                    Admission No *
                   </label>
                   <input
                     type="text"
                     name="admissionNo"
                     value={formData.admissionNo}
                     onChange={handleInputChange}
+                    required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
-                    placeholder="Enter your admission number (optional)"
+                    placeholder="Enter your admission number"
                   />
                 </div>
                 <div>
