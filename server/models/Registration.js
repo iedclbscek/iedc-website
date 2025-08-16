@@ -38,7 +38,7 @@ const registrationSchema = new mongoose.Schema(
       type: String,
       trim: true,
       uppercase: true,
-      required: [true, "Admission number is required"],
+      required: false,
     },
     referralCode: {
       type: String,
