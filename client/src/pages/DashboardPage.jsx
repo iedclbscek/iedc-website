@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -16,6 +17,9 @@ import {
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
 import RegistrationManagement from '../components/admin/RegistrationManagement';
+
+// Add placeholder import
+const ExecomCallResponsesPage = React.lazy(() => import('../components/admin/ExecomCallResponsesPage'));
 
 // Dashboard Home Component
 const DashboardHome = () => {
@@ -142,7 +146,7 @@ const DashboardHome = () => {
         className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 lg:p-8"
       >
         <h2 className="text-xl font-bold text-gray-900 mb-6">Quick Actions</h2>
-                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <motion.button
             whileHover={{ scale: 1.05, y: -5 }}
             whileTap={{ scale: 0.95 }}
@@ -177,6 +181,18 @@ const DashboardHome = () => {
               <FaCalendarAlt className="h-8 w-8 text-accent group-hover:text-white" />
             </div>
             <span className="font-semibold text-gray-900 group-hover:text-accent">Create Event</span>
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.05, y: -5 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => navigate('/dashboard/execom-call-responses')}
+            className="group flex flex-col items-center justify-center p-6 border-2 border-gray-200 rounded-xl hover:border-accent hover:bg-accent/5 transition-all duration-300 cursor-pointer"
+          >
+            <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mb-4 group-hover:bg-accent group-hover:scale-110 transition-all duration-300">
+              <FaClipboardList className="h-8 w-8 text-accent group-hover:text-white" />
+            </div>
+            <span className="font-semibold text-gray-900 group-hover:text-accent">Execom Call Responses</span>
           </motion.button>
         </div>
       </motion.div>
@@ -270,6 +286,7 @@ const DashboardPage = () => {
         <Route path="/team" element={<TeamManagement />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/execom-call-responses" element={<React.Suspense fallback={<div>Loading...</div>}><ExecomCallResponsesPage /></React.Suspense>} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </DashboardLayout>
