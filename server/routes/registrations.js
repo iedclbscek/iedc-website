@@ -3,6 +3,7 @@ import { body, validationResult } from "express-validator";
 import Registration from "../models/Registration.js";
 import { authenticateToken, authorizeRoles } from "../middleware/auth.js";
 import { sendMembershipIdEmail } from "../utils/emailService.js";
+//import { addMemberToGroup } from "../utils/googleGroupsService.js";
 import mongoose from "mongoose";
 
 // Execom Call Schema (if not already defined)
@@ -154,6 +155,22 @@ router.post("/", validateRegistration, async (req, res) => {
       console.error("Failed to send membership ID email:", emailError);
       // Do not fail registration if email fails
     }
+
+    /* Add member to Google Group
+    try {
+      const groupEmail = process.env.GOOGLE_GROUP_EMAIL || 'iedc-members@lbscek.ac.in';
+      const groupResult = await addMemberToGroup(registration.email, groupEmail);
+      
+      if (groupResult.success) {
+        console.log(`✅ Successfully added ${registration.email} to Google Group: ${groupEmail}`);
+      } else {
+        console.warn(`⚠️ Google Group addition failed for ${registration.email}: ${groupResult.message}`);
+        // Don't fail registration if Google Group addition fails
+      }
+    } catch (groupError) {
+      console.error("Failed to add member to Google Group:", groupError);
+      // Do not fail registration if Google Group addition fails
+    }*/
 
     res.status(201).json({
       success: true,
