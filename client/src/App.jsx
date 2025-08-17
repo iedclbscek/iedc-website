@@ -91,7 +91,6 @@ const AppContent = () => {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/events" element={<EventsPage />} />
           <Route path="/events/:id" element={<EventPage />} />
-          <Route path="/proposed-events" element={<ProposedEventsPage />} />
           <Route path="/team" element={<TeamPage />} />
           <Route path="/communities" element={<CommunitiesPage />} />
           <Route path="/communities/:id" element={<CommunityPage />} />

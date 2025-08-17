@@ -11,7 +11,6 @@ const Navbar = () => {
     { name: 'Home', path: '/' },
     { name: 'About', path: '/about' },
     { name: 'Events', path: '/events' },
-    ...(user ? [{ name: 'Proposed Events', path: '/proposed-events' }] : []),
     { name: 'Team', path: '/team' },
     { name: 'Communities', path: '/communities' }
   ];
