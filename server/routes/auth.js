@@ -11,6 +11,10 @@ import {
   generateResetToken,
   hashResetToken,
 } from "../utils/emailService.js";
+import mongoose from "mongoose";
+import Registration from "../models/Registration.js";
+import Verification from "../models/Verification.js";
+import { sendEmail } from "../utils/emailService.js";
 
 const router = express.Router();
 
@@ -720,5 +724,175 @@ router.post(
     }
   }
 );
+
+// Email verification endpoints
+router.post('/send-verification', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required'
+      });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid email format'
+      });
+    }
+
+    // Check if email already exists in registrations
+    const existingRegistration = await Registration.findOne({ email: email.toLowerCase() });
+    if (existingRegistration) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email already registered'
+      });
+    }
+
+    // Generate 6-digit verification code
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // Store verification code with expiration (10 minutes)
+    const verificationData = {
+      email: email.toLowerCase(),
+      code: verificationCode,
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
+      attempts: 0
+    };
+
+    // Remove existing verification for this email
+    await Verification.deleteOne({ email: email.toLowerCase() });
+    
+    // Save new verification
+    await Verification.create(verificationData);
+
+    // Send verification email
+    const emailContent = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; text-align: center; border-radius: 10px 10px 0 0;">
+          <h1 style="color: white; margin: 0; font-size: 24px;">IEDC LBSCEK</h1>
+          <p style="color: white; margin: 5px 0 0 0; opacity: 0.9;">Email Verification</p>
+        </div>
+        
+        <div style="padding: 30px; background: #f8f9fa; border-radius: 0 0 10px 10px;">
+          <h2 style="color: #333; text-align: center; margin-bottom: 20px;">Verify Your Email Address</h2>
+          
+          <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
+            Thank you for registering with IEDC LBSCEK! To complete your registration, 
+            please enter the verification code below:
+          </p>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <div style="background: white; padding: 20px; border-radius: 10px; border: 2px solid #667eea; display: inline-block;">
+              <span style="font-size: 32px; font-weight: bold; color: #667eea; letter-spacing: 5px;">${verificationCode}</span>
+            </div>
+          </div>
+          
+          <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
+            This code will expire in <strong>10 minutes</strong>. If you didn't request this verification, 
+            please ignore this email.
+          </p>
+          
+          <div style="text-align: center; margin-top: 30px;">
+            <p style="color: #999; font-size: 14px;">
+              Best regards,<br>
+              IEDC LBSCEK Team
+            </p>
+          </div>
+        </div>
+      </div>
+    `;
+
+    await sendEmail({
+      to: email,
+      subject: 'IEDC LBSCEK - Email Verification Code',
+      html: emailContent
+    });
+
+    res.json({
+      success: true,
+      message: 'Verification code sent successfully'
+    });
+
+  } catch (error) {
+    console.error('Error sending verification code:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send verification code'
+    });
+  }
+});
+
+router.post('/verify-email', async (req, res) => {
+  try {
+    const { email, code } = req.body;
+
+    if (!email || !code) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email and verification code are required'
+      });
+    }
+
+    const verification = await Verification.findOne({ email: email.toLowerCase() });
+
+    if (!verification) {
+      return res.status(400).json({
+        success: false,
+        message: 'Verification code not found or expired'
+      });
+    }
+
+    // Check if expired
+    if (verification.isExpired()) {
+      await Verification.deleteOne({ _id: verification._id });
+      return res.status(400).json({
+        success: false,
+        message: 'Verification code has expired'
+      });
+    }
+
+    // Check attempts
+    if (verification.maxAttemptsReached()) {
+      await Verification.deleteOne({ _id: verification._id });
+      return res.status(400).json({
+        success: false,
+        message: 'Too many failed attempts. Please request a new code'
+      });
+    }
+
+    // Verify code
+    if (verification.code !== code) {
+      // Increment attempts
+      await verification.incrementAttempts();
+      
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid verification code'
+      });
+    }
+
+    // Code is valid - delete verification record
+    await Verification.deleteOne({ _id: verification._id });
+
+    res.json({
+      success: true,
+      message: 'Email verified successfully'
+    });
+
+  } catch (error) {
+    console.error('Error verifying email:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to verify email'
+    });
+  }
+});
 
 export default router;

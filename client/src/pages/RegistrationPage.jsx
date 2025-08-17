@@ -27,6 +27,16 @@ const RegistrationPage = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
+  
+  // Email verification states
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isSendingCode, setIsSendingCode] = useState(false);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [showVerificationField, setShowVerificationField] = useState(false);
+  const [verificationAttempts, setVerificationAttempts] = useState(0);
+  const [canResend, setCanResend] = useState(true);
+  const [resendCountdown, setResendCountdown] = useState(0);
 
   const departments = [
     'Computer Science and Engineering',
@@ -68,6 +78,13 @@ const RegistrationPage = () => {
       ...prev,
       [name]: value
     }));
+    
+    // Reset email verification if email changes
+    if (name === 'email' && isEmailVerified) {
+      setIsEmailVerified(false);
+      setShowVerificationField(false);
+      setVerificationCode('');
+    }
   };
 
   const handleInterestChange = (interest) => {
@@ -99,11 +116,114 @@ const RegistrationPage = () => {
     }
   };
 
+  // Email verification functions
+  const sendVerificationCode = async () => {
+    if (!formData.email.trim()) {
+      toast.error('Please enter your email address first');
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+
+    setIsSendingCode(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/send-verification`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: formData.email.trim() }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success('Verification code sent to your email!');
+        setShowVerificationField(true);
+        setIsEmailVerified(false);
+        setVerificationCode('');
+        setVerificationAttempts(0);
+        
+        // Start resend countdown
+        setCanResend(false);
+        setResendCountdown(60);
+        const countdownInterval = setInterval(() => {
+          setResendCountdown(prev => {
+            if (prev <= 1) {
+              setCanResend(true);
+              clearInterval(countdownInterval);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+      } else {
+        toast.error(data.message || 'Failed to send verification code');
+      }
+    } catch (error) {
+      console.error('Error sending verification code:', error);
+      toast.error('Failed to send verification code. Please try again.');
+    } finally {
+      setIsSendingCode(false);
+    }
+  };
+
+  const verifyCode = async () => {
+    if (!verificationCode.trim()) {
+      toast.error('Please enter the verification code');
+      return;
+    }
+
+    if (verificationAttempts >= 3) {
+      toast.error('Too many failed attempts. Please request a new code.');
+      return;
+    }
+
+    setIsVerifying(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/verify-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          email: formData.email.trim(),
+          code: verificationCode.trim()
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success('Email verified successfully!');
+        setIsEmailVerified(true);
+        setShowVerificationField(false);
+        setVerificationCode('');
+      } else {
+        setVerificationAttempts(prev => prev + 1);
+        toast.error(data.message || 'Invalid verification code');
+        
+        if (verificationAttempts >= 2) {
+          toast.error('Last attempt! Please request a new code if needed.');
+        }
+      }
+    } catch (error) {
+      console.error('Error verifying code:', error);
+      toast.error('Failed to verify code. Please try again.');
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
   const validateForm = () => {
     const newErrors = {};
     if (!formData.firstName.trim()) newErrors.firstName = "First name is required";
     if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
     if (!formData.email.trim()) newErrors.email = "Email is required";
+    if (!isEmailVerified) newErrors.email = "Email must be verified";
     if (!formData.phone.trim()) newErrors.phone = "Phone number is required";
     if (!formData.admissionNo.trim()) newErrors.admissionNo = "Admission number is required";
     if (!formData.referralCode.trim()) newErrors.referralCode = "Referral code is required";
@@ -137,6 +257,12 @@ const RegistrationPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Check if email is verified
+    if (!isEmailVerified) {
+      toast.error('Please verify your email address before submitting');
+      return;
+    }
     
     const validationErrors = validateForm();
     setErrors(validationErrors);
@@ -205,6 +331,12 @@ const RegistrationPage = () => {
         profilePhoto: null,
         idPhoto: null
       });
+      
+      // Reset verification states
+      setIsEmailVerified(false);
+      setShowVerificationField(false);
+      setVerificationCode('');
+      setVerificationAttempts(0);
     } catch (error) {
       toast.dismiss();
       console.error('Registration error:', error);
@@ -263,19 +395,90 @@ const RegistrationPage = () => {
                     placeholder="Enter your last name"
                   />
                 </div>
-                <div>
+                <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-text-dark mb-2">
                     Email *
                   </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
-                    placeholder="Enter your email address"
-                  />
+                  <div className="flex gap-3">
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      required
+                      className={`flex-1 px-4 py-3 border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all ${
+                        isEmailVerified ? 'border-green-500 bg-green-50' : 'border-gray-300'
+                      }`}
+                      placeholder="Enter your email address"
+                    />
+                    {!isEmailVerified && (
+                      <button
+                        type="button"
+                        onClick={sendVerificationCode}
+                        disabled={isSendingCode || !canResend || !formData.email.trim()}
+                        className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+                      >
+                        {isSendingCode ? 'Sending...' : canResend ? 'Verify Email' : `Resend (${resendCountdown}s)`}
+                      </button>
+                    )}
+                  </div>
+                  
+                  {/* Email verification status */}
+                  {isEmailVerified && (
+                    <div className="flex items-center mt-2 text-green-600">
+                      <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-sm font-medium">Email verified successfully!</span>
+                    </div>
+                  )}
+                  
+                  {/* Verification code field */}
+                  {showVerificationField && !isEmailVerified && (
+                    <div className="mt-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="flex gap-3 items-end">
+                        <div className="flex-1">
+                          <label className="block text-sm font-medium text-blue-800 mb-2">
+                            Enter verification code sent to your email
+                          </label>
+                          <input
+                            type="text"
+                            value={verificationCode}
+                            onChange={(e) => setVerificationCode(e.target.value)}
+                            placeholder="Enter 6-digit code"
+                            maxLength="6"
+                            className="w-full px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={verifyCode}
+                          disabled={isVerifying || !verificationCode.trim()}
+                          className="px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                          {isVerifying ? 'Verifying...' : 'Verify Code'}
+                        </button>
+                      </div>
+                      <p className="text-xs text-blue-600 mt-2">
+                        Check your email for the verification code. Didn't receive it? 
+                        {canResend ? (
+                          <button
+                            type="button"
+                            onClick={sendVerificationCode}
+                            className="text-blue-800 underline ml-1 hover:text-blue-900"
+                          >
+                            Resend code
+                          </button>
+                        ) : (
+                          <span className="ml-1">Wait {resendCountdown}s to resend</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  
+                  {errors.email && (
+                    <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-text-dark mb-2">
@@ -645,14 +848,31 @@ const RegistrationPage = () => {
               </div>
             </div>
 
+            {/* Verification Status */}
+            {!isEmailVerified && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div className="flex items-center">
+                  <svg className="w-5 h-5 text-yellow-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-yellow-800 font-medium">
+                    Email verification required before submission
+                  </span>
+                </div>
+                <p className="text-yellow-700 text-sm mt-1">
+                  Please verify your email address using the verification code sent to your inbox.
+                </p>
+              </div>
+            )}
+
             {/* Submit Button */}
             <div className="pt-6">
               <button
                 type="submit"
-                disabled={isSubmitting || formData.referralCode.trim().toUpperCase() !== 'DREAMITDOIT'}
+                disabled={isSubmitting || !isEmailVerified || formData.referralCode.trim().toUpperCase() !== 'DREAMITDOIT'}
                 className="w-full bg-accent text-white py-4 px-8 rounded-lg font-semibold text-lg hover:bg-accent-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isSubmitting ? 'Submitting...' : 'Submit Application'}
+                {isSubmitting ? 'Submitting...' : !isEmailVerified ? 'Verify Email First' : 'Submit Application'}
               </button>
             </div>
 

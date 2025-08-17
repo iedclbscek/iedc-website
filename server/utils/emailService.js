@@ -333,7 +333,7 @@ export const sendMembershipIdEmail = async (email, name, membershipId) => {
               <p style="font-size: 1.2em; font-weight: bold;">📌 Your Membership ID: <span style="color: #e74c3c;">${membershipId}</span></p>
               <p>Please keep this ID safe, as it will be required for all official IEDC-related communications, events, and activities.</p>
               <p>If you have any queries or notice any discrepancy, feel free to contact us.</p>
-              <p>Thank you for being an active part of the Innovation and Entrepreneurship Development Cell. Together, let’s innovate, create, and inspire!</p>
+              <p>Thank you for being an active part of the Innovation and Entrepreneurship Development Cell. Together, let's innovate, create, and inspire!</p>
               <p>Best regards,<br/>IEDC Team</p>
             </div>
             <div class="footer">
@@ -344,13 +344,35 @@ export const sendMembershipIdEmail = async (email, name, membershipId) => {
         </body>
         </html>
       `,
-      text: `Dear ${name},\n\nWe are happy to inform you that your IEDC Membership ID has been successfully generated.\n\nYour Membership ID: ${membershipId}\n\nPlease keep this ID safe, as it will be required for all official IEDC-related communications, events, and activities.\n\nIf you have any queries or notice any discrepancy, feel free to contact us.\n\nThank you for being an active part of the Innovation and Entrepreneurship Development Cell. Together, let’s innovate, create, and inspire!\n\nBest regards,\nIEDC Team`,
+      text: `Dear ${name},\n\nWe are happy to inform you that your IEDC Membership ID has been successfully generated.\n\nYour Membership ID: ${membershipId}\n\nPlease keep this ID safe, as it will be required for all official IEDC-related communications, events, and activities.\n\nIf you have any queries or notice any discrepancy, feel free to contact us.\n\nThank you for being an active part of the Innovation and Entrepreneurship Development Cell. Together, let's innovate, create, and inspire!\n\nBest regards,\nIEDC Team`,
     };
     const result = await transporter.sendMail(mailOptions);
     console.log("📧 Membership ID email sent successfully:", result.messageId);
     return { success: true, messageId: result.messageId };
   } catch (error) {
     console.error("❌ Error sending membership ID email:", error);
+    return { success: false, error: error.message };
+  }
+};
+
+// Generic email sending function for verification codes and other purposes
+export const sendEmail = async ({ to, subject, html, text }) => {
+  try {
+    const transporter = createTransporter();
+    
+    const mailOptions = {
+      from: `"IEDC LBSCEK" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
+      to,
+      subject,
+      html,
+      text: text || html.replace(/<[^>]*>/g, ''), // Strip HTML tags for text version if not provided
+    };
+
+    const result = await transporter.sendMail(mailOptions);
+    console.log("📧 Email sent successfully:", result.messageId);
+    return { success: true, messageId: result.messageId };
+  } catch (error) {
+    console.error("❌ Error sending email:", error);
     return { success: false, error: error.message };
   }
 };

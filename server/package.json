@@ -13,7 +13,8 @@
     "test:google-groups": "node test-google-groups.js",
     "setup:google-groups": "node setup-google-groups.js",
     "setup:oauth2": "node setup-oauth2.js",
-    "test:oauth2": "node test-oauth2.js"
+    "test:oauth2": "node test-oauth2.js",
+    "test:email-verification": "node test-email-verification.js"
   },
   "keywords": [
     "iedc",
