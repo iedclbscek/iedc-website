@@ -28,3 +28,16 @@ RENDER_INSTRUCTIONS.md
 server/ping.js
 server/dropAdmissionNoIndex.js
 server/listRegistrationIndexes.js
+
+# Google Service Account
+server/google-service-account.json
+server/GOOGLE_GROUPS_SETUP.md
+server/google-service-account.template.json
+server/QUICK_SETUP_GUIDE.md
+server/README_GOOGLE_GROUPS.md
+server/setup-google-groups.js
+server/setup-oauth2.js
+server/test-google-groups.js
+server/routes/googleAuth.js
+server/utils/googleGroupsService.js
+server/test-oauth2.js
