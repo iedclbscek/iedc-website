@@ -47,7 +47,7 @@ const ExecomCallFormPage = () => {
         if (!found) {
           setEligible(false);
           setNotEligibleReason("No member found with this Membership ID.");
-        } else if (!["2022", "2024"].includes(found.yearOfJoining)) {
+        } else if (!["2024", "2025"].includes(found.yearOfJoining)) {
           setEligible(false);
           setNotEligibleReason("Only S1 & S3 students (2024 & 2025 batch) are eligible for Execom 2025.");
         } else {
@@ -194,31 +194,33 @@ const ExecomCallFormPage = () => {
           </p>
         </div>
         <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10">
-          {/* Eligibility Criteria Section */}
-          <div className="mb-8 p-6 bg-accent/5 border border-accent/20 rounded-lg">
-            <h3 className="text-xl font-semibold text-accent mb-4 flex items-center">
-              <span className="mr-2">✅</span>
-              Eligibility for IEDC Execom
-            </h3>
-            <ul className="space-y-2 text-text-dark">
-              <li className="flex items-start">
-                <span className="mr-2 mt-1">•</span>
-                <span>Must be a registered IEDC member with a valid Membership ID</span>
-              </li>
-              <li className="flex items-start">
-                <span className="mr-2 mt-1">•</span>
-                <span>Open to S1 & S3 students (2024 & 2025 Batch)</span>
-              </li>
-              <li className="flex items-start">
-                <span className="mr-2 mt-1">•</span>
-                <span>Minimum 7.0 CGPA & No Backlogs</span>
-              </li>
-              <li className="flex items-start">
-                <span className="mr-2 mt-1">•</span>
-                <span>Should not hold any position in other clubs/associations within the college</span>
-              </li>
-            </ul>
-          </div>
+          {/* Eligibility Criteria Section - Only show on step 1 */}
+          {step === 1 && (
+            <div className="mb-8 p-6 bg-accent/5 border border-accent/20 rounded-lg">
+              <h3 className="text-xl font-semibold text-accent mb-4 flex items-center">
+                <span className="mr-2">✅</span>
+                Eligibility for IEDC Execom
+              </h3>
+              <ul className="space-y-2 text-text-dark">
+                <li className="flex items-start">
+                  <span className="mr-2 mt-1">•</span>
+                  <span>Must be a registered IEDC member with a valid Membership ID</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="mr-2 mt-1">•</span>
+                  <span>Open to S1 & S3 students (2024 & 2025 Batch)</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="mr-2 mt-1">•</span>
+                  <span>Minimum 7.0 CGPA & No Backlogs</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="mr-2 mt-1">•</span>
+                  <span>Should not hold any position in other clubs/associations within the college</span>
+                </li>
+              </ul>
+            </div>
+          )}
 
           {/* Step 1: Membership ID */}
           {step === 1 && (
