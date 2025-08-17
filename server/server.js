@@ -38,6 +38,7 @@ import userRoutes from "./routes/users.js";
 import eventRoutes from "./routes/events.js";
 import registrationRoutes from "./routes/registrations.js";
 import uploadRoutes from "./routes/upload.js";
+//import googleAuthRoutes from "./routes/googleAuth.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -135,6 +136,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/registrations", registrationRoutes);
 app.use("/api/upload", uploadRoutes);
+//app.use("/auth", googleAuthRoutes);
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {
