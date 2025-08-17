@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import ExecomCallStats from './ExecomCallStats';
 
 // Import the configured axios instance from AuthContext
 import axios from 'axios';
@@ -179,6 +180,9 @@ const ExecomCallResponsesPage = () => {
 
   return (
     <div className="p-6">
+      {/* Execom Call Response Stats */}
+      <ExecomCallStats />
+      
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">Execom Call Responses</h2>
         <div className="flex gap-2">
@@ -336,34 +340,201 @@ const ExecomCallResponsesPage = () => {
           </div>
         </div>
       )}
-      {/* Modal for details */}
+      {/* Enhanced Modal for details */}
       {selected && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 relative">
-            <button className="absolute top-2 right-2 text-gray-500 hover:text-accent" onClick={() => setSelected(null)}>&times;</button>
-            <h3 className="text-xl font-bold mb-4">Execom Call Response</h3>
-            <div className="space-y-2">
-              <div><strong>Membership ID:</strong> {selected.membershipId}</div>
-              <div><strong>Name:</strong> {selected.firstName || '-'}</div>
-              <div><strong>Email:</strong> {selected.email || '-'}</div>
-              <div><strong>Department:</strong> {selected.department || '-'}</div>
-              <div><strong>Submitted At:</strong> {selected.submittedAt ? new Date(selected.submittedAt).toLocaleString() : '-'}</div>
-              <hr className="my-2" />
-              <div><strong>Currently holding position in other clubs?</strong> {selected.q1}</div>
-              {selected.q1 === 'Yes' && <div><strong>Willing to step down?</strong> {selected.q2}</div>}
-              {(selected.q1 === 'No' || (selected.q1 === 'Yes' && selected.q2 === 'Yes')) && (
-                <div><strong>Agree to removal if join other club?</strong> {selected.q3}</div>
-              )}
-              <div><strong>Motivation:</strong> {selected.motivation}</div>
-              <div><strong>Role in innovation:</strong> {selected.role}</div>
-              <div><strong>Skills/Qualities:</strong> {selected.skills}</div>
-              <div><strong>Experience:</strong> {selected.experience}</div>
-              <div><strong>Preferred Area:</strong> {selected.area}</div>
-              <div><strong>Time per week:</strong> {selected.time}</div>
-              <div><strong>Vision:</strong> {selected.vision}</div>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-t-xl">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Execom Call Response</h2>
+                  <p className="text-blue-100">Detailed application information</p>
+                </div>
+                <button 
+                  className="text-white hover:text-gray-200 text-2xl font-bold p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-all"
+                  onClick={() => setSelected(null)}
+                >
+                  ×
+                </button>
+              </div>
             </div>
-            <div className="flex justify-end mt-4">
-              <button className="bg-accent text-white px-4 py-2 rounded hover:bg-accent-dark" onClick={() => setSelected(null)}>Close</button>
+
+            <div className="p-6">
+              {/* Basic Information Section */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <span className="text-blue-600 mr-2">👤</span>
+                    Basic Information
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="font-medium text-gray-600">Membership ID:</span>
+                      <span className="font-bold text-gray-900 bg-blue-100 px-3 py-1 rounded-full text-sm">
+                        {selected.membershipId}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium text-gray-600">Name:</span>
+                      <span className="font-semibold text-gray-900">{selected.firstName || '-'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium text-gray-600">Email:</span>
+                      <span className="font-semibold text-gray-900 text-sm break-all">{selected.email || '-'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium text-gray-600">Department:</span>
+                      <span className="font-semibold text-gray-900">{selected.department || '-'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium text-gray-600">Submitted:</span>
+                      <span className="font-semibold text-gray-900 text-sm">
+                        {selected.submittedAt ? new Date(selected.submittedAt).toLocaleString() : '-'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <span className="text-green-600 mr-2">🏛️</span>
+                    Club Affiliation
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="font-medium text-gray-600">Currently in other clubs?</span>
+                      <span className={`font-semibold px-3 py-1 rounded-full text-sm ${
+                        selected.q1 === 'Yes' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
+                      }`}>
+                        {selected.q1 || '-'}
+                      </span>
+                    </div>
+                    {selected.q1 === 'Yes' && (
+                      <div className="flex justify-between">
+                        <span className="font-medium text-gray-600">Willing to step down?</span>
+                        <span className={`font-semibold px-3 py-1 rounded-full text-sm ${
+                          selected.q2 === 'Yes' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {selected.q2 || '-'}
+                        </span>
+                      </div>
+                    )}
+                    {(selected.q1 === 'No' || (selected.q1 === 'Yes' && selected.q2 === 'Yes')) && (
+                      <div className="flex justify-between">
+                        <span className="font-medium text-gray-600">Agree to removal?</span>
+                        <span className={`font-semibold px-3 py-1 rounded-full text-sm ${
+                          selected.q3 === 'Yes' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {selected.q3 || '-'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Motivation & Skills Section */}
+              <div className="bg-gray-50 p-4 rounded-lg mb-8">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                  <span className="text-purple-600 mr-2">💡</span>
+                  Motivation & Skills
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-semibold text-gray-700 mb-2">Motivation</h4>
+                    <p className="text-gray-800 bg-white p-3 rounded border-l-4 border-purple-500">
+                      {selected.motivation || 'No motivation provided'}
+                    </p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-700 mb-2">Role in Innovation</h4>
+                    <p className="text-gray-800 bg-white p-3 rounded border-l-4 border-blue-500">
+                      {selected.role || 'No role specified'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Experience & Preferences Section */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <span className="text-orange-600 mr-2">🎯</span>
+                    Experience & Skills
+                  </h3>
+                  <div className="space-y-3">
+                    <div>
+                      <h4 className="font-semibold text-gray-700 mb-2">Skills/Qualities</h4>
+                      <p className="text-gray-800 bg-white p-3 rounded border-l-4 border-orange-500">
+                        {selected.skills || 'No skills specified'}
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-700 mb-2">Experience</h4>
+                      <p className="text-gray-800 bg-white p-3 rounded border-l-4 border-green-500">
+                        {selected.experience || 'No experience specified'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <span className="text-indigo-600 mr-2">⚡</span>
+                    Preferences & Vision
+                  </h3>
+                  <div className="space-y-3">
+                    <div>
+                      <h4 className="font-semibold text-gray-700 mb-2">Preferred Area</h4>
+                      <p className="text-gray-800 bg-white p-3 rounded border-l-4 border-indigo-500">
+                        {selected.area || 'No area specified'}
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-700 mb-2">Time Commitment</h4>
+                      <p className="text-gray-800 bg-white p-3 rounded border-l-4 border-pink-500">
+                        {selected.time || 'No time commitment specified'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Vision Section */}
+              <div className="bg-gray-50 p-4 rounded-lg mb-8">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                  <span className="text-red-600 mr-2">🚀</span>
+                  Vision & Goals
+                </h3>
+                <p className="text-gray-800 bg-white p-4 rounded border-l-4 border-red-500 leading-relaxed">
+                  {selected.vision || 'No vision statement provided'}
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-between items-center pt-6 border-t border-gray-200">
+                <div className="flex gap-3">
+                  <button 
+                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2"
+                    onClick={() => handleApprove(selected.membershipId)}
+                  >
+                    ✅ Approve
+                  </button>
+                  <button 
+                    className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2"
+                    onClick={() => handleReject(selected.membershipId)}
+                  >
+                    ❌ Reject
+                  </button>
+                </div>
+                <button 
+                  className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
+                  onClick={() => setSelected(null)}
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         </div>
