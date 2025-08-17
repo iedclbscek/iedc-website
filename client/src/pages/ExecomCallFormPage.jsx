@@ -47,9 +47,9 @@ const ExecomCallFormPage = () => {
         if (!found) {
           setEligible(false);
           setNotEligibleReason("No member found with this Membership ID.");
-        } else if (!["2024", "2025"].includes(found.yearOfJoining)) {
+        } else if (!["1st Semester", "3rd Semester"].includes(found.semester)) {
           setEligible(false);
-          setNotEligibleReason("Only S1 & S3 students (2024 & 2025 batch) are eligible for Execom 2025.");
+          setNotEligibleReason("Only S1 & S3 students (1st & 3rd Semester) are eligible for Execom 2025.");
         } else {
           // Check if they've already submitted an Execom Call form
           try {
@@ -208,7 +208,7 @@ const ExecomCallFormPage = () => {
                 </li>
                 <li className="flex items-start">
                   <span className="mr-2 mt-1">•</span>
-                  <span>Open to S1 & S3 students (2024 & 2025 Batch)</span>
+                  <span>Open to S1 & S3 students (1st & 3rd Semester)</span>
                 </li>
                 <li className="flex items-start">
                   <span className="mr-2 mt-1">•</span>

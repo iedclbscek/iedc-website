@@ -111,6 +111,27 @@ const RegistrationPage = () => {
     if (!formData.yearOfJoining.trim()) newErrors.yearOfJoining = "Year of joining is required";
     if (!formData.semester.trim()) newErrors.semester = "Semester is required";
     if (!formData.motivation.trim()) newErrors.motivation = "Motivation is required";
+    
+    // Character limit validations
+    if (formData.nonTechInterests && formData.nonTechInterests.length > 500) {
+      newErrors.nonTechInterests = "Non-technical interests cannot exceed 500 characters";
+    }
+    if (formData.experience && formData.experience.length > 1000) {
+      newErrors.experience = "Experience description cannot exceed 1000 characters";
+    }
+    if (formData.motivation && formData.motivation.length > 1000) {
+      newErrors.motivation = "Motivation cannot exceed 1000 characters";
+    }
+    if (formData.linkedin && formData.linkedin.length > 200) {
+      newErrors.linkedin = "LinkedIn URL cannot exceed 200 characters";
+    }
+    if (formData.github && formData.github.length > 200) {
+      newErrors.github = "GitHub URL cannot exceed 200 characters";
+    }
+    if (formData.portfolio && formData.portfolio.length > 200) {
+      newErrors.portfolio = "Portfolio URL cannot exceed 200 characters";
+    }
+    
     return newErrors;
   };
 
@@ -124,12 +145,6 @@ const RegistrationPage = () => {
     // Phone number validation
     if (!/^\d{10}$/.test(formData.phone.trim())) {
       toast.error('Phone number must be exactly 10 digits.');
-      return;
-    }
-    
-    // Experience length validation
-    if (formData.experience && formData.experience.length > 1000) {
-      toast.error('Experience description cannot exceed 1000 characters.');
       return;
     }
     
@@ -406,9 +421,19 @@ const RegistrationPage = () => {
                   value={formData.nonTechInterests}
                   onChange={handleInputChange}
                   rows="3"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all ${
+                    errors.nonTechInterests ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   placeholder="Tell us about your non-technical interests, hobbies, sports, arts, music, etc..."
                 />
+                <div className="flex justify-between items-center mt-1">
+                  {errors.nonTechInterests && (
+                    <span className="text-red-500 text-sm">{errors.nonTechInterests}</span>
+                  )}
+                  <span className={`text-sm ${formData.nonTechInterests.length > 450 ? 'text-orange-500' : 'text-gray-500'}`}>
+                    {formData.nonTechInterests.length}/500
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -503,9 +528,19 @@ const RegistrationPage = () => {
                     value={formData.experience}
                     onChange={handleInputChange}
                     rows="4"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all ${
+                      errors.experience ? 'border-red-500' : 'border-gray-300'
+                    }`}
                     placeholder="Describe any relevant experience, projects, or skills you have..."
                   />
+                  <div className="flex justify-between items-center mt-1">
+                    {errors.experience && (
+                      <span className="text-red-500 text-sm">{errors.experience}</span>
+                    )}
+                    <span className={`text-sm ${formData.experience.length > 900 ? 'text-orange-500' : 'text-gray-500'}`}>
+                      {formData.experience.length}/1000
+                    </span>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-text-dark mb-2">
@@ -517,9 +552,19 @@ const RegistrationPage = () => {
                     onChange={handleInputChange}
                     required
                     rows="4"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all ${
+                      errors.motivation ? 'border-red-500' : 'border-gray-300'
+                    }`}
                     placeholder="Tell us why you want to join IEDC and what you hope to achieve..."
                   />
+                  <div className="flex justify-between items-center mt-1">
+                    {errors.motivation && (
+                      <span className="text-red-500 text-sm">{errors.motivation}</span>
+                    )}
+                    <span className={`text-sm ${formData.motivation.length > 900 ? 'text-orange-500' : 'text-gray-500'}`}>
+                      {formData.motivation.length}/1000
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -537,9 +582,19 @@ const RegistrationPage = () => {
                     name="linkedin"
                     value={formData.linkedin}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all ${
+                      errors.linkedin ? 'border-red-500' : 'border-gray-300'
+                    }`}
                     placeholder="https://linkedin.com/in/yourprofile"
                   />
+                  <div className="flex justify-between items-center mt-1">
+                    {errors.linkedin && (
+                      <span className="text-red-500 text-sm">{errors.linkedin}</span>
+                    )}
+                    <span className={`text-sm ${formData.linkedin.length > 180 ? 'text-orange-500' : 'text-gray-500'}`}>
+                      {formData.linkedin.length}/200
+                    </span>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-text-dark mb-2">
@@ -550,9 +605,19 @@ const RegistrationPage = () => {
                     name="github"
                     value={formData.github}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all ${
+                      errors.github ? 'border-red-500' : 'border-gray-300'
+                    }`}
                     placeholder="https://github.com/yourusername"
                   />
+                  <div className="flex justify-between items-center mt-1">
+                    {errors.github && (
+                      <span className="text-red-500 text-sm">{errors.github}</span>
+                    )}
+                    <span className={`text-sm ${formData.github.length > 180 ? 'text-orange-500' : 'text-gray-500'}`}>
+                      {formData.github.length}/200
+                    </span>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-text-dark mb-2">
@@ -563,9 +628,19 @@ const RegistrationPage = () => {
                     name="portfolio"
                     value={formData.portfolio}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all ${
+                      errors.portfolio ? 'border-red-500' : 'border-gray-300'
+                    }`}
                     placeholder="https://yourportfolio.com"
                   />
+                  <div className="flex justify-between items-center mt-1">
+                    {errors.portfolio && (
+                      <span className="text-red-500 text-sm">{errors.portfolio}</span>
+                    )}
+                    <span className={`text-sm ${formData.portfolio.length > 180 ? 'text-orange-500' : 'text-gray-500'}`}>
+                      {formData.portfolio.length}/200
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

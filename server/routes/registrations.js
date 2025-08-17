@@ -7,7 +7,7 @@ import mongoose from "mongoose";
 
 // Execom Call Schema (if not already defined)
 const execomCallSchema = new mongoose.Schema({
-  membershipId: String,
+  membershipId: { type: String, unique: true, required: true },
   q1: String,
   q2: String,
   q3: String,
@@ -191,10 +191,27 @@ router.post("/execom-call", async (req, res) => {
     if (!data.membershipId) {
       return res.status(400).json({ success: false, message: "Membership ID is required" });
     }
+    
+    // Check if already submitted
+    const existing = await ExecomCall.findOne({ membershipId: data.membershipId.toUpperCase() });
+    if (existing) {
+      return res.status(409).json({ 
+        success: false, 
+        message: "You have already submitted an Execom Call application. Only one application per member is allowed." 
+      });
+    }
+    
     const doc = new ExecomCall(data);
     await doc.save();
     res.json({ success: true });
   } catch (error) {
+    if (error.code === 11000) {
+      // Duplicate key error (fallback)
+      return res.status(409).json({ 
+        success: false, 
+        message: "You have already submitted an Execom Call application. Only one application per member is allowed." 
+      });
+    }
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
@@ -334,7 +351,29 @@ router.get("/execom-call-responses", authenticateToken, authorizeRoles("admin"),
         }
       },
       {
+        $group: {
+          _id: "$membershipId",
+          membershipId: { $first: "$membershipId" },
+          q1: { $first: "$q1" },
+          q2: { $first: "$q2" },
+          q3: { $first: "$q3" },
+          motivation: { $first: "$motivation" },
+          role: { $first: "$role" },
+          skills: { $first: "$skills" },
+          experience: { $first: "$experience" },
+          area: { $first: "$area" },
+          time: { $first: "$time" },
+          vision: { $first: "$vision" },
+          submittedAt: { $first: "$submittedAt" },
+          status: { $first: "$status" },
+          firstName: { $first: "$registrationInfo.firstName" },
+          email: { $first: "$registrationInfo.email" },
+          department: { $first: "$registrationInfo.department" }
+        }
+      },
+      {
         $project: {
+          _id: 0,
           membershipId: 1,
           q1: 1,
           q2: 1,
@@ -347,9 +386,10 @@ router.get("/execom-call-responses", authenticateToken, authorizeRoles("admin"),
           time: 1,
           vision: 1,
           submittedAt: 1,
-          firstName: "$registrationInfo.firstName",
-          email: "$registrationInfo.email",
-          department: "$registrationInfo.department"
+          status: 1,
+          firstName: 1,
+          email: 1,
+          department: 1
         }
       },
       { $sort: { submittedAt: -1 } }
@@ -368,7 +408,7 @@ router.get("/public-lookup", async (req, res) => {
   }
   try {
     const reg = await Registration.findOne({ membershipId: membershipId.toUpperCase() })
-      .select("membershipId firstName lastName yearOfJoining department status");
+      .select("membershipId firstName lastName yearOfJoining semester department status");
     if (!reg) {
       return res.status(404).json({ success: false, message: "No member found with this Membership ID" });
     }
