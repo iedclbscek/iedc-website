@@ -238,7 +238,7 @@ const ExecomCallFormPage = () => {
               <div className="mb-4 text-sm text-gray-600">
                 Not a registered member? Click{" "}
                 <a 
-                  href="https://iedclbscek.vercel.app/register" 
+                  href={`/register`} 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="text-accent hover:text-accent-dark underline font-medium"
