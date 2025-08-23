@@ -148,47 +148,47 @@ const DashboardLayout = ({ children }) => {
         </div>
       </motion.div>
 
-      {/* Main content */}
-      <div className="lg:pl-64">
+      {/* Main content - no left padding, sidebar overlays on all screens */}
+      <div className="w-full">
         {/* Top bar */}
         <div className="bg-white shadow-lg border-b border-gray-100">
           <div className="flex items-center justify-between px-4 lg:px-6 py-3 lg:py-4">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
             >
               <FaBars className="h-5 w-5" />
             </button>
             <div className="flex-1" />
-                         <div className="flex items-center space-x-4">
-               <div className="hidden md:flex items-center space-x-3 px-4 py-2 bg-gray-50 rounded-lg">
-                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                 <span className="text-sm text-gray-600">
-                   Welcome back, {user?.name}
-                 </span>
-               </div>
-               <button
-                 onClick={handleLogout}
-                 className="hidden md:flex items-center px-3 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 hover:shadow-md transition-all duration-200 border border-red-200"
-               >
-                 <FaSignOutAlt className="mr-2 h-4 w-4" />
-                 Logout
-               </button>
-             </div>
+            <div className="flex items-center space-x-4">
+              <div className="hidden md:flex items-center space-x-3 px-4 py-2 bg-gray-50 rounded-lg">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-sm text-gray-600">
+                  Welcome back, {user?.name}
+                </span>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="hidden md:flex items-center px-3 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 hover:shadow-md transition-all duration-200 border border-red-200"
+              >
+                <FaSignOutAlt className="mr-2 h-4 w-4" />
+                Logout
+              </button>
+            </div>
           </div>
         </div>
 
-                 {/* Page content */}
-         <main className="p-2 lg:p-2 bg-gray-50 min-h-screen">
-           <motion.div
-             initial={{ opacity: 0, y: 20 }}
-             animate={{ opacity: 1, y: 0 }}
-             transition={{ duration: 0.3 }}
-             className="max-w-7xl mx-auto"
-           >
-             {children}
-           </motion.div>
-         </main>
+        {/* Page content */}
+  <main className="bg-gray-50 min-h-screen w-full">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="w-full h-full"
+          >
+            {children}
+          </motion.div>
+        </main>
       </div>
     </div>
   );
