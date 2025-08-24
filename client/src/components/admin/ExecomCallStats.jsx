@@ -33,13 +33,14 @@ const ExecomCallStats = () => {
   const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
-    if (!isAuthenticated || user?.role !== 'admin') {
+    if (!isAuthenticated || !['admin', 'iic_admin'].includes(user?.role)) {
       return;
     }
 
     const fetchStats = async () => {
       try {
         setLoading(true);
+        // Remove the view=iic parameter since the backend now automatically handles role-based filtering
         const response = await api.get('/registrations/execom-call-responses');
         const data = response.data.data || [];
         
@@ -61,7 +62,7 @@ const ExecomCallStats = () => {
     fetchStats();
   }, [isAuthenticated, user]);
 
-  if (!isAuthenticated || user?.role !== 'admin') {
+  if (!isAuthenticated || !['admin', 'iic_admin'].includes(user?.role)) {
     return null;
   }
 
