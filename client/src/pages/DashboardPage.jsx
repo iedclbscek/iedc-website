@@ -17,6 +17,9 @@ import {
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
 import RegistrationManagement from '../components/admin/RegistrationManagement';
+import IicRegistrationView from '../components/admin/IicRegistrationView';
+import IicExecomCallResponses from '../components/admin/IicExecomCallResponses';
+import IicDashboardHome from '../components/admin/IicDashboardHome';
 
 // Add placeholder import
 const ExecomCallResponsesPage = React.lazy(() => import('../components/admin/ExecomCallResponsesPage'));
@@ -78,7 +81,7 @@ const DashboardHome = () => {
   ];
 
      return (
-     <div className="space-y-3">
+     <div className="space-y-3 p-4 lg:p-6 h-full">
        {/* Welcome Section */}
        <motion.div
          initial={{ opacity: 0, y: 20 }}
@@ -287,6 +290,11 @@ const DashboardPage = () => {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/execom-call-responses" element={<React.Suspense fallback={<div>Loading...</div>}><ExecomCallResponsesPage /></React.Suspense>} />
+        
+        {/* IIC Admin Routes */}
+        <Route path="/iic-registrations" element={<IicRegistrationView />} />
+        <Route path="/iic-execom-responses" element={<IicExecomCallResponses />} />
+        
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </DashboardLayout>

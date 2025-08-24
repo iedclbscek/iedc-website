@@ -297,14 +297,14 @@ router.delete("/execom-call/:membershipId", authenticateToken, authorizeRoles("a
   }
 });
 
-// GET /api/registrations - Get all registrations (admin only)
+// GET /api/registrations - Get all registrations (admin or iic_admin only)
 router.get(
   "/",
   authenticateToken,
-  authorizeRoles("admin"),
+  authorizeRoles("admin", "iic_admin"),
   async (req, res) => {
     try {
-      const { page = 1, limit = 10, status, department, search } = req.query;
+      const { page = 1, limit = 10, status, department, search, view = 'full' } = req.query;
 
       // Build query
       let query = {};
@@ -320,11 +320,18 @@ router.get(
         ];
       }
 
+      // Determine field selection based on view type or user role
+      let selectFields = "-__v";
+      if (view === 'iic' || req.user.role === 'iic_admin') {
+        // For IIC view or iic_admin users, only return specific fields
+        selectFields = "firstName lastName phone email department semester";
+      }
+
       const registrations = await Registration.find(query)
         .sort({ submittedAt: -1 })
         .limit(limit * 1)
         .skip((page - 1) * limit)
-        .select("-__v");
+        .select(selectFields);
 
       const total = await Registration.countDocuments(query);
 
@@ -349,10 +356,15 @@ router.get(
 );
 
 // GET /api/registrations/execom-call-responses - Admin: Get all execom call responses with registration info
-router.get("/execom-call-responses", authenticateToken, authorizeRoles("admin"), async (req, res) => {
+router.get("/execom-call-responses", authenticateToken, authorizeRoles("admin", "iic_admin"), async (req, res) => {
   try {
-    // Use aggregation to join execomCall with registrations
-    const responses = await mongoose.connection.collection("execomCall").aggregate([
+    const { view = 'full' } = req.query;
+    
+    // Determine view based on query parameter or user role
+    const isIicView = view === 'iic' || req.user.role === 'iic_admin';
+    
+    // Base aggregation pipeline
+    let pipeline = [
       {
         $lookup: {
           from: "registrations",
@@ -384,11 +396,35 @@ router.get("/execom-call-responses", authenticateToken, authorizeRoles("admin"),
           submittedAt: { $first: "$submittedAt" },
           status: { $first: "$status" },
           firstName: { $first: "$registrationInfo.firstName" },
+          lastName: { $first: "$registrationInfo.lastName" },
+          phone: { $first: "$registrationInfo.phone" },
           email: { $first: "$registrationInfo.email" },
-          department: { $first: "$registrationInfo.department" }
+          department: { $first: "$registrationInfo.department" },
+          semester: { $first: "$registrationInfo.semester" }
         }
-      },
-      {
+      }
+    ];
+
+    // Add projection based on view type or user role
+    if (isIicView) {
+      // For IIC view or iic_admin users, only return specific fields
+      pipeline.push({
+        $project: {
+          _id: 0,
+          membershipId: 1,
+          firstName: 1,
+          lastName: 1,
+          phone: 1,
+          email: 1,
+          department: 1,
+          semester: 1,
+          submittedAt: 1,
+          status: 1
+        }
+      });
+    } else {
+      // For full admin view, return all fields
+      pipeline.push({
         $project: {
           _id: 0,
           membershipId: 1,
@@ -405,12 +441,18 @@ router.get("/execom-call-responses", authenticateToken, authorizeRoles("admin"),
           submittedAt: 1,
           status: 1,
           firstName: 1,
+          lastName: 1,
+          phone: 1,
           email: 1,
-          department: 1
+          department: 1,
+          semester: 1
         }
-      },
-      { $sort: { submittedAt: -1 } }
-    ]).toArray();
+      });
+    }
+
+    pipeline.push({ $sort: { submittedAt: -1 } });
+
+    const responses = await mongoose.connection.collection("execomCall").aggregate(pipeline).toArray();
     res.json({ success: true, data: responses });
   } catch (error) {
     res.status(500).json({ success: false, message: "Internal server error" });
