@@ -78,7 +78,7 @@ const DashboardHome = () => {
   ];
 
      return (
-     <div className="space-y-3">
+     <div className="space-y-3 p-4 lg:p-6 h-full">
        {/* Welcome Section */}
        <motion.div
          initial={{ opacity: 0, y: 20 }}
