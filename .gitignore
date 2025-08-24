@@ -41,3 +41,7 @@ server/test-google-groups.js
 server/routes/googleAuth.js
 server/utils/googleGroupsService.js
 server/test-oauth2.js
+server/EMAIL_VERIFICATION_GUIDE.md
+server/test-email-verification.js
+server/seed-iic-admin.js
+IIC_ADMIN_SETUP.md
