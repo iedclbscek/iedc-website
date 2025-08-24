@@ -9,7 +9,8 @@ import {
   FaCog,
   FaBars,
   FaTimes,
-  FaHome
+  FaHome,
+  FaClipboardList
 } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -50,14 +51,27 @@ const DashboardLayout = ({ children }) => {
     return null;
   }
 
-  const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: FaHome },
-    { name: 'Registrations', href: '/dashboard/registrations', icon: FaUsers },
-    { name: 'Events', href: '/dashboard/events', icon: FaCalendarAlt },
-    { name: 'Team', href: '/dashboard/team', icon: FaUsers },
-    { name: 'Profile', href: '/dashboard/profile', icon: FaUser },
-    { name: 'Settings', href: '/dashboard/settings', icon: FaCog },
-  ];
+  const getNavigation = () => {
+    if (user?.role === 'iic_admin') {
+      return [
+        { name: 'Dashboard', href: '/dashboard', icon: FaHome },
+        { name: 'IIC Registrations', href: '/dashboard/iic-registrations', icon: FaUsers },
+        { name: 'IIC Execom Responses', href: '/dashboard/iic-execom-responses', icon: FaClipboardList },
+        { name: 'Profile', href: '/dashboard/profile', icon: FaUser },
+      ];
+    }
+    
+    return [
+      { name: 'Dashboard', href: '/dashboard', icon: FaHome },
+      { name: 'Registrations', href: '/dashboard/registrations', icon: FaUsers },
+      { name: 'Events', href: '/dashboard/events', icon: FaCalendarAlt },
+      { name: 'Team', href: '/dashboard/team', icon: FaUsers },
+      { name: 'Profile', href: '/dashboard/profile', icon: FaUser },
+      { name: 'Settings', href: '/dashboard/settings', icon: FaCog },
+    ];
+  };
+
+  const navigation = getNavigation();
 
   const handleLogout = () => {
     logout();
