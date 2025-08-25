@@ -27,6 +27,7 @@ const ExecomCallFormPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [form, setForm] = useState(initialForm);
+  const [showClosedModal, setShowClosedModal] = useState(true); // Show closed modal by default
 
   // Step 1: Membership ID input and eligibility check
   const handleNext = async () => {
@@ -184,6 +185,40 @@ const ExecomCallFormPage = () => {
   // Render
   return (
     <div className="min-h-screen pt-24 pb-16 px-6 bg-gradient-to-br from-primary/5 to-accent/5">
+      {/* Execom Call Closed Modal */}
+      {showClosedModal && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative">
+            <div className="text-center">
+              <div className="mb-4">
+                <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100">
+                  <svg className="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </div>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                Execom Call Closed
+              </h3>
+              <p className="text-gray-600 mb-6">
+                The IEDC Execom Call for 2025 has been closed. Thank you for your interest!
+              </p>
+              <p className="text-gray-600 mb-6">
+                Interested in becoming part of IEDC? You can still register for membership and participate in our events and activities.
+              </p>
+              <div className="space-y-3">
+                <a
+                  href="/register"
+                  className="w-full inline-flex justify-center px-6 py-3 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-accent hover:bg-accent-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent transition-colors"
+                >
+                  Register for Membership
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-10">
           <h1 className="text-4xl md:text-5xl font-bold text-text-dark mb-2">
@@ -193,7 +228,7 @@ const ExecomCallFormPage = () => {
             Apply for the IEDC Execom. Please enter your Membership ID to begin.
           </p>
         </div>
-        <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10">
+        <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10 relative">
           {/* Eligibility Criteria Section - Only show on step 1 */}
           {step === 1 && (
             <div className="mb-8 p-6 bg-accent/5 border border-accent/20 rounded-lg">
@@ -228,12 +263,12 @@ const ExecomCallFormPage = () => {
               <label className="block mb-2 font-semibold text-text-dark">Membership ID *</label>
               <input
                 type="text"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all mb-4"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all mb-4 disabled:bg-gray-100 disabled:cursor-not-allowed"
                 name="membershipId"
                 value={form.membershipId}
                 onChange={handleInput}
                 placeholder="IEDCxxxx..."
-                disabled={loading}
+                disabled={loading || showClosedModal}
               />
               <div className="mb-4 text-sm text-gray-600">
                 Not a registered member? Click{" "}
@@ -249,9 +284,9 @@ const ExecomCallFormPage = () => {
               </div>
               <div className="flex justify-end">
                 <button
-                  className="bg-accent text-white px-6 py-2 rounded-lg font-semibold hover:bg-accent-dark transition-all"
+                  className="bg-accent text-white px-6 py-2 rounded-lg font-semibold hover:bg-accent-dark transition-all disabled:bg-gray-400 disabled:cursor-not-allowed"
                   onClick={handleNext}
-                  disabled={loading || !form.membershipId}
+                  disabled={loading || !form.membershipId || showClosedModal}
                 >
                   {loading ? "Checking..." : "Next"}
                 </button>
@@ -281,13 +316,37 @@ const ExecomCallFormPage = () => {
               <div className="mb-6">
                 <label className="block mb-2">Are you currently holding any position in other college clubs/associations?</label>
                 <div className="flex gap-4">
-                  <button className={`px-6 py-2 rounded-lg font-semibold ${form.q1 === "Yes" ? "bg-accent text-white" : "bg-gray-200"}`} onClick={() => setForm((prev) => ({ ...prev, q1: "Yes" }))}>Yes</button>
-                  <button className={`px-6 py-2 rounded-lg font-semibold ${form.q1 === "No" ? "bg-accent text-white" : "bg-gray-200"}`} onClick={() => setForm((prev) => ({ ...prev, q1: "No" }))}>No</button>
+                  <button 
+                    className={`px-6 py-2 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${form.q1 === "Yes" ? "bg-accent text-white" : "bg-gray-200"}`} 
+                    onClick={() => setForm((prev) => ({ ...prev, q1: "Yes" }))}
+                    disabled={!showClosedModal}
+                  >
+                    Yes
+                  </button>
+                  <button 
+                    className={`px-6 py-2 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${form.q1 === "No" ? "bg-accent text-white" : "bg-gray-200"}`} 
+                    onClick={() => setForm((prev) => ({ ...prev, q1: "No" }))}
+                    disabled={!showClosedModal}
+                  >
+                    No
+                  </button>
                 </div>
               </div>
               <div className="flex justify-between">
-                <button className="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold hover:bg-gray-400 transition-all" onClick={handleBack}>Back</button>
-                <button className="bg-accent text-white px-6 py-2 rounded-lg font-semibold hover:bg-accent-dark transition-all" onClick={handleNext}>Next</button>
+                <button 
+                  className="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold hover:bg-gray-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed" 
+                  onClick={handleBack}
+                  disabled={showClosedModal}
+                >
+                  Back
+                </button>
+                <button 
+                  className="bg-accent text-white px-6 py-2 rounded-lg font-semibold hover:bg-accent-dark transition-all disabled:bg-gray-400 disabled:cursor-not-allowed" 
+                  onClick={handleNext}
+                  disabled={showClosedModal}
+                >
+                  Next
+                </button>
               </div>
               {error && <div className="text-red-600 mt-2">{error}</div>}
             </>
@@ -298,8 +357,20 @@ const ExecomCallFormPage = () => {
               <div className="mb-6">
                 <label className="block mb-2">If yes, are you willing to step down from that position to take up IEDC Execom responsibilities?</label>
                 <div className="flex gap-4">
-                  <button className={`px-6 py-2 rounded-lg font-semibold ${form.q2 === "Yes" ? "bg-accent text-white" : "bg-gray-200"}`} onClick={() => setForm((prev) => ({ ...prev, q2: "Yes" }))}>Yes</button>
-                  <button className={`px-6 py-2 rounded-lg font-semibold ${form.q2 === "No" ? "bg-accent text-white" : "bg-gray-200"}`} onClick={() => setForm((prev) => ({ ...prev, q2: "No" }))}>No</button>
+                  <button 
+                    className={`px-6 py-2 rounded-lg font-semibold ${form.q2 === "Yes" ? "bg-accent text-white" : "bg-gray-200"} disabled:opacity-50 disabled:cursor-not-allowed`} 
+                    onClick={() => setForm((prev) => ({ ...prev, q2: "Yes" }))}
+                    disabled={showClosedModal}
+                  >
+                    Yes
+                  </button>
+                  <button 
+                    className={`px-6 py-2 rounded-lg font-semibold ${form.q2 === "No" ? "bg-accent text-white" : "bg-gray-200"} disabled:opacity-50 disabled:cursor-not-allowed`} 
+                    onClick={() => setForm((prev) => ({ ...prev, q2: "No" }))}
+                    disabled={showClosedModal}
+                  >
+                    No
+                  </button>
                 </div>
               </div>
               <div className="flex justify-between">
@@ -315,13 +386,37 @@ const ExecomCallFormPage = () => {
               <div className="mb-6">
                 <label className="block mb-2">Do you agree that if you take up a position in any other club/association during your tenure, you will be removed from IEDC Execom?</label>
                 <div className="flex gap-4">
-                  <button className={`px-6 py-2 rounded-lg font-semibold ${form.q3 === "Yes" ? "bg-accent text-white" : "bg-gray-200"}`} onClick={() => setForm((prev) => ({ ...prev, q3: "Yes" }))}>Yes</button>
-                  <button className={`px-6 py-2 rounded-lg font-semibold ${form.q3 === "No" ? "bg-accent text-white" : "bg-gray-200"}`} onClick={() => setForm((prev) => ({ ...prev, q3: "No" }))}>No</button>
+                  <button 
+                    className={`px-6 py-2 rounded-lg font-semibold ${form.q3 === "Yes" ? "bg-accent text-white" : "bg-gray-200"} disabled:opacity-50 disabled:cursor-not-allowed`} 
+                    onClick={() => setForm((prev) => ({ ...prev, q3: "Yes" }))}
+                    disabled={showClosedModal}
+                  >
+                    Yes
+                  </button>
+                  <button 
+                    className={`px-6 py-2 rounded-lg font-semibold ${form.q3 === "No" ? "bg-accent text-white" : "bg-gray-200"} disabled:opacity-50 disabled:cursor-not-allowed`} 
+                    onClick={() => setForm((prev) => ({ ...prev, q3: "No" }))}
+                    disabled={showClosedModal}
+                  >
+                    No
+                  </button>
                 </div>
               </div>
               <div className="flex justify-between">
-                <button className="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold hover:bg-gray-400 transition-all" onClick={handleBack}>Back</button>
-                <button className="bg-accent text-white px-6 py-2 rounded-lg font-semibold hover:bg-accent-dark transition-all" onClick={handleNext}>Next</button>
+                <button 
+                  className="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold hover:bg-gray-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed" 
+                  onClick={handleBack}
+                  disabled={showClosedModal}
+                >
+                  Back
+                </button>
+                <button 
+                  className="bg-accent text-white px-6 py-2 rounded-lg font-semibold hover:bg-accent-dark transition-all disabled:bg-gray-400 disabled:cursor-not-allowed" 
+                  onClick={handleNext}
+                  disabled={showClosedModal}
+                >
+                  Next
+                </button>
               </div>
               {error && <div className="text-red-600 mt-2">{error}</div>}
             </>
@@ -332,15 +427,48 @@ const ExecomCallFormPage = () => {
               <h3 className="text-xl font-semibold text-text-dark mb-4">Motivation & Interest</h3>
               <div className="mb-6">
                 <label className="block mb-2">Why do you want to be part of the IEDC Execom?</label>
-                <textarea name="motivation" value={form.motivation} onChange={handleInput} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all mb-4" rows={2} />
+                <textarea 
+                  name="motivation" 
+                  value={form.motivation} 
+                  onChange={handleInput} 
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all mb-4 disabled:bg-gray-100 disabled:cursor-not-allowed" 
+                  rows={2}
+                  disabled={showClosedModal}
+                />
                 <label className="block mb-2">What role do you see yourself playing in driving innovation at LBSCEK?</label>
-                <textarea name="role" value={form.role} onChange={handleInput} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all mb-4" rows={2} />
+                <textarea 
+                  name="role" 
+                  value={form.role} 
+                  onChange={handleInput} 
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all mb-4 disabled:bg-gray-100 disabled:cursor-not-allowed" 
+                  rows={2}
+                  disabled={showClosedModal}
+                />
                 <label className="block mb-2">Which skills or qualities make you a strong candidate?</label>
-                <textarea name="skills" value={form.skills} onChange={handleInput} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all mb-4" rows={2} />
+                <textarea 
+                  name="skills" 
+                  value={form.skills} 
+                  onChange={handleInput} 
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all mb-4 disabled:bg-gray-100 disabled:cursor-not-allowed" 
+                  rows={2}
+                  disabled={showClosedModal}
+                />
               </div>
               <div className="flex justify-between">
-                <button className="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold hover:bg-gray-400 transition-all" onClick={handleBack}>Back</button>
-                <button className="bg-accent text-white px-6 py-2 rounded-lg font-semibold hover:bg-accent-dark transition-all" onClick={handleNext}>Next</button>
+                <button 
+                  className="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold hover:bg-gray-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed" 
+                  onClick={handleBack}
+                  disabled={showClosedModal}
+                >
+                  Back
+                </button>
+                <button 
+                  className="bg-accent text-white px-6 py-2 rounded-lg font-semibold hover:bg-accent-dark transition-all disabled:bg-gray-400 disabled:cursor-not-allowed" 
+                  onClick={handleNext}
+                  disabled={showClosedModal}
+                >
+                  Next
+                </button>
               </div>
               {error && <div className="text-red-600 mt-2">{error}</div>}
             </>
@@ -351,15 +479,46 @@ const ExecomCallFormPage = () => {
               <h3 className="text-xl font-semibold text-text-dark mb-4">Experience & Commitment</h3>
               <div className="mb-6">
                 <label className="block mb-2">Have you been part of any events, clubs, or teams (IEDC or others)? Briefly describe.</label>
-                <textarea name="experience" value={form.experience} onChange={handleInput} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all mb-4" rows={2} />
+                <textarea 
+                  name="experience" 
+                  value={form.experience} 
+                  onChange={handleInput} 
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all mb-4 disabled:bg-gray-100 disabled:cursor-not-allowed" 
+                  rows={2}
+                  disabled={showClosedModal}
+                />
                 <label className="block mb-2">Which area would you like to contribute most? (Events, Tech, Design, PR, Finance, Content, Documentation, etc.)</label>
-                <input name="area" value={form.area} onChange={handleInput} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all mb-4" />
+                <input 
+                  name="area" 
+                  value={form.area} 
+                  onChange={handleInput} 
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all mb-4 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  disabled={showClosedModal}
+                />
                 <label className="block mb-2">How much time per week can you realistically dedicate to Execom activities?</label>
-                <input name="time" value={form.time} onChange={handleInput} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all mb-4" />
+                <input 
+                  name="time" 
+                  value={form.time} 
+                  onChange={handleInput} 
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all mb-4 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  disabled={showClosedModal}
+                />
               </div>
               <div className="flex justify-between">
-                <button className="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold hover:bg-gray-400 transition-all" onClick={handleBack}>Back</button>
-                <button className="bg-accent text-white px-6 py-2 rounded-lg font-semibold hover:bg-accent-dark transition-all" onClick={handleNext}>Next</button>
+                <button 
+                  className="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold hover:bg-gray-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed" 
+                  onClick={handleBack}
+                  disabled={showClosedModal}
+                >
+                  Back
+                </button>
+                <button 
+                  className="bg-accent text-white px-6 py-2 rounded-lg font-semibold hover:bg-accent-dark transition-all disabled:bg-gray-400 disabled:cursor-not-allowed" 
+                  onClick={handleNext}
+                  disabled={showClosedModal}
+                >
+                  Next
+                </button>
               </div>
               {error && <div className="text-red-600 mt-2">{error}</div>}
             </>
@@ -370,11 +529,28 @@ const ExecomCallFormPage = () => {
               <h3 className="text-xl font-semibold text-text-dark mb-4">Vision</h3>
               <div className="mb-6">
                 <label className="block mb-2">What new initiative or change would you like to introduce through IEDC this year?</label>
-                <textarea name="vision" value={form.vision} onChange={handleInput} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all mb-4" rows={2} />
+                <textarea 
+                  name="vision" 
+                  value={form.vision} 
+                  onChange={handleInput} 
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all mb-4 disabled:bg-gray-100 disabled:cursor-not-allowed" 
+                  rows={2}
+                  disabled={showClosedModal}
+                />
               </div>
               <div className="flex justify-between">
-                <button className="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold hover:bg-gray-400 transition-all" onClick={handleBack}>Back</button>
-                <button className="bg-accent text-white px-6 py-2 rounded-lg font-semibold hover:bg-accent-dark transition-all" onClick={handleNext} disabled={isSubmitting}>
+                <button 
+                  className="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold hover:bg-gray-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed" 
+                  onClick={handleBack}
+                  disabled={showClosedModal}
+                >
+                  Back
+                </button>
+                <button 
+                  className="bg-accent text-white px-6 py-2 rounded-lg font-semibold hover:bg-accent-dark transition-all disabled:bg-gray-400 disabled:cursor-not-allowed" 
+                  onClick={handleNext} 
+                  disabled={isSubmitting || showClosedModal}
+                >
                   {isSubmitting ? "Submitting..." : "Submit"}
                 </button>
               </div>
