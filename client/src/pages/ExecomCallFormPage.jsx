@@ -27,7 +27,7 @@ const ExecomCallFormPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [form, setForm] = useState(initialForm);
-  const [showClosedModal, setShowClosedModal] = useState(false); // Changed from true to false to reopen the form
+  const [showClosedModal, setShowClosedModal] = useState(true); // Changed from false to true to close the form
 
   // Step 1: Membership ID input and eligibility check
   const handleNext = async () => {
