@@ -27,7 +27,7 @@ const ExecomCallFormPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [form, setForm] = useState(initialForm);
-  const [showClosedModal, setShowClosedModal] = useState(true); // Show closed modal by default
+  const [showClosedModal, setShowClosedModal] = useState(false); // Changed from true to false to reopen the form
 
   // Step 1: Membership ID input and eligibility check
   const handleNext = async () => {
@@ -319,14 +319,14 @@ const ExecomCallFormPage = () => {
                   <button 
                     className={`px-6 py-2 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${form.q1 === "Yes" ? "bg-accent text-white" : "bg-gray-200"}`} 
                     onClick={() => setForm((prev) => ({ ...prev, q1: "Yes" }))}
-                    disabled={!showClosedModal}
+                    disabled={showClosedModal}
                   >
                     Yes
                   </button>
                   <button 
                     className={`px-6 py-2 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${form.q1 === "No" ? "bg-accent text-white" : "bg-gray-200"}`} 
                     onClick={() => setForm((prev) => ({ ...prev, q1: "No" }))}
-                    disabled={!showClosedModal}
+                    disabled={showClosedModal}
                   >
                     No
                   </button>
