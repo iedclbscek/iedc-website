@@ -46,3 +46,10 @@ server/EMAIL_VERIFICATION_GUIDE.md
 server/test-email-verification.js
 server/seed-iic-admin.js
 IIC_ADMIN_SETUP.md
+server/utils/EMAIL_SETUP_GUIDE.md
+server/utils/IMPLEMENTATION_SUMMARY.md
+server/bulk-email-results-2025-09-04T09-24-15-416Z.json
+server/bulk-email-results-2025-09-04T09-31-44-437Z.json
+server/bulk-email-results-2025-09-04T09-47-24-392Z.json
+server/utils/bulkEmailScript.js
+server/utils/emailExamples.js
