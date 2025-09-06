@@ -304,10 +304,6 @@ const RegistrationPage = () => {
         referralCode: formData.referralCode
       };
       
-      // Log to confirm lateral entry value is being sent
-      console.log("Sending registration with lateral entry:", formData.isLateralEntry);
-      console.log("Complete form data:", JSON.stringify(formData, null, 2));
-      
       // Submit to MongoDB via API
       toast.loading('Submitting application...');
       await submitRegistration(registrationData);
