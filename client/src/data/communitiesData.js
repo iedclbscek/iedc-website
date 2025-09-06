@@ -43,11 +43,11 @@ export const communities = [
     path: "/nexus/coders",
   },
   {
-    id: "space",
-    name: "Space Club",
+    id: "galaxia",
+    name: "Galaxia LBSCEK",
     description: "Space technology and astronomy enthusiasts",
     icon: "🚀",
-    path: "/nexus/space",
+    path: "/nexus/galaxia",
   },
   {
     id: "gdg",
@@ -315,7 +315,7 @@ export const communityData = {
       },
       {
         name: "muhammad b m",
-        role: "creative lead",
+        role: "Creative Lead",
         image: "https://api.dicebear.com/6.x/initials/svg?seed=MBM",
         contact: "muhemmadbinmahabob@gmail.com",
         linkedin:
@@ -324,7 +324,7 @@ export const communityData = {
       },
       {
         name: "Divyashree M T",
-        role: "4th year Ambassador",
+        role: "Fourth Year Ambassador",
         image: "https://api.dicebear.com/6.x/initials/svg?seed=DMT",
         contact: "divyashree.vts@gmail.com",
         linkedin: "https://www.linkedin.com/in/divyashree-m-t",
@@ -332,7 +332,7 @@ export const communityData = {
       },
       {
         name: "Neeraj Rajeev",
-        role: "2nd year ambassador",
+        role: "Second Year Ambassador",
         image: "https://api.dicebear.com/6.x/initials/svg?seed=NR",
         contact: "neerajrajeevofficial@gmail.com",
         linkedin: "https://www.linkedin.com/in/idkneeraj",
@@ -340,7 +340,7 @@ export const communityData = {
       },
       {
         name: "Nandana Ganesh",
-        role: "Quality lead",
+        role: "Quality Lead",
         image: "https://api.dicebear.com/6.x/initials/svg?seed=NG",
         contact: "nandana14231@gmail.com",
         linkedin:
@@ -349,7 +349,7 @@ export const communityData = {
       },
       {
         name: "veda sudheesan",
-        role: "2nd year female Ambassador",
+        role: "Second Year Female Ambassador",
         image: "https://api.dicebear.com/6.x/initials/svg?seed=VS",
         contact: "Vedas0907@gmail.com",
         linkedin:
