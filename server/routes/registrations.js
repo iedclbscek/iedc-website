@@ -150,6 +150,7 @@ router.post("/", validateRegistration, async (req, res) => {
     if (req.body.admissionNo === "" || req.body.admissionNo == null) {
       delete req.body.admissionNo;
     }
+
     // Create new registration
     const registration = new Registration(req.body);
     await registration.save();
@@ -536,12 +537,10 @@ router.get("/public-lookup", async (req, res) => {
       "membershipId firstName lastName yearOfJoining semester department status"
     );
     if (!reg) {
-      return res
-        .status(404)
-        .json({
-          success: false,
-          message: "No member found with this Membership ID",
-        });
+      return res.status(404).json({
+        success: false,
+        message: "No member found with this Membership ID",
+      });
     }
     res.json({ success: true, data: reg });
   } catch (error) {

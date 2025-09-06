@@ -14,7 +14,9 @@
     "setup:google-groups": "node setup-google-groups.js",
     "setup:oauth2": "node setup-oauth2.js",
     "test:oauth2": "node test-oauth2.js",
-    "test:email-verification": "node test-email-verification.js"
+    "test:email-verification": "node test-email-verification.js",
+    "update:membership-ids": "node utils/updateMembershipIDs.js",
+    "update:membership-ids:dry-run": "node utils/updateMembershipIDs.js --dry-run"
   },
   "keywords": [
     "iedc",

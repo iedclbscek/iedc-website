@@ -30,3 +30,4 @@ yarn-error.log*
 server/utils/emailExamples.js
 server/utils/updateMembershipIDs.js
 server/utils/bulkEmailScript.js
+server/utils/README.md

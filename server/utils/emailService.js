@@ -1187,10 +1187,10 @@ export const sendMembershipIdUpdateEmail = async (
             </div>
             
             <p><strong>Why has my membership ID changed?</strong></p>
-            <p>As part of our ongoing efforts to standardize our membership database and improve our systems, we've updated the format of membership IDs. This change helps us better organize and manage our member community.</p>
+            <p>We have updated our membership ID system to better identify lateral entry students. Your new ID includes an "L" after your department code to indicate lateral entry status.</p>
             
             <p><strong>What do I need to do?</strong></p>
-            <p>Please make note of your new membership ID for all future IEDC-related activities, events, and communications. Your previous ID will no longer be valid.</p>
+            <p>Please use your new membership ID for all future IEDC-related activities, events, and communications. Your previous ID will no longer be valid.</p>
             
             <div style="text-align: center; margin: 30px 0;">
               ${
@@ -1235,7 +1235,7 @@ export const sendMembershipIdUpdateEmail = async (
       New ID: ${newMembershipId}
       
       Why has my membership ID changed?
-      As part of our ongoing efforts to standardize our membership database and improve our systems, we've updated the format of membership IDs. This change helps us better organize and manage our member community.
+      We have updated our membership ID system to better identify lateral entry students. Your new ID includes an "L" after your department code to indicate lateral entry status.
       
       What do I need to do?
       Please make note of your new membership ID for all future IEDC-related activities, events, and communications. Your previous ID will no longer be valid.

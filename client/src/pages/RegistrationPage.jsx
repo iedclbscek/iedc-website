@@ -293,6 +293,7 @@ const RegistrationPage = () => {
         department: formData.department,
         yearOfJoining: formData.yearOfJoining,
         semester: formData.semester,
+        isLateralEntry: formData.isLateralEntry === true, // Ensure it's a proper boolean
         interests: formData.interests,
         nonTechInterests: formData.nonTechInterests,
         experience: formData.experience,
@@ -302,6 +303,10 @@ const RegistrationPage = () => {
         portfolio: formData.portfolio,
         referralCode: formData.referralCode
       };
+      
+      // Log to confirm lateral entry value is being sent
+      console.log("Sending registration with lateral entry:", formData.isLateralEntry);
+      console.log("Complete form data:", JSON.stringify(formData, null, 2));
       
       // Submit to MongoDB via API
       toast.loading('Submitting application...');
@@ -321,6 +326,7 @@ const RegistrationPage = () => {
         department: '',
         yearOfJoining: '',
         semester: '',
+        isLateralEntry: false,
         interests: [],
         nonTechInterests: '',
         experience: '',
@@ -602,10 +608,7 @@ const RegistrationPage = () => {
                       id="isLateralEntry"
                       name="isLateralEntry"
                       checked={formData.isLateralEntry}
-                      onChange={(e) => setFormData({
-                        ...formData,
-                        isLateralEntry: e.target.checked
-                      })}
+                      onChange={handleInputChange}
                       className="h-4 w-4 text-accent focus:ring-accent border-gray-300 rounded"
                     />
                     <label htmlFor="isLateralEntry" className="ml-2 block text-sm font-medium text-text-dark">

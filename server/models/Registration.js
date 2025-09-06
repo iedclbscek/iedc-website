@@ -250,7 +250,11 @@ registrationSchema.pre("save", async function (next) {
     const seq = String(count + 1).padStart(3, "0");
 
     // Add 'L' to the ID if the student is a lateral entry
-    if (this.isLateralEntry) {
+    // Explicitly convert to boolean to handle any string representations
+    const isLateral =
+      this.isLateralEntry === true || this.isLateralEntry === "true";
+
+    if (isLateral) {
       this.membershipId = `IEDC${yearSuffix}${deptCode}L${seq}`;
     } else {
       this.membershipId = `IEDC${yearSuffix}${deptCode}${seq}`;
