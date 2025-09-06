@@ -25,24 +25,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-RENDER_INSTRUCTIONS.md
-server/ping.js
-server/dropAdmissionNoIndex.js
-server/listRegistrationIndexes.js
 
 # Google Service Account
-server/google-service-account.json
-server/GOOGLE_GROUPS_SETUP.md
-server/google-service-account.template.json
-server/QUICK_SETUP_GUIDE.md
-server/README_GOOGLE_GROUPS.md
-server/setup-google-groups.js
-server/setup-oauth2.js
-server/test-google-groups.js
-server/routes/googleAuth.js
-server/utils/googleGroupsService.js
-server/test-oauth2.js
-server/EMAIL_VERIFICATION_GUIDE.md
-server/test-email-verification.js
-server/seed-iic-admin.js
-IIC_ADMIN_SETUP.md
+server/utils/emailExamples.js
+server/utils/updateMembershipIDs.js
+server/utils/bulkEmailScript.js
+server/utils/README.md

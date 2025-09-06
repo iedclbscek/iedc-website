@@ -23,9 +23,9 @@ const CommunityPage = () => {
       {/* Hero section */}
       <section className="bg-accent/10 pt-24 md:pt-32 pb-12">
         <div className="container mx-auto px-4">
-          <Link to="/communities" className="inline-flex items-center text-accent hover:text-accent-dark mb-8 transition-colors">
+          <Link to="/nexus" className="inline-flex items-center text-accent hover:text-accent-dark mb-8 transition-colors">
             <FaArrowLeft className="mr-2" />
-            Back to Communities
+            Back to Nexus
           </Link>
           
           <motion.div

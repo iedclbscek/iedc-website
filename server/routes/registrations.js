@@ -19,12 +19,18 @@ const execomCallSchema = new mongoose.Schema({
   area: String,
   time: String,
   vision: String,
-  status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
+  status: {
+    type: String,
+    enum: ["pending", "approved", "rejected"],
+    default: "pending",
+  },
   reviewedAt: Date,
-  reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   submittedAt: { type: Date, default: Date.now },
 });
-const ExecomCall = mongoose.models.ExecomCall || mongoose.model("ExecomCall", execomCallSchema, "execomCall");
+const ExecomCall =
+  mongoose.models.ExecomCall ||
+  mongoose.model("ExecomCall", execomCallSchema, "execomCall");
 
 const router = express.Router();
 
@@ -45,6 +51,10 @@ const validateRegistration = [
   body("phone")
     .isMobilePhone("any")
     .withMessage("Valid phone number is required"),
+  body("isLateralEntry")
+    .optional()
+    .isBoolean()
+    .withMessage("Lateral entry must be true or false"),
   body("admissionNo")
     .optional({ nullable: true, checkFalsy: true })
     .trim()
@@ -140,6 +150,7 @@ router.post("/", validateRegistration, async (req, res) => {
     if (req.body.admissionNo === "" || req.body.admissionNo == null) {
       delete req.body.admissionNo;
     }
+
     // Create new registration
     const registration = new Registration(req.body);
     await registration.save();
@@ -206,27 +217,33 @@ router.post("/execom-call", async (req, res) => {
   try {
     const data = req.body;
     if (!data.membershipId) {
-      return res.status(400).json({ success: false, message: "Membership ID is required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Membership ID is required" });
     }
-    
+
     // Check if already submitted
-    const existing = await ExecomCall.findOne({ membershipId: data.membershipId.toUpperCase() });
+    const existing = await ExecomCall.findOne({
+      membershipId: data.membershipId.toUpperCase(),
+    });
     if (existing) {
-      return res.status(409).json({ 
-        success: false, 
-        message: "You have already submitted an Execom Call application. Only one application per member is allowed." 
+      return res.status(409).json({
+        success: false,
+        message:
+          "You have already submitted an Execom Call application. Only one application per member is allowed.",
       });
     }
-    
+
     const doc = new ExecomCall(data);
     await doc.save();
     res.json({ success: true });
   } catch (error) {
     if (error.code === 11000) {
       // Duplicate key error (fallback)
-      return res.status(409).json({ 
-        success: false, 
-        message: "You have already submitted an Execom Call application. Only one application per member is allowed." 
+      return res.status(409).json({
+        success: false,
+        message:
+          "You have already submitted an Execom Call application. Only one application per member is allowed.",
       });
     }
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -234,68 +251,97 @@ router.post("/execom-call", async (req, res) => {
 });
 
 // PUT /api/registrations/execom-call/:membershipId/approve - Approve Execom Call response
-router.put("/execom-call/:membershipId/approve", authenticateToken, authorizeRoles("admin"), async (req, res) => {
-  try {
-    const { membershipId } = req.params;
-    const updated = await ExecomCall.findOneAndUpdate(
-      { membershipId: membershipId.toUpperCase() },
-      { 
-        status: 'approved',
-        reviewedAt: new Date(),
-        reviewedBy: req.user._id
-      },
-      { new: true }
-    );
-    
-    if (!updated) {
-      return res.status(404).json({ success: false, message: "Response not found" });
+router.put(
+  "/execom-call/:membershipId/approve",
+  authenticateToken,
+  authorizeRoles("admin"),
+  async (req, res) => {
+    try {
+      const { membershipId } = req.params;
+      const updated = await ExecomCall.findOneAndUpdate(
+        { membershipId: membershipId.toUpperCase() },
+        {
+          status: "approved",
+          reviewedAt: new Date(),
+          reviewedBy: req.user._id,
+        },
+        { new: true }
+      );
+
+      if (!updated) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Response not found" });
+      }
+
+      res.json({ success: true, message: "Response approved successfully" });
+    } catch (error) {
+      res
+        .status(500)
+        .json({ success: false, message: "Internal server error" });
     }
-    
-    res.json({ success: true, message: "Response approved successfully" });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Internal server error" });
   }
-});
+);
 
 // PUT /api/registrations/execom-call/:membershipId/reject - Reject Execom Call response
-router.put("/execom-call/:membershipId/reject", authenticateToken, authorizeRoles("admin"), async (req, res) => {
-  try {
-    const { membershipId } = req.params;
-    const updated = await ExecomCall.findOneAndUpdate(
-      { membershipId: membershipId.toUpperCase() },
-      { 
-        status: 'rejected',
-        reviewedAt: new Date(),
-        reviewedBy: req.user._id
-      },
-      { new: true }
-    );
-    
-    if (!updated) {
-      return res.status(404).json({ success: false, message: "Response not found" });
+router.put(
+  "/execom-call/:membershipId/reject",
+  authenticateToken,
+  authorizeRoles("admin"),
+  async (req, res) => {
+    try {
+      const { membershipId } = req.params;
+      const updated = await ExecomCall.findOneAndUpdate(
+        { membershipId: membershipId.toUpperCase() },
+        {
+          status: "rejected",
+          reviewedAt: new Date(),
+          reviewedBy: req.user._id,
+        },
+        { new: true }
+      );
+
+      if (!updated) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Response not found" });
+      }
+
+      res.json({ success: true, message: "Response rejected successfully" });
+    } catch (error) {
+      res
+        .status(500)
+        .json({ success: false, message: "Internal server error" });
     }
-    
-    res.json({ success: true, message: "Response rejected successfully" });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Internal server error" });
   }
-});
+);
 
 // DELETE /api/registrations/execom-call/:membershipId - Delete Execom Call response
-router.delete("/execom-call/:membershipId", authenticateToken, authorizeRoles("admin"), async (req, res) => {
-  try {
-    const { membershipId } = req.params;
-    const deleted = await ExecomCall.findOneAndDelete({ membershipId: membershipId.toUpperCase() });
-    
-    if (!deleted) {
-      return res.status(404).json({ success: false, message: "Response not found" });
+router.delete(
+  "/execom-call/:membershipId",
+  authenticateToken,
+  authorizeRoles("admin"),
+  async (req, res) => {
+    try {
+      const { membershipId } = req.params;
+      const deleted = await ExecomCall.findOneAndDelete({
+        membershipId: membershipId.toUpperCase(),
+      });
+
+      if (!deleted) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Response not found" });
+      }
+
+      res.json({ success: true, message: "Response deleted successfully" });
+    } catch (error) {
+      res
+        .status(500)
+        .json({ success: false, message: "Internal server error" });
     }
-    
-    res.json({ success: true, message: "Response deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Internal server error" });
   }
-});
+);
 
 // GET /api/registrations - Get all registrations (admin or iic_admin only)
 router.get(
@@ -304,7 +350,14 @@ router.get(
   authorizeRoles("admin", "iic_admin"),
   async (req, res) => {
     try {
-      const { page = 1, limit = 10, status, department, search, view = 'full' } = req.query;
+      const {
+        page = 1,
+        limit = 10,
+        status,
+        department,
+        search,
+        view = "full",
+      } = req.query;
 
       // Build query
       let query = {};
@@ -322,7 +375,7 @@ router.get(
 
       // Determine field selection based on view type or user role
       let selectFields = "-__v";
-      if (view === 'iic' || req.user.role === 'iic_admin') {
+      if (view === "iic" || req.user.role === "iic_admin") {
         // For IIC view or iic_admin users, only return specific fields
         selectFields = "firstName lastName phone email department semester";
       }
@@ -356,120 +409,138 @@ router.get(
 );
 
 // GET /api/registrations/execom-call-responses - Admin: Get all execom call responses with registration info
-router.get("/execom-call-responses", authenticateToken, authorizeRoles("admin", "iic_admin"), async (req, res) => {
-  try {
-    const { view = 'full' } = req.query;
-    
-    // Determine view based on query parameter or user role
-    const isIicView = view === 'iic' || req.user.role === 'iic_admin';
-    
-    // Base aggregation pipeline
-    let pipeline = [
-      {
-        $lookup: {
-          from: "registrations",
-          localField: "membershipId",
-          foreignField: "membershipId",
-          as: "registrationInfo"
-        }
-      },
-      {
-        $unwind: {
-          path: "$registrationInfo",
-          preserveNullAndEmptyArrays: true
-        }
-      },
-      {
-        $group: {
-          _id: "$membershipId",
-          membershipId: { $first: "$membershipId" },
-          q1: { $first: "$q1" },
-          q2: { $first: "$q2" },
-          q3: { $first: "$q3" },
-          motivation: { $first: "$motivation" },
-          role: { $first: "$role" },
-          skills: { $first: "$skills" },
-          experience: { $first: "$experience" },
-          area: { $first: "$area" },
-          time: { $first: "$time" },
-          vision: { $first: "$vision" },
-          submittedAt: { $first: "$submittedAt" },
-          status: { $first: "$status" },
-          firstName: { $first: "$registrationInfo.firstName" },
-          lastName: { $first: "$registrationInfo.lastName" },
-          phone: { $first: "$registrationInfo.phone" },
-          email: { $first: "$registrationInfo.email" },
-          department: { $first: "$registrationInfo.department" },
-          semester: { $first: "$registrationInfo.semester" }
-        }
+router.get(
+  "/execom-call-responses",
+  authenticateToken,
+  authorizeRoles("admin", "iic_admin"),
+  async (req, res) => {
+    try {
+      const { view = "full" } = req.query;
+
+      // Determine view based on query parameter or user role
+      const isIicView = view === "iic" || req.user.role === "iic_admin";
+
+      // Base aggregation pipeline
+      let pipeline = [
+        {
+          $lookup: {
+            from: "registrations",
+            localField: "membershipId",
+            foreignField: "membershipId",
+            as: "registrationInfo",
+          },
+        },
+        {
+          $unwind: {
+            path: "$registrationInfo",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $group: {
+            _id: "$membershipId",
+            membershipId: { $first: "$membershipId" },
+            q1: { $first: "$q1" },
+            q2: { $first: "$q2" },
+            q3: { $first: "$q3" },
+            motivation: { $first: "$motivation" },
+            role: { $first: "$role" },
+            skills: { $first: "$skills" },
+            experience: { $first: "$experience" },
+            area: { $first: "$area" },
+            time: { $first: "$time" },
+            vision: { $first: "$vision" },
+            submittedAt: { $first: "$submittedAt" },
+            status: { $first: "$status" },
+            firstName: { $first: "$registrationInfo.firstName" },
+            lastName: { $first: "$registrationInfo.lastName" },
+            phone: { $first: "$registrationInfo.phone" },
+            email: { $first: "$registrationInfo.email" },
+            department: { $first: "$registrationInfo.department" },
+            semester: { $first: "$registrationInfo.semester" },
+          },
+        },
+      ];
+
+      // Add projection based on view type or user role
+      if (isIicView) {
+        // For IIC view or iic_admin users, only return specific fields
+        pipeline.push({
+          $project: {
+            _id: 0,
+            membershipId: 1,
+            firstName: 1,
+            lastName: 1,
+            phone: 1,
+            email: 1,
+            department: 1,
+            semester: 1,
+            submittedAt: 1,
+            status: 1,
+          },
+        });
+      } else {
+        // For full admin view, return all fields
+        pipeline.push({
+          $project: {
+            _id: 0,
+            membershipId: 1,
+            q1: 1,
+            q2: 1,
+            q3: 1,
+            motivation: 1,
+            role: 1,
+            skills: 1,
+            experience: 1,
+            area: 1,
+            time: 1,
+            vision: 1,
+            submittedAt: 1,
+            status: 1,
+            firstName: 1,
+            lastName: 1,
+            phone: 1,
+            email: 1,
+            department: 1,
+            semester: 1,
+          },
+        });
       }
-    ];
 
-    // Add projection based on view type or user role
-    if (isIicView) {
-      // For IIC view or iic_admin users, only return specific fields
-      pipeline.push({
-        $project: {
-          _id: 0,
-          membershipId: 1,
-          firstName: 1,
-          lastName: 1,
-          phone: 1,
-          email: 1,
-          department: 1,
-          semester: 1,
-          submittedAt: 1,
-          status: 1
-        }
-      });
-    } else {
-      // For full admin view, return all fields
-      pipeline.push({
-        $project: {
-          _id: 0,
-          membershipId: 1,
-          q1: 1,
-          q2: 1,
-          q3: 1,
-          motivation: 1,
-          role: 1,
-          skills: 1,
-          experience: 1,
-          area: 1,
-          time: 1,
-          vision: 1,
-          submittedAt: 1,
-          status: 1,
-          firstName: 1,
-          lastName: 1,
-          phone: 1,
-          email: 1,
-          department: 1,
-          semester: 1
-        }
-      });
+      pipeline.push({ $sort: { submittedAt: -1 } });
+
+      const responses = await mongoose.connection
+        .collection("execomCall")
+        .aggregate(pipeline)
+        .toArray();
+      res.json({ success: true, data: responses });
+    } catch (error) {
+      res
+        .status(500)
+        .json({ success: false, message: "Internal server error" });
     }
-
-    pipeline.push({ $sort: { submittedAt: -1 } });
-
-    const responses = await mongoose.connection.collection("execomCall").aggregate(pipeline).toArray();
-    res.json({ success: true, data: responses });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Internal server error" });
   }
-});
+);
 
 // PUBLIC: GET /api/registrations/public-lookup?membershipId=... - Public lookup for eligibility
 router.get("/public-lookup", async (req, res) => {
   const { membershipId } = req.query;
   if (!membershipId) {
-    return res.status(400).json({ success: false, message: "Membership ID is required" });
+    return res
+      .status(400)
+      .json({ success: false, message: "Membership ID is required" });
   }
   try {
-    const reg = await Registration.findOne({ membershipId: membershipId.toUpperCase() })
-      .select("membershipId firstName lastName yearOfJoining semester department status");
+    const reg = await Registration.findOne({
+      membershipId: membershipId.toUpperCase(),
+    }).select(
+      "membershipId firstName lastName yearOfJoining semester department status"
+    );
     if (!reg) {
-      return res.status(404).json({ success: false, message: "No member found with this Membership ID" });
+      return res.status(404).json({
+        success: false,
+        message: "No member found with this Membership ID",
+      });
     }
     res.json({ success: true, data: reg });
   } catch (error) {
@@ -481,10 +552,14 @@ router.get("/public-lookup", async (req, res) => {
 router.get("/execom-call-check", async (req, res) => {
   const { membershipId } = req.query;
   if (!membershipId) {
-    return res.status(400).json({ success: false, message: "Membership ID is required" });
+    return res
+      .status(400)
+      .json({ success: false, message: "Membership ID is required" });
   }
   try {
-    const existing = await ExecomCall.findOne({ membershipId: membershipId.toUpperCase() });
+    const existing = await ExecomCall.findOne({
+      membershipId: membershipId.toUpperCase(),
+    });
     res.json({ success: true, exists: !!existing });
   } catch (error) {
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -612,7 +687,3 @@ router.delete(
 );
 
 export default router;
-
-
-
-
