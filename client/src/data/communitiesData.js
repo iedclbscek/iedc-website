@@ -43,11 +43,11 @@ export const communities = [
     path: "/nexus/coders",
   },
   {
-    id: "space",
+    id: "galaxia",
     name: "Galaxia LBSCEK",
     description: "Space technology and astronomy enthusiasts",
     icon: "🚀",
-    path: "/nexus/space",
+    path: "/nexus/galaxia",
   },
   {
     id: "gdg",
