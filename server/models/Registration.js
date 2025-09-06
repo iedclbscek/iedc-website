@@ -89,6 +89,10 @@ const registrationSchema = new mongoose.Schema(
         message: "Please select a valid semester",
       },
     },
+    isLateralEntry: {
+      type: Boolean,
+      default: false,
+    },
 
     // Interests
     interests: [
@@ -244,7 +248,14 @@ registrationSchema.pre("save", async function (next) {
       department: this.department,
     });
     const seq = String(count + 1).padStart(3, "0");
-    this.membershipId = `IEDC${yearSuffix}${deptCode}${seq}`;
+
+    // Add 'L' to the ID if the student is a lateral entry
+    if (this.isLateralEntry) {
+      this.membershipId = `IEDC${yearSuffix}${deptCode}L${seq}`;
+    } else {
+      this.membershipId = `IEDC${yearSuffix}${deptCode}${seq}`;
+    }
+
     next();
   } catch (err) {
     next(err);

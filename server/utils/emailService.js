@@ -223,7 +223,7 @@ export const sendInvitationEmail = async (email, name, resetToken) => {
         <div class="container">
           <div class="header">
             <h1 style="color: #e74c3c; margin: 0;">IEDC LBSCEK</h1>
-            <p style="margin: 5px 0 0 0; color: #666;">Innovation and Entrepreneurship Development Cell</p>
+            <p style="margin: 5px 0 0 0; color: #666;">Innovation and Entrepreneurship Development Centre</p>
           </div>
           
           <div class="content">
@@ -516,12 +516,12 @@ export const sendRegistrationEmail = async (email, name, membershipId) => {
         <div class="container">
           <div class="header">
             <h1 style="color: #e74c3c; margin: 0;">🎉 Welcome to IEDC LBSCEK!</h1>
-            <p style="margin: 5px 0 0 0; color: #666;">Innovation and Entrepreneurship Development Cell</p>
+            <p style="margin: 5px 0 0 0; color: #666;">Innovation and Entrepreneurship Development Centre</p>
           </div>
           <div class="content">
             <h2>Registration Successful, ${name}! 🚀</h2>
             
-            <p>Congratulations! You have successfully registered with the Innovation and Entrepreneurship Development Cell at LBS College of Engineering, Kasaragod.</p>
+            <p>Congratulations! You have successfully registered with the Innovation and Entrepreneurship Development Centre at LBS College of Engineering, Kasaragod.</p>
             
             <div class="membership-card">
               <h3 style="margin: 0 0 15px 0; font-size: 18px;">🆔 Your IEDC Membership</h3>
@@ -586,7 +586,7 @@ export const sendRegistrationEmail = async (email, name, membershipId) => {
       
       Registration Successful, ${name}!
       
-      Congratulations! You have successfully registered with the Innovation and Entrepreneurship Development Cell at LBS College of Engineering, Kasaragod.
+      Congratulations! You have successfully registered with the Innovation and Entrepreneurship Development Centre at LBS College of Engineering, Kasaragod.
       
       🆔 Your IEDC Membership ID: ${membershipId}
       Keep this ID safe for all IEDC activities.
@@ -648,7 +648,7 @@ export const sendTestEmail = async (testEmail = "test@mail-tester.com") => {
       <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="text-align: center; padding: 20px; background: #f8f9fa; border-radius: 8px;">
           <h1 style="color: #e74c3c;">IEDC LBSCEK</h1>
-          <p>Innovation and Entrepreneurship Development Cell</p>
+          <p>Innovation and Entrepreneurship Development Centre</p>
         </div>
         
         <div style="padding: 30px 0;">
@@ -668,7 +668,7 @@ export const sendTestEmail = async (testEmail = "test@mail-tester.com") => {
     `,
     text: `
       IEDC LBSCEK
-      Innovation and Entrepreneurship Development Cell
+      Innovation and Entrepreneurship Development Centre
       
       Email Deliverability Test
       
@@ -974,7 +974,7 @@ export const sendMembershipIdEmail = async (email, name, membershipId) => {
         <div class="container">
           <div class="header">
             <h1 style="color: #e74c3c; margin: 0;">IEDC LBSCEK</h1>
-            <p style="margin: 5px 0 0 0; color: #666;">Innovation and Entrepreneurship Development Cell</p>
+            <p style="margin: 5px 0 0 0; color: #666;">Innovation and Entrepreneurship Development Centre</p>
           </div>
           <div class="content">
             <h2>Welcome to IEDC Community, ${name}! 🎉</h2>
@@ -1016,7 +1016,7 @@ export const sendMembershipIdEmail = async (email, name, membershipId) => {
             
             <p>If you have any questions or notice any discrepancy, feel free to contact us.</p>
             
-            <p>Thank you for being an active part of the Innovation and Entrepreneurship Development Cell. Together, let's innovate, create, and inspire!</p>
+            <p>Thank you for being an active part of the Innovation and Entrepreneurship Development Centre. Together, let's innovate, create, and inspire!</p>
             
             <p>Best regards,<br/>IEDC Team</p>
           </div>
@@ -1059,7 +1059,7 @@ export const sendMembershipIdEmail = async (email, name, membershipId) => {
       
       If you have any questions or notice any discrepancy, feel free to contact us.
       
-      Thank you for being an active part of the Innovation and Entrepreneurship Development Cell. Together, let's innovate, create, and inspire!
+      Thank you for being an active part of the Innovation and Entrepreneurship Development Centre. Together, let's innovate, create, and inspire!
       
       Best regards,
       IEDC Team
@@ -1079,6 +1079,176 @@ export const sendEmail = async ({ to, subject, html, text }) => {
     subject,
     html,
     text: text || html.replace(/<[^>]*>/g, ""), // Strip HTML tags for text version if not provided
+  };
+
+  return await queueEmail(mailOptions);
+};
+
+// Send notification email for membership ID updates
+export const sendMembershipIdUpdateEmail = async (
+  email,
+  name,
+  newMembershipId,
+  oldMembershipId
+) => {
+  const googleGroupsUrl = process.env.GOOGLE_GROUPS_JOIN_URL;
+
+  const mailOptions = {
+    from: `"IEDC LBSCEK" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
+    to: email,
+    subject: "Important: Your IEDC Membership ID Has Been Updated",
+    headers: {
+      "List-Unsubscribe": `<${process.env.UNSUBSCRIBE_URL}>`,
+      "X-Priority": "3",
+      "X-MSMail-Priority": "Normal",
+    },
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Your IEDC Membership ID Has Been Updated</title>
+        <style>
+          body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; 
+            line-height: 1.6; 
+            color: #333; 
+            background-color: #f4f4f4; 
+            margin: 0; 
+            padding: 0; 
+          }
+          .container { 
+            max-width: 600px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 20px; 
+            border-radius: 10px; 
+            box-shadow: 0 0 10px rgba(0,0,0,0.1); 
+            margin-top: 20px; 
+          }
+          .header { 
+            text-align: center; 
+            padding: 20px 0; 
+            border-bottom: 2px solid #e74c3c; 
+          }
+          .content {
+            padding: 30px 0;
+          }
+          .membership-id {
+            background: #f8f9fa;
+            border: 2px solid #e74c3c;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+          }
+          .button {
+            display: inline-block;
+            background-color: #e74c3c;
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 5px;
+            font-weight: bold;
+          }
+          .footer { 
+            text-align: center; 
+            padding: 20px 0; 
+            border-top: 1px solid #eee; 
+            color: #666; 
+            font-size: 14px; 
+          }
+          .unsubscribe {
+            font-size: 12px;
+            color: #999;
+            margin-top: 10px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1 style="color: #e74c3c; margin: 0;">IEDC LBSCEK</h1>
+            <p style="margin: 5px 0 0 0; color: #666;">Innovation and Entrepreneurship Development Centre</p>
+          </div>
+          <div class="content">
+            <h2>Important Notice: Membership ID Update</h2>
+            
+            <p>Hello ${name},</p>
+            
+            <p>We're writing to inform you that your IEDC membership ID has been updated in our system.</p>
+            
+            <div class="membership-id">
+              <h3 style="color: #e74c3c; margin: 0 0 10px 0;">📌 Your Updated Membership ID</h3>
+              <p style="font-size: 1.2em; margin: 0;">Previous ID: <span style="text-decoration: line-through;">${oldMembershipId}</span></p>
+              <p style="font-size: 1.5em; font-weight: bold; color: #e74c3c; margin: 10px 0 0 0;">New ID: ${newMembershipId}</p>
+            </div>
+            
+            <p><strong>Why has my membership ID changed?</strong></p>
+            <p>As part of our ongoing efforts to standardize our membership database and improve our systems, we've updated the format of membership IDs. This change helps us better organize and manage our member community.</p>
+            
+            <p><strong>What do I need to do?</strong></p>
+            <p>Please make note of your new membership ID for all future IEDC-related activities, events, and communications. Your previous ID will no longer be valid.</p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              ${
+                googleGroupsUrl
+                  ? `<a href="${googleGroupsUrl}" class="button">Join Google Groups Community</a>`
+                  : ""
+              }
+              <a href="${
+                process.env.CLIENT_URL || "https://www.iedclbscek.in"
+              }" class="button">Visit IEDC Website</a>
+            </div>
+            
+            <p>If you have any questions or concerns about this update, please feel free to contact us.</p>
+            
+            <p>Thank you for being an active part of the Innovation and Entrepreneurship Development Centre.</p>
+            
+            <p>Best regards,<br/>IEDC Team</p>
+          </div>
+          <div class="footer">
+            <p>IEDC LBSCEK</p>
+            <p>LBS College of Engineering, Kasaragod, Kerala</p>
+            <div class="unsubscribe">
+              <p><a href="${
+                process.env.UNSUBSCRIBE_URL
+              }">Unsubscribe</a> | <a href="${
+      process.env.CONTACT_URL || "mailto:" + process.env.EMAIL_USER
+    }">Contact Us</a></p>
+            </div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+    text: `
+      IEDC LBSCEK - Important Notice: Membership ID Update
+      
+      Hello ${name},
+      
+      We're writing to inform you that your IEDC membership ID has been updated in our system.
+      
+      Previous ID: ${oldMembershipId}
+      New ID: ${newMembershipId}
+      
+      Why has my membership ID changed?
+      As part of our ongoing efforts to standardize our membership database and improve our systems, we've updated the format of membership IDs. This change helps us better organize and manage our member community.
+      
+      What do I need to do?
+      Please make note of your new membership ID for all future IEDC-related activities, events, and communications. Your previous ID will no longer be valid.
+      
+      If you have any questions or concerns about this update, please feel free to contact us.
+      
+      Thank you for being an active part of the Innovation and Entrepreneurship Development Centre.
+      
+      Best regards,
+      IEDC Team
+      
+      Unsubscribe: ${process.env.UNSUBSCRIBE_URL}
+    `,
   };
 
   return await queueEmail(mailOptions);
