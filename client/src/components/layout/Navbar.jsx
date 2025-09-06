@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
 
 const Navbar = () => {
-  const { user } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -12,7 +10,7 @@ const Navbar = () => {
     { name: 'About', path: '/about' },
     { name: 'Events', path: '/events' },
     { name: 'Team', path: '/team' },
-    { name: 'Communities', path: '/communities' }
+    { name: 'Nexus', path: '/nexus' }
   ];
 
   useEffect(() => {
