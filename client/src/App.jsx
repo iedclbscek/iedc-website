@@ -93,7 +93,7 @@ const AppContent = () => {
           <Route path="/events/:id" element={<EventPage />} />
           <Route path="/team" element={<TeamPage />} />
           <Route path="/nexus" element={<CommunitiesPage />} />
-          <Route path="/communities/:id" element={<CommunityPage />} />
+          <Route path="/nexus/:id" element={<CommunityPage />} />
           <Route path="/register" element={<RegistrationPage />} />
           <Route path="/execom-call" element={<ExecomCallFormPage />} />
           <Route path="*" element={<PlaceholderPage title="Page Not Found" />} />
