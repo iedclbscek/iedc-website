@@ -153,7 +153,7 @@ export const communityData = {
       coordinator: "Ajmal P K",
     },
   },
-  thinkerhub: {
+  tinkerhub: {
     name: "TinkerHub",
     description: "Innovation and technology learning community",
     icon: "💡",
@@ -223,8 +223,8 @@ export const communityData = {
       // More team members...
     ],
     contact: {
-      email: "thinkerhub@iedc.com",
-      coordinator: "Srinidhi C V",
+      email: "oneelagopi03@gmail.com",
+      coordinator: "Oneela Gopi",
     },
   },
   cyber: {
