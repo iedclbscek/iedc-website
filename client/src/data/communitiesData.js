@@ -8,11 +8,11 @@ export const communities = [
     path: "/nexus/mulearn",
   },
   {
-    id: "thinkerhub",
-    name: "Thinkerhub",
+    id: "tinkerhub",
+    name: "Tinkerhub",
     description: "Innovation and technology learning community",
     icon: "💡",
-    path: "/nexus/thinkerhub",
+    path: "/nexus/tinkerhub",
   },
   {
     id: "cyber",
