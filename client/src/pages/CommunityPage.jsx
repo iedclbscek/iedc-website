@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useParams, Link } from 'react-router-dom';
-import { FaArrowLeft, FaLinkedin, FaGithub, FaExternalLinkAlt } from 'react-icons/fa';
+import { FaArrowLeft, FaLinkedin, FaGithub, FaExternalLinkAlt, FaInstagram, FaGlobe } from 'react-icons/fa';
 import { communityData } from '../data/communitiesData';
 import CommunitySection from '../components/community/CommunitySection';
 import CommunityGallery from '../components/community/CommunityGallery';
@@ -163,6 +163,52 @@ const CommunityPage = () => {
                   </div>
                 )}
 
+                {community.socialMedia && (
+                  <div className="mb-8">
+                    <h2 className="text-xl font-bold text-text-dark mb-4">Follow Us</h2>
+                    <div className="flex space-x-4">
+                      {community.socialMedia.instagram && (
+                        <a
+                          href={community.socialMedia.instagram.startsWith('http') 
+                            ? community.socialMedia.instagram 
+                            : `https://www.instagram.com/${community.socialMedia.instagram}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center text-pink-600 hover:text-pink-700 transition-colors"
+                          title="Instagram"
+                        >
+                          <FaInstagram size={24} className="mr-2" />
+                          <span className="text-sm">Instagram</span>
+                        </a>
+                      )}
+                      {community.socialMedia.linkedin && (
+                        <a
+                          href={community.socialMedia.linkedin}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center text-blue-600 hover:text-blue-700 transition-colors"
+                          title="LinkedIn"
+                        >
+                          <FaLinkedin size={24} className="mr-2" />
+                          <span className="text-sm">LinkedIn</span>
+                        </a>
+                      )}
+                      {community.socialMedia.website && (
+                        <a
+                          href={community.socialMedia.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center text-green-600 hover:text-green-700 transition-colors"
+                          title="Website"
+                        >
+                          <FaGlobe size={24} className="mr-2" />
+                          <span className="text-sm">Website</span>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 <div className="p-6 bg-primary/10 rounded-lg">
                   <h2 className="text-xl font-bold text-text-dark mb-4">Contact</h2>
                   {/* Prioritize contact object over execomTeam */}
@@ -184,7 +230,7 @@ const CommunityPage = () => {
             </div>
             
             {/* Community Gallery */}
-            <CommunityGallery communityId={id} />
+            <CommunityGallery galleryImages={community.galleryImages} />
           </motion.div>
         </div>
       </section>

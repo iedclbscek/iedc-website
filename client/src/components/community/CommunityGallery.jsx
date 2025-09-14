@@ -1,60 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
-const CommunityGallery = ({ communityId }) => {
-  const [galleryImages, setGalleryImages] = useState([]);
+const CommunityGallery = ({ galleryImages = [] }) => {
   const [selectedImage, setSelectedImage] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // Function to check if an image exists
-    const imageExists = (src) => {
-      return new Promise((resolve) => {
-        const img = new Image();
-        img.onload = () => resolve(true);
-        img.onerror = () => resolve(false);
-        img.src = src;
-      });
-    };
-
-    // Function to load images from the gallery folder
-    const loadGalleryImages = async () => {
-      setIsLoading(true);
-      const images = [];
-      const imageExtensions = ['jpg', 'jpeg', 'png', 'webp'];
-      
-      // Try to load images from 1 to 20 (you can adjust this range)
-      for (let i = 1; i <= 20; i++) {
-        for (const ext of imageExtensions) {
-          const imagePath = `/img/communities/${communityId}/gallery/${i}.${ext}`;
-          const exists = await imageExists(imagePath);
-          if (exists) {
-            images.push(imagePath);
-            break; // Found the image, no need to try other extensions
-          }
-        }
-      }
-      
-      setGalleryImages(images);
-      setIsLoading(false);
-    };
-
-    if (communityId) {
-      loadGalleryImages();
-    }
-  }, [communityId]);
-
-  if (isLoading) {
-    return (
-      <div className="mt-8">
-        <h2 className="text-2xl font-bold text-text-dark mb-6">Gallery</h2>
-        <div className="flex justify-center items-center py-8">
-          <div className="text-text-light">Loading gallery...</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (galleryImages.length === 0) {
+  // If no gallery images provided, return null
+  if (!galleryImages || galleryImages.length === 0) {
     return null;
   }
 

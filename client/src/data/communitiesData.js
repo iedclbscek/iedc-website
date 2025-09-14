@@ -22,11 +22,11 @@ export const communities = [
     path: "/nexus/cyber",
   },
   {
-    id: "floss",
+    id: "foss",
     name: "FOSS Club",
     description: "Free/Libre and Open Source Software community",
     icon: "🐧",
-    path: "/nexus/floss",
+    path: "/nexus/foss",
   },
   {
     id: "mlsa",
@@ -148,8 +148,53 @@ export const communityData = {
       "500+ Active Members",
       "100+ Successfully Completed Projects",
     ],
+    execomTeam: [
+      {
+        name: "Monika Devi",
+        role: "Lead",
+        contact: "monikadevilbsksd@gmail.com",
+        image:
+          "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757855129/monika_th6hzg.jpg",
+        linkedin:
+          "https://www.linkedin.com/in/monika-devi-a049b433a?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app",
+      },
+      {
+        name: "Meenu P P",
+        role: "Co-Lead",
+        image:
+          "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757855129/meenu_wpgrgs.jpg",
+      },
+      {
+        name: "Srinivas",
+        role: "Tech and Operation Lead",
+        image:
+          "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757855126/srinivas_v6slcz.jpg",
+        linkedin: "https://www.linkedin.com/in/srinivasammangod/",
+        github: "https://github.com/SRINIVASRAOAMMANGOD",
+      },
+      {
+        name: "Akshaya VP",
+        role: "Content Lead",
+        image:
+          "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757855127/akshaya_q5efno.jpg",
+        linkedin: "https://www.linkedin.com/in/akshaya-vp-9199b6291",
+      },
+      {
+        name: "Adithya Dev P",
+        role: "Media Lead",
+        image:
+          "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757855128/aditiyadev_jgczlw.jpg",
+        linkedin: "https://www.linkedin.com/in/adithya-dev-613799301",
+        github: "https://github.com/adithyadev-2005",
+      },
+      {
+        name: "Ridha Fathima",
+        role: "Posters",
+        image: "https://api.dicebear.com/6.x/initials/svg?seed=RF",
+      },
+    ],
     contact: {
-      email: "mulearn@iedc.com",
+      email: "lbscekmulearn@gmail.com",
       coordinator: "Monika Devi",
     },
   },
@@ -183,7 +228,8 @@ export const communityData = {
       {
         name: "Dr. Sarith Divakar M",
         role: "Staff Coordinator",
-        image: "/img/team/2024/sarith.jpeg",
+        image:
+          "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757838895/sarith_dp8raf.jpg",
         contact: "sarith@lbscek.ac.in",
         linkedin: "https://linkedin.com/in/sreeraj-r",
         github: "https://github.com/sarithdivakar",
@@ -191,7 +237,8 @@ export const communityData = {
       {
         name: "Oneela Gopi",
         role: "Campus Lead",
-        image: "/img/team/2024/oneela.jpg",
+        image:
+          "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757838884/oneela_lgxend.jpg",
         contact: "oneelagopi03@gmail.com",
         linkedin: "https://www.linkedin.com/in/oneelagopi",
         github: "https://github.com/Ch3rrycosmos",
@@ -199,7 +246,8 @@ export const communityData = {
       {
         name: "Ajmal P K",
         role: "Learning Coordinator",
-        image: "/img/communities/tinkerhub/execom/ajmal.jpg",
+        image:
+          "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757841117/ajmal_goumcs.jpg",
         contact: "ajmalwlwl@gmail.com",
         linkedin: "https://www.linkedin.com/in/ajmalllw/",
         github: "https://github.com/gleeaa",
@@ -249,7 +297,7 @@ export const communityData = {
       coordinator: "Abin N R",
     },
   },
-  floss: {
+  foss: {
     name: "FOSS Club",
     description: "Free/Libre and Open Source Software community",
     icon: "🐧",
@@ -278,7 +326,8 @@ export const communityData = {
         role: "Chief FOSS Ambassador",
         class: "S3 CSE-A",
         regNo: "KSD24CS025",
-        image: "/img/team/2025/alvira.jpg",
+        image:
+          "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757838727/alvira_fvh5om.jpg",
         contact: "alviraruchbah123@gmail.com",
         phone: "9526942235",
         linkedin: "https://www.linkedin.com/in/alviraruchbah123/",
@@ -290,7 +339,8 @@ export const communityData = {
         role: "Deputy Chief FOSS Ambassador",
         class: "S5 CSE-A",
         regNo: "KSD23CS065",
-        image: "/img/communities/foss/execom/siraja.jpeg",
+        image:
+          "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757853772/siraja_f5v3ge.jpg",
         contact: "Kadeejathsiraja@gmail.com",
         phone: "8137878398",
         linkedin: "https://www.linkedin.com/in/kadeejathsirajaca",
@@ -371,7 +421,8 @@ export const communityData = {
         role: "4th Year Ambassador",
         class: "S7 CSE-B",
         regNo: "KSD22CS113",
-        image: "/img/team/2024/shamil.jpg",
+        image:
+          "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757838893/shamil_raywnj.jpg",
         contact: "shamilshameer777@gmail.com",
         phone: "9074107075",
         linkedin: "https://www.linkedin.com/in/shamil-shameer-336747272",
@@ -407,7 +458,8 @@ export const communityData = {
         role: "2nd Year Ambassador",
         class: "S3 CSE-B",
         regNo: "KSD24CS135",
-        image: "/img/team/2025/neeraj.jpg",
+        image:
+          "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757838733/neeraj_pew7bm.jpg",
         contact: "neerajrajeevofficial@gmail.com",
         phone: "9633449485",
         linkedin: "https://www.linkedin.com/in/idkneeraj",
@@ -463,6 +515,90 @@ export const communityData = {
       "Programs & Workshops - We have successfully conducted multiple tech workshops, interaction sessions, and hands-on events, creating impactful learning experiences for our peers.",
       "Growing Team - A dedicated and passionate team is actively working towards the growth of MLSA in our campus, with efforts being fast-tracked to bring more opportunities for students.",
     ],
+    execomTeam: [
+      {
+        name: "THANSEEHA NASRIN P M",
+        role: "Campus Lead",
+        image:
+          "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757838722/thanseeha_xbplpe.jpg",
+        github: "https://github.com/Thanseeha-nasrin",
+        linkedin: "https://linkedin.com/in/thanseeha-na",
+      },
+      {
+        name: "S AKHIL",
+        role: "Campus Co-Lead",
+        image:
+          "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757838734/akhil_e6dbws.jpg",
+        github: "https://github.com/Akhil-Sanal",
+        linkedin: "https://www.linkedin.com/in/s-akhil-92ba83337",
+      },
+      {
+        name: "SHADIL ABUBACKER M V",
+        role: "Technical Lead",
+        image:
+          "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757856324/shadil_lpbzfb.jpg",
+        github: "https://github.com/shadil-abubacker",
+        linkedin:
+          "https://www.linkedin.com/in/shadil-abubacker-m-v-68860b349?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app",
+      },
+      {
+        name: "JESTIN JAYAS",
+        role: "Technical Co-Lead",
+        image:
+          "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757855877/jestin_icxtj1.jpg",
+        github: "https://github.com/jestinsource",
+        linkedin: "https://www.linkedin.com/in/jestin-jayas-a3ab86331/",
+      },
+      {
+        name: "DEEPAK MOHAN",
+        role: "Creative Lead",
+        image:
+          "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757855880/Deepak_mktfng.jpg",
+        github: "https://github.com/DeepakMoHank",
+        linkedin: "https://www.linkedin.com/in/deepakmohankk",
+      },
+      {
+        name: "MINHA M",
+        role: "Creative Co Lead",
+        image:
+          "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757856005/Minha_q8wf1c.jpg",
+        github: "https://github.com/minha8891/github-session",
+        linkedin: "https://www.linkedin.com/in/minha-m-457874280",
+      },
+      {
+        name: "FATHIMATH FAHEEMA",
+        role: "Community Lead",
+        image:
+          "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757855884/faheema_nyobmw.jpg",
+        github: "https://github.com/fyymaah",
+        linkedin: "https://www.linkedin.com/in/fathimath-faheema-9370712b8",
+      },
+      {
+        name: "ANUGRAHA MURALIDHARAN",
+        role: "Community Co-Lead",
+        image:
+          "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757855879/Anugraha_d3xdm4.jpg",
+        github: "https://github.com/anugrahamurali",
+        linkedin: "https://www.linkedin.com/in/anugraha-murali-147590328",
+      },
+      {
+        name: "FATHIMATH SHIRIN SANA C A",
+        role: "Media Lead",
+        image:
+          "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757855877/Shirin_sana_wxnjhw.jpg",
+        github: "https://github.com/fathimath-Shirin-sana-c-a",
+        linkedin:
+          "https://www.linkedin.com/in/fathimath-shirin-sana-c-a-481a48348",
+      },
+      {
+        name: "M A KADEEJA TAMANNA",
+        role: "Media Co-Lead",
+        image:
+          "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757855880/tamanna_mm3skq.jpg",
+        github: "https://github.com/tamanna-nizar",
+        linkedin: "https://www.linkedin.com/in/m-a-kadeeja-tamanna-444347329",
+      },
+    ],
     contact: {
       email: "mlsalbscek@gmail.com",
       coordinator: "Thanseeha Nasrin PM",
@@ -488,15 +624,17 @@ export const communityData = {
       {
         name: "Mohammed Nihal A A",
         role: "Lead",
-        image: "/img/team/2025/nihal.jpg",
+        image:
+          "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757838724/nihal_j55ugs.jpg",
         contact: "mnaaksd2@gmail.com",
         linkedin: "https://www.linkedin.com/in/devnihal",
         github: "https://github.com/devnihal",
       },
       {
-        name: "ABUBACKER AFNAN K",
+        name: "Abubacker Afnan K",
         role: "Co-Lead",
-        image: "/img/communities/coders/execom/afnan.jpg",
+        image:
+          "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757840788/afnan_ckmsr6.jpg",
         contact: "abubackerafnan1211@gmail.com",
         linkedin: "https://www.linkedin.com/in/abubacker-afnan-k-475b12263",
         github: "https://github.com/Afudude",
@@ -504,7 +642,7 @@ export const communityData = {
     ],
     contact: {
       email: "coders.lbscek@gmail.com",
-      coordinator: "",
+      coordinator: "Mohammed Nihal A A",
     },
   },
   galaxia: {
@@ -531,14 +669,13 @@ export const communityData = {
       {
         name: "Kasim Afraz",
         role: "Lead",
-        image: "/img/communities/galaxia/execom/afraz.jpg",
-        contact: "galaxialbscek@gmail.com",
+        image:
+          "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757840917/afraz_bmglkw.jpg",
       },
       {
         name: "Veda sudheesan",
         role: "Co-Lead",
         image: "https://api.dicebear.com/6.x/initials/svg?seed=VS",
-        contact: "galaxialbscek@gmail.com",
       },
     ],
     socialMedia: {
@@ -549,29 +686,55 @@ export const communityData = {
     contact: {
       email: "galaxialbscek@gmail.com",
       facultyAdvisor: "",
-      coordinators: "Kasim Afraz (Lead), Veda sudheesan (Co-Lead)",
+      coordinator: "Kasim Afraz",
     },
   },
   gdg: {
-    name: "Google Developer Groups (GDG)",
+    name: "GDG on Campus LBSCEK",
     description: "Google Developer Groups community",
     icon: "🌐",
     longDescription:
-      "GDG is a community of developers interested in Google's developer technology. Through meetups, workshops, and events, members learn about the latest Google technologies and connect with other developers.",
+      "GDG (Google Developer Groups) on Campus LBSCEK is a newly established student community at LBS College of Engineering, Kasaragod. The club is designed to bring together developers, designers, and tech enthusiasts who are eager to learn, build, and innovate with Google technologies. The community provides a platform to explore cutting-edge fields like web and mobile development, AI/ML, cloud computing, and design thinking. By creating opportunities for peer learning, workshops, and collaborations, GDG on Campus aims to nurture a strong tech culture on campus. Our goal is to inspire curiosity, foster innovation, and help students grow into future-ready developers and leaders.",
+    vision:
+      "To inspire curiosity, foster innovation, and help students grow into future-ready developers and leaders through Google technologies.",
+    whyJoin: [
+      "Learn the latest technologies directly from Google resources",
+      "Gain hands-on experience through events and projects",
+      "Build a network of peers, alumni, and industry experts",
+      "Be part of a global developer community recognized worldwide",
+    ],
     activities: [
-      "Google Technology Workshops",
-      "Android Development Sessions",
-      "Cloud Platform Training",
-      "Developer Meetups",
+      "Hands-on Workshops: Introductory sessions on Android, Web, Flutter, AI/ML, and Google Cloud",
+      "Hackathons & Coding Challenges: Competitions to spark innovation and teamwork",
+      "Tech Talks & Expert Sessions: Learn directly from industry professionals and Google Developer Experts (GDEs)",
+      "Community Building Meetups: A space for students to connect, collaborate, and exchange ideas",
+      "Project Showcases: Opportunities to build real-world projects and share them with peers",
     ],
-    achievements: [
-      "Organized successful DevFest events",
-      "Active community of 100+ developers",
-      "Partnerships with Google Developer Relations",
+    execomTeam: [
+      {
+        name: "Dr. Sarith Divakar M",
+        role: "Faculty Advisor",
+        image:
+          "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757838895/sarith_dp8raf.jpg",
+        contact: "sarith@lbscek.ac.in",
+        linkedin: "https://linkedin.com/in/sreeraj-r",
+        github: "https://github.com/sarithdivakar",
+      },
+      {
+        name: "Neeraj Rajeev",
+        role: "Organizer",
+        image:
+          "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757838733/neeraj_pew7bm.jpg",
+      },
     ],
+    socialMedia: {
+      instagram: "https://www.instagram.com/gdgclbscek",
+      linkedin: "https://www.linkedin.com/company/gdgc-lbscek/",
+      website: "",
+    },
     contact: {
-      email: "gdg@lbscek.ac.in",
-      coordinator: "",
+      email: "gdglbscek@gmail.com",
+      coordinator: "Neeraj Rajeev",
     },
   },
   /*
@@ -628,13 +791,15 @@ export const communityData = {
       {
         name: "Adhish R",
         role: "President",
-        image: "/img/team/2024/adhish.jpg",
+        image:
+          "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757838882/adhish_fm7wfj.jpg",
         contact: "ahdishr@lbscek.ac.in",
       },
       {
         name: "Anagha A",
         role: "Secretary",
-        image: "/img/team/2024/anagha.jpg",
+        image:
+          "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757838884/anagha_foryw3.jpg",
         contact: "anaghaa@lbscek.ac.in",
       },
     ],
@@ -642,6 +807,16 @@ export const communityData = {
       email: "yipclub@lbscek.ac.in",
       coordinator: "Dr Kannan M",
     },
+    galleryImages: [
+      "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757854247/8_vjlfjc.jpg",
+      "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757854246/6_iypfcu.jpg",
+      "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757854246/7_wpxbhe.jpg",
+      "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757854249/9_fn4vxm.jpg",
+      "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757854245/2_afdxuk.jpg",
+      "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757854246/5_vntzy6.jpg",
+      "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757854245/3_twhbm6.jpg",
+      "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757854245/1_diomsk.jpg",
+    ],
   },
   wtm: {
     name: "Women Tech Makers(WTM)",
@@ -667,14 +842,16 @@ export const communityData = {
       {
         name: "Sethulakshmi.k.v",
         role: "Lead",
-        image: "/img/team/2025/sethulakshmi.jpg",
+        image:
+          "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757838721/sethulakshmi_q1ffjj.jpg",
         contact: "wtmclublbs@gmail.com",
         linkedin: "https://www.linkedin.com/in/sethu-lakshmi-k-v-1808ab331",
       },
       {
         name: "Keerthana.m",
         role: "Co Lead",
-        image: "/img/team/2025/keerthana.jpg",
+        image:
+          "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757838723/keerthana_bnfkg3.jpg",
         contact: "wtmclublbs@gmail.com",
         linkedin: "https://www.linkedin.com/in/keerthana-m-543929340",
         github: "https://github.com/Keerthanakuthirakode",
@@ -686,25 +863,33 @@ export const communityData = {
     },
   },
   kba: {
-    name: "Kerala Blockchain Academy (KBA) Chapter",
-    description: "Kerala Blockchain Academy community",
+    name: "KBA LBSCEK",
+    description: "Kerala Blockchain Academy Chapter",
     icon: "⛓️",
     longDescription:
-      "KBA Chapter focuses on blockchain technology education, cryptocurrency understanding, and decentralized application development, preparing students for the future of distributed systems.",
+      "KBA LBSCEK is the official Kerala Blockchain Academy Chapter of LBS College of Engineering, Kasaragod. The chapter is committed to promoting awareness, learning, and innovation in blockchain technology among students. Through workshops, talks, and hands-on projects, KBA LBSCEK provides a platform for learners, developers, and innovators to explore the potential of blockchain in real-world applications. KBA LBSCEK strives to nurture technical expertise, entrepreneurial thinking, and a spirit of innovation by bridging students with industry leaders and cutting-edge advancements in decentralized technologies.",
     activities: [
       "Blockchain Technology Workshops",
-      "Cryptocurrency Education Sessions",
+      "Industry Expert Talks",
+      "Hands-on Blockchain Projects",
+      "Real-world Application Development",
       "Smart Contract Development",
       "DApp Building Competitions",
     ],
-    achievements: [
-      "Certified blockchain developers in campus",
-      "Successful blockchain project implementations",
-      "Partnerships with industry blockchain companies",
+    mission:
+      "To promote awareness, learning, and innovation in blockchain technology among students while nurturing technical expertise and entrepreneurial thinking.",
+    execomTeam: [
+      {
+        name: "Naeem Muhammed NP",
+        role: "Lead",
+        image:
+          "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757838729/naeem_dm1ksk.jpg",
+        contact: "naeemmuhammed4321@gmail.com",
+      },
     ],
     contact: {
-      email: "kba@lbscek.ac.in",
-      coordinator: "Mohammed Naeem P",
+      email: "naeemmuhammed4321@gmail.com",
+      coordinator: "Naeem Muhammed NP",
     },
   },
   wow: {
@@ -730,7 +915,7 @@ export const communityData = {
     ],
     execomTeam: [
       {
-        name: "ARATHI.K",
+        name: "Arathi K",
         role: "Club Lead",
         image: "https://api.dicebear.com/6.x/initials/svg?seed=AK",
         contact: "lbscekwowiedc@gmail.com",
@@ -742,6 +927,11 @@ export const communityData = {
       email: "lbscekwowiedc@gmail.com",
       coordinator: "NAYANA MURALI",
     },
+    galleryImages: [
+      "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757857183/1_xlbhjw.jpg",
+      "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757857183/2_rz1zek.jpg",
+      "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757857271/3_nyes8p.jpg",
+    ],
   },
   aws: {
     name: "AWS Cloud Club",
@@ -780,6 +970,15 @@ export const communityData = {
       "Access to exclusive AWS resources and learning credits",
       "Direct pathway to cloud computing careers",
       "Global network of AWS student ambassadors",
+    ],
+    execomTeam: [
+      {
+        name: "Thrisha K",
+        role: "Club Lead",
+        image:
+          "https://res.cloudinary.com/dd3bry4rs/image/upload/v1757838892/thrisha_pcis2d.jpg",
+        linkedin: "https://www.linkedin.com/in/thrisha-k-596514331/",
+      },
     ],
     contact: {
       email: "awsclub.lbscek@gmail.com",
