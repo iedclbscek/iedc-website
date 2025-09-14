@@ -1,6 +1,3 @@
-import { useState, useEffect } from 'react';
-import { motion, useScroll } from 'framer-motion';
-
 // Import home sections
 import HeroSection from '../components/home/HeroSection';
 import WhatWeDoSection from '../components/home/WhatWeDoSection';
@@ -15,7 +12,6 @@ const HomePage = () => {
   return (
     <>
       <ScrollProgress />
-      
       <HeroSection />
       <WhatWeDoSection />
       <EventsSection />
