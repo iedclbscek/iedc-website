@@ -17,7 +17,7 @@ const createTransporter = () => {
   // Try SendGrid first if API key is available
   if (process.env.SENDGRID_API_KEY) {
     console.log("📧 Using SendGrid for email delivery");
-    globalTransporter = nodemailer.createTransporter({
+    globalTransporter = nodemailer.createTransport({
       host: "smtp.sendgrid.net",
       port: 587,
       secure: false,
@@ -37,7 +37,7 @@ const createTransporter = () => {
   else if (process.env.NODE_ENV === "development") {
     // Using Gmail for development (you'll need to enable app passwords)
     console.log("📧 Using Gmail for email delivery (development)");
-    globalTransporter = nodemailer.createTransporter({
+    globalTransporter = nodemailer.createTransport({
       service: "gmail",
       pool: true, // Enable connection pooling
       maxConnections: parseInt(process.env.EMAIL_POOL_MAX_CONNECTIONS) || 5,
@@ -59,7 +59,7 @@ const createTransporter = () => {
   } else {
     // Production email service configuration with custom domain
     console.log("📧 Using SMTP/Gmail for email delivery (production)");
-    globalTransporter = nodemailer.createTransporter({
+    globalTransporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST || "smtp.gmail.com",
       port: process.env.SMTP_PORT || 587,
       secure: false, // Use STARTTLS
