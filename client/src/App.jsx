@@ -28,6 +28,7 @@ import SetPasswordPage from './pages/SetPasswordPage';
 import DashboardPage from './pages/DashboardPage';
 import RegistrationPage from './pages/RegistrationPage';
 import ExecomCallFormPage from './pages/ExecomCallFormPage';
+import ExecomDashboardPage from './pages/ExecomDashboardPage';
 
 // Placeholder page component
 const PlaceholderPage = ({ title }) => (
@@ -62,6 +63,7 @@ const AppContent = () => {
 
   // Dashboard routes don't need navbar/footer
   const isDashboardRoute = location.pathname.startsWith('/dashboard') || 
+                           location.pathname.startsWith('/execom-dashboard') ||
                            location.pathname === '/login' || 
                            location.pathname === '/forgot-password' ||
                            location.pathname.startsWith('/reset-password') ||
@@ -76,6 +78,7 @@ const AppContent = () => {
           <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
           <Route path="/set-password/:token" element={<SetPasswordPage />} />
           <Route path="/dashboard/*" element={<DashboardPage />} />
+          <Route path="/execom-dashboard" element={<ExecomDashboardPage />} />
           <Route path="/register" element={<RegistrationPage />} />
         </Routes>
       </div>

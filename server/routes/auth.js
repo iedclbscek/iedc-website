@@ -809,22 +809,83 @@ router.post('/send-verification', async (req, res) => {
       </div>
     `;
 
-    await sendEmail({
-      to: email,
-      subject: 'IEDC LBSCEK - Email Verification Code',
-      html: emailContent
+    // Send verification email with timeout handling
+    try {
+      const emailResult = await Promise.race([
+        sendEmail({
+          to: email,
+          subject: 'IEDC LBSCEK - Email Verification Code',
+          html: emailContent
+        }),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Email timeout')), 30000)
+        )
+      ]);
+
+      if (emailResult && emailResult.success === false) {
+        throw new Error(emailResult.error || 'Failed to send email');
+      }
+
+      res.json({
+        success: true,
+        message: 'Verification code sent successfully'
+      });
+
+    } catch (emailError) {
+      console.error('Email sending failed:', emailError.message);
+      
+      // Still return success to user since verification code is stored
+      // They can try to resend later if needed
+      res.json({
+        success: true,
+        message: 'Verification code generated. If you don\'t receive the email, please try again.',
+        warning: 'Email delivery may be delayed'
+      });
+    }
+
+  } catch (error) {
+    console.error('Error in send-verification:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to process verification request'
     });
+  }
+});
+
+// Test email endpoint (for debugging production email issues)
+router.post('/test-email', async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required'
+      });
+    }
+
+    console.log(`🧪 Testing email to: ${email}`);
+    
+    const testResult = await sendEmail({
+      to: email,
+      subject: 'IEDC LBSCEK - Email Test',
+      html: '<h1>Email Test</h1><p>If you receive this, email service is working!</p>'
+    });
+
+    console.log('📧 Test email result:', testResult);
 
     res.json({
       success: true,
-      message: 'Verification code sent successfully'
+      message: 'Test email sent',
+      result: testResult
     });
 
   } catch (error) {
-    console.error('Error sending verification code:', error);
+    console.error('❌ Test email failed:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to send verification code'
+      message: 'Test email failed',
+      error: error.message
     });
   }
 });

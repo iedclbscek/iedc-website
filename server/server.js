@@ -30,6 +30,10 @@ console.log(
 );
 console.log("MONGODB_URI:", process.env.MONGODB_URI ? "✅ Set" : "❌ Not Set");
 console.log("JWT_SECRET:", process.env.JWT_SECRET ? "✅ Set" : "❌ Not Set");
+console.log("EMAIL_USER:", process.env.EMAIL_USER ? "✅ Set" : "❌ Not Set");
+console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "✅ Set" : "❌ Not Set");
+console.log("EMAIL_FROM:", process.env.EMAIL_FROM ? "✅ Set" : "❌ Not Set");
+console.log("SENDGRID_API_KEY:", process.env.SENDGRID_API_KEY ? "✅ Set" : "❌ Not Set");
 console.log("---");
 
 // Import routes
@@ -38,6 +42,7 @@ import userRoutes from "./routes/users.js";
 import eventRoutes from "./routes/events.js";
 import registrationRoutes from "./routes/registrations.js";
 import uploadRoutes from "./routes/upload.js";
+import execomRoutes from "./routes/execom.js";
 //import googleAuthRoutes from "./routes/googleAuth.js";
 
 const app = express();
@@ -136,6 +141,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/registrations", registrationRoutes);
 app.use("/api/upload", uploadRoutes);
+app.use("/api/execom", execomRoutes);
 //app.use("/auth", googleAuthRoutes);
 
 // Health check endpoint

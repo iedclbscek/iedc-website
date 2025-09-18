@@ -1,8 +1,13 @@
 import express from "express";
 import { body, validationResult } from "express-validator";
 import Registration from "../models/Registration.js";
+import User from "../models/User.js";
 import { authenticateToken, authorizeRoles } from "../middleware/auth.js";
-import { sendMembershipIdEmail } from "../utils/emailService.js";
+import {
+  sendMembershipIdEmail,
+  sendPasswordResetEmail,
+} from "../utils/emailService.js";
+import crypto from "crypto";
 //import { addMemberToGroup } from "../utils/googleGroupsService.js";
 import mongoose from "mongoose";
 
@@ -649,6 +654,154 @@ router.put(
       });
     } catch (error) {
       console.error("Update registration status error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  }
+);
+
+// POST /api/registrations/execom/approve/:membershipId - Approve execom call response and create user
+router.post(
+  "/execom/approve/:membershipId",
+  authenticateToken,
+  authorizeRoles("admin"),
+  async (req, res) => {
+    try {
+      const { membershipId } = req.params;
+      const { displayOrder } = req.body;
+      const currentYear = new Date().getFullYear().toString();
+
+      // Find the execom call response
+      const execomResponse = await ExecomCall.findOne({ membershipId });
+      if (!execomResponse) {
+        return res.status(404).json({
+          success: false,
+          message: "Execom call response not found",
+        });
+      }
+
+      // Find the registration details
+      const registration = await Registration.findOne({ membershipId });
+      if (!registration) {
+        return res.status(404).json({
+          success: false,
+          message: "Registration not found for this membership ID",
+        });
+      }
+
+      // Check if user already exists
+      const existingUser = await User.findOne({ username: membershipId });
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: "User already exists for this membership ID",
+        });
+      }
+
+      // Create new user
+      const newUser = new User({
+        name: `${registration.firstName} ${registration.lastName}`,
+        username: membershipId,
+        email: registration.email,
+        role: "execom",
+        teamYear: currentYear,
+        teamYears: [parseInt(currentYear)],
+        yearlyRoles: [
+          {
+            year: parseInt(currentYear),
+            role: "execom",
+            teamRole: execomResponse.role || "Member",
+            order: displayOrder || 0,
+          },
+        ],
+        displayOrder: displayOrder || 0,
+        department: registration.department,
+        phoneNumber: registration.phone,
+        linkedin: registration.linkedin,
+        github: registration.github,
+        bio: execomResponse.motivation || "",
+        isActive: true,
+        isEmailVerified: false,
+      });
+
+      // Set yearly display order
+      newUser.yearlyDisplayOrders.set(currentYear, displayOrder || 0);
+
+      await newUser.save();
+
+      // Update execom call status
+      execomResponse.status = "approved";
+      execomResponse.reviewedAt = new Date();
+      execomResponse.reviewedBy = req.user.id;
+      await execomResponse.save();
+
+      // Generate password reset token
+      const resetToken = crypto.randomBytes(32).toString("hex");
+      newUser.passwordResetToken = crypto
+        .createHash("sha256")
+        .update(resetToken)
+        .digest("hex");
+      newUser.passwordResetExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+      await newUser.save();
+
+      // Send password setup email
+      await sendPasswordResetEmail(
+        registration.email,
+        `${registration.firstName} ${registration.lastName}`,
+        resetToken,
+        true // isNewUser flag
+      );
+
+      res.json({
+        success: true,
+        message: "Execom member approved and user created successfully",
+        data: {
+          user: newUser,
+          membershipId,
+        },
+      });
+    } catch (error) {
+      console.error("Execom approval error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  }
+);
+
+// GET /api/registrations/execom/responses - Get all execom call responses
+router.get(
+  "/execom/responses",
+  authenticateToken,
+  authorizeRoles("admin"),
+  async (req, res) => {
+    try {
+      const responses = await ExecomCall.find()
+        .populate("reviewedBy", "name email")
+        .sort({ submittedAt: -1 });
+
+      // Enrich with registration data
+      const enrichedResponses = await Promise.all(
+        responses.map(async (response) => {
+          const registration = await Registration.findOne({
+            membershipId: response.membershipId,
+          });
+          return {
+            ...response.toObject(),
+            registration: registration || null,
+          };
+        })
+      );
+
+      res.json({
+        success: true,
+        data: enrichedResponses,
+      });
+    } catch (error) {
+      console.error("Get execom responses error:", error);
       res.status(500).json({
         success: false,
         message: "Internal server error",

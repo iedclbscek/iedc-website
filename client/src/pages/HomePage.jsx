@@ -1,6 +1,7 @@
 // Import home sections
 import HeroSection from '../components/home/HeroSection';
 import WhatWeDoSection from '../components/home/WhatWeDoSection';
+import RoadmapSection from '../components/home/RoadmapSection';
 import EventsSection from '../components/home/EventsSection';
 import ImpactSection from '../components/home/ImpactSection';
 import TeamPreviewSection from '../components/home/TeamPreviewSection';
@@ -14,6 +15,7 @@ const HomePage = () => {
       <ScrollProgress />
       <HeroSection />
       <WhatWeDoSection />
+      <RoadmapSection />
       <EventsSection />
       <CommunitiesSection />
       <ImpactSection />

@@ -14,12 +14,30 @@ const createTransporter = () => {
     return globalTransporter;
   }
 
-  // For development, you can use Gmail or a test service like Ethereal
-  // For production, use a proper email service like SendGrid, AWS SES, etc.
-
-  if (process.env.NODE_ENV === "development") {
+  // Try SendGrid first if API key is available
+  if (process.env.SENDGRID_API_KEY) {
+    console.log("📧 Using SendGrid for email delivery");
+    globalTransporter = nodemailer.createTransporter({
+      host: "smtp.sendgrid.net",
+      port: 587,
+      secure: false,
+      auth: {
+        user: "apikey",
+        pass: process.env.SENDGRID_API_KEY,
+      },
+      pool: true,
+      maxConnections: 3,
+      maxMessages: 50,
+      connectionTimeout: 60000,
+      greetingTimeout: 30000,
+      socketTimeout: 60000,
+    });
+  }
+  // Fallback to Gmail/SMTP configuration
+  else if (process.env.NODE_ENV === "development") {
     // Using Gmail for development (you'll need to enable app passwords)
-    globalTransporter = nodemailer.createTransport({
+    console.log("📧 Using Gmail for email delivery (development)");
+    globalTransporter = nodemailer.createTransporter({
       service: "gmail",
       pool: true, // Enable connection pooling
       maxConnections: parseInt(process.env.EMAIL_POOL_MAX_CONNECTIONS) || 5,
@@ -38,17 +56,22 @@ const createTransporter = () => {
         "Reply-To": process.env.EMAIL_USER,
       },
     });
-  } else {
+    } else {
     // Production email service configuration with custom domain
-    globalTransporter = nodemailer.createTransport({
+    console.log("📧 Using SMTP/Gmail for email delivery (production)");
+    globalTransporter = nodemailer.createTransporter({
       host: process.env.SMTP_HOST || "smtp.gmail.com",
       port: process.env.SMTP_PORT || 587,
-      secure: false,
+      secure: false, // Use STARTTLS
       pool: true, // Enable connection pooling
-      maxConnections: parseInt(process.env.EMAIL_POOL_MAX_CONNECTIONS) || 5,
-      maxMessages: parseInt(process.env.EMAIL_POOL_MAX_MESSAGES) || 100,
-      rateDelta: parseInt(process.env.EMAIL_BULK_DELAY_MS) || 1000,
-      rateLimit: parseInt(process.env.EMAIL_BULK_RATE_LIMIT) || 10,
+      maxConnections: parseInt(process.env.EMAIL_POOL_MAX_CONNECTIONS) || 3,
+      maxMessages: parseInt(process.env.EMAIL_POOL_MAX_MESSAGES) || 50,
+      rateDelta: parseInt(process.env.EMAIL_BULK_DELAY_MS) || 2000,
+      rateLimit: parseInt(process.env.EMAIL_BULK_RATE_LIMIT) || 5,
+      // Connection timeout settings for production
+      connectionTimeout: 60000, // 60 seconds
+      greetingTimeout: 30000, // 30 seconds
+      socketTimeout: 60000, // 60 seconds
       auth: {
         user: process.env.SMTP_USER || process.env.EMAIL_USER,
         pass: process.env.SMTP_PASS || process.env.EMAIL_PASS,
@@ -59,6 +82,11 @@ const createTransporter = () => {
         "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
         "X-Mailer": "IEDC-LBSCEK-MailSystem",
         "Reply-To": process.env.EMAIL_USER,
+      },
+      // Better TLS configuration for production
+      tls: {
+        ciphers: 'SSLv3',
+        rejectUnauthorized: false
       },
       // DKIM configuration (if available)
       dkim: process.env.DKIM_PRIVATE_KEY
@@ -104,6 +132,9 @@ const sendEmailWithRateLimit = async (mailOptions, retryCount = 0) => {
       retryCount < maxRetries &&
       (error.code === "ETIMEDOUT" ||
         error.code === "ECONNRESET" ||
+        error.code === "ECONNREFUSED" ||
+        error.message.includes("Connection timeout") ||
+        error.message.includes("timeout") ||
         error.responseCode >= 500)
     ) {
       console.log(
@@ -111,7 +142,10 @@ const sendEmailWithRateLimit = async (mailOptions, retryCount = 0) => {
           retryCount + 1
         }/${maxRetries})`
       );
-      await delay(2000 * (retryCount + 1)); // Exponential backoff
+      // Exponential backoff with jitter
+      const baseDelay = 2000 * Math.pow(2, retryCount);
+      const jitter = Math.random() * 1000;
+      await delay(baseDelay + jitter);
       return sendEmailWithRateLimit(mailOptions, retryCount + 1);
     }
 
@@ -290,13 +324,28 @@ export const sendInvitationEmail = async (email, name, resetToken) => {
   return await queueEmail(mailOptions);
 };
 
-export const sendPasswordResetEmail = async (email, name, resetToken) => {
-  const resetUrl = `${process.env.CLIENT_URL}/reset-password?token=${resetToken}`;
+export const sendPasswordResetEmail = async (
+  email,
+  name,
+  resetToken,
+  isNewUser = false
+) => {
+  const resetUrl = `${process.env.CLIENT_URL}/${
+    isNewUser ? "set-password" : "reset-password"
+  }?token=${resetToken}`;
+  const subject = isNewUser
+    ? "Welcome to IEDC - Set Your Password"
+    : "Reset Your IEDC Dashboard Password";
+  const heading = isNewUser ? "Welcome to IEDC!" : "Password Reset Request";
+  const message = isNewUser
+    ? "Congratulations! You have been approved as an Execom member. Please set your password using the button below:"
+    : "We received a request to reset your password for the IEDC Dashboard. If you made this request, please click the button below to reset your password:";
+  const buttonText = isNewUser ? "Set Your Password" : "Reset Password";
 
   const mailOptions = {
     from: `"IEDC LBSCEK" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
     to: email,
-    subject: "Reset Your IEDC Dashboard Password",
+    subject: subject,
     headers: {
       "List-Unsubscribe": `<${process.env.UNSUBSCRIBE_URL}>`,
       "X-Priority": "3",
@@ -365,19 +414,23 @@ export const sendPasswordResetEmail = async (email, name, resetToken) => {
             </div>
             
             <div class="content">
-              <h2>Password Reset Request</h2>
+              <h2>${heading}</h2>
               
               <p>Hello ${name},</p>
               
-              <p>We received a request to reset your password for the IEDC Dashboard. If you made this request, please click the button below to reset your password:</p>
+              <p>${message}</p>
               
               <div style="text-align: center;">
-                <a href="${resetUrl}" class="button">Reset My Password</a>
+                <a href="${resetUrl}" class="button">${buttonText}</a>
               </div>
               
-              <p><strong>Important:</strong> This link will expire in 1 hour for security reasons.</p>
+              <p><strong>Important:</strong> This link will expire in 24 hours for security reasons.</p>
               
-              <p>If you didn't request a password reset, please ignore this email. Your password will remain unchanged.</p>
+              ${
+                isNewUser
+                  ? "<p>As an Execom member, you will have access to special features and responsibilities within the IEDC Dashboard.</p>"
+                  : "<p>If you didn't request a password reset, please ignore this email. Your password will remain unchanged.</p>"
+              }
             </div>
             
             <div class="footer">
