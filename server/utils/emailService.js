@@ -30,6 +30,15 @@ const getVerifiedFromAddress = () => {
       process.env.EMAIL_USER
     );
   }
+  // Prefer explicit RESEND_FROM when using Resend
+  if (process.env.RESEND_API_KEY) {
+    return (
+      process.env.RESEND_FROM ||
+      process.env.EMAIL_FROM ||
+      process.env.SMTP_USER ||
+      process.env.EMAIL_USER
+    );
+  }
   return (
     process.env.EMAIL_FROM || process.env.SMTP_USER || process.env.EMAIL_USER
   );
