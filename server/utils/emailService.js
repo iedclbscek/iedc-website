@@ -7,6 +7,16 @@ let globalTransporter = null;
 // Email sending queue for rate limiting
 let emailQueue = [];
 let isProcessingQueue = false;
+// Resend HTTP client (optional)
+let resendClient = null;
+const getResend = async () => {
+  if (!process.env.RESEND_API_KEY) return null;
+  if (!resendClient) {
+    const { Resend } = await import("resend");
+    resendClient = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resendClient;
+};
 
 // Select a verified "from" address, especially for SendGrid requirements
 const getVerifiedFromAddress = () => {
@@ -160,6 +170,28 @@ const sendEmailWithRateLimit = async (mailOptions, retryCount = 0) => {
   const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   try {
+    // Prefer Resend in production if API key is available (avoids SMTP port issues)
+    if (process.env.NODE_ENV === "production") {
+      const resend = await getResend();
+      if (resend) {
+        const sent = await resend.emails.send({
+          from: mailOptions.from,
+          to: mailOptions.to,
+          subject: mailOptions.subject,
+          html: mailOptions.html,
+          text: mailOptions.text,
+          headers: mailOptions.headers,
+        });
+        if (sent?.id) {
+          console.log(
+            `📧 Email sent via Resend to ${mailOptions.to}:`,
+            sent.id
+          );
+          return { success: true, messageId: sent.id, service: "resend" };
+        }
+      }
+    }
+
     const transporter = createTransporter();
     const result = await transporter.sendMail(mailOptions);
 
