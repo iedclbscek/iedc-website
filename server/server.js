@@ -88,6 +88,8 @@ if (process.env.NODE_ENV === "development") {
     process.env.FRONTEND_URL || "http://localhost:5173",
     "http://localhost:5173",
     "http://localhost:3000",
+    "https://www.iedclbscek.in",
+    "https://iedclbscek.in",
     "https://iedclbscekapi.onrender.com",
     "https://das-nabvuax2d-umar-al-mukhtar-s-projects.vercel.app",
     /\.onrender\.com$/,
