@@ -10,11 +10,12 @@ import {
   sendPasswordResetEmail,
   generateResetToken,
   hashResetToken,
+  sendEmail,
+  testEmailService, // Add this import
 } from "../utils/emailService.js";
 import mongoose from "mongoose";
 import Registration from "../models/Registration.js";
 import Verification from "../models/Verification.js";
-import { sendEmail } from "../utils/emailService.js";
 
 const router = express.Router();
 
@@ -25,6 +26,18 @@ const authLimiter = rateLimit({
   message: {
     error: "Too many authentication attempts",
     message: "Please try again later",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// More lenient rate limit for verification emails
+const verificationLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 minutes
+  max: 3, // 3 attempts per 5 minutes
+  message: {
+    error: "Too many verification attempts",
+    message: "Please wait before requesting another code",
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -139,6 +152,42 @@ const handleValidationErrors = (req, res, next) => {
     });
   }
   next();
+};
+
+// Helper function to send email with timeout and better error handling
+const sendEmailSafely = async (emailFunction, ...args) => {
+  try {
+    console.log("📧 Attempting to send email...");
+
+    // Create a timeout promise
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(
+        () => reject(new Error("Email timeout after 45 seconds")),
+        45000
+      );
+    });
+
+    // Race the email sending against the timeout
+    const result = await Promise.race([emailFunction(...args), timeoutPromise]);
+
+    if (result && result.success) {
+      console.log("✅ Email sent successfully:", result.messageId || "no-id");
+      return {
+        success: true,
+        messageId: result.messageId,
+        service: result.service,
+      };
+    } else {
+      console.error(
+        "❌ Email sending failed:",
+        result?.error || "Unknown error"
+      );
+      return { success: false, error: result?.error || "Email service failed" };
+    }
+  } catch (error) {
+    console.error("❌ Email sending error:", error.message);
+    return { success: false, error: error.message };
+  }
 };
 
 // @route   POST /api/auth/login
@@ -326,7 +375,12 @@ router.post(
           );
           updateData.isActive = true; // Activate user when sending email
 
-          emailResult = await sendInvitationEmail(email, name, resetToken);
+          emailResult = await sendEmailSafely(
+            sendInvitationEmail,
+            email,
+            name,
+            resetToken
+          );
         }
 
         // Update the existing user
@@ -411,7 +465,12 @@ router.post(
 
       // Send invitation email only if requested
       if (sendEmail && resetToken) {
-        emailResult = await sendInvitationEmail(email, name, resetToken);
+        emailResult = await sendEmailSafely(
+          sendInvitationEmail,
+          email,
+          name,
+          resetToken
+        );
 
         if (!emailResult.success) {
           console.error("Failed to send invitation email:", emailResult.error);
@@ -641,11 +700,20 @@ router.post(
       user.passwordResetExpires = Date.now() + 60 * 60 * 1000; // 1 hour
       await user.save();
 
-      // Send reset email
-      try {
-        await sendPasswordResetEmail(user.email, user.name, resetToken);
-      } catch (emailError) {
-        console.error("Failed to send password reset email:", emailError);
+      // Send reset email with improved error handling
+      const emailResult = await sendEmailSafely(
+        sendPasswordResetEmail,
+        user.email,
+        user.name,
+        resetToken
+      );
+
+      if (!emailResult.success) {
+        console.error(
+          "Failed to send password reset email:",
+          emailResult.error
+        );
+
         // Clear reset token if email fails
         user.passwordResetToken = undefined;
         user.passwordResetExpires = undefined;
@@ -653,7 +721,8 @@ router.post(
 
         return res.status(500).json({
           success: false,
-          message: "Failed to send password reset email. Please try again.",
+          message:
+            "Failed to send password reset email. Please try again later.",
         });
       }
 
@@ -725,8 +794,8 @@ router.post(
   }
 );
 
-// Email verification endpoints
-router.post("/send-verification", async (req, res) => {
+// Email verification endpoints with improved error handling
+router.post("/send-verification", verificationLimiter, async (req, res) => {
   try {
     const { email } = req.body;
 
@@ -813,37 +882,25 @@ router.post("/send-verification", async (req, res) => {
       </div>
     `;
 
-    // Send verification email with timeout handling
-    try {
-      const emailResult = await Promise.race([
-        sendEmail({
-          to: email,
-          subject: "IEDC LBSCEK - Email Verification Code",
-          html: emailContent,
-        }),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("Email timeout")), 30000)
-        ),
-      ]);
+    // Send verification email with improved error handling
+    const emailResult = await sendEmailSafely(sendEmail, {
+      to: email,
+      subject: "IEDC LBSCEK - Email Verification Code",
+      html: emailContent,
+    });
 
-      if (emailResult && emailResult.success === false) {
-        throw new Error(emailResult.error || "Failed to send email");
-      }
-
+    if (emailResult.success) {
       res.json({
         success: true,
         message: "Verification code sent successfully",
       });
-    } catch (emailError) {
-      console.error("Email sending failed:", emailError.message);
-
+    } else {
       // Still return success to user since verification code is stored
-      // They can try to resend later if needed
       res.json({
         success: true,
         message:
-          "Verification code generated. If you don't receive the email, please try again.",
-        warning: "Email delivery may be delayed",
+          "Verification code generated. Email delivery may be delayed - please try again if you don't receive it.",
+        warning: "Email service temporarily unavailable",
       });
     }
   } catch (error) {
@@ -863,24 +920,35 @@ router.post("/test-email", async (req, res) => {
     if (!email) {
       return res.status(400).json({
         success: false,
-        message: "Email is required",
+        message: "Email is required for testing",
       });
     }
 
-    console.log(`🧪 Testing email to: ${email}`);
+    console.log(`🧪 Testing email service to: ${email}`);
 
-    const testResult = await sendEmail({
+    const testResult = await sendEmailSafely(sendEmail, {
       to: email,
-      subject: "IEDC LBSCEK - Email Test",
-      html: "<h1>Email Test</h1><p>If you receive this, email service is working!</p>",
+      subject: "IEDC LBSCEK - Email Service Test",
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px;">
+          <h1 style="color: #e74c3c;">Email Test Successful!</h1>
+          <p>If you receive this email, the email service is working properly.</p>
+          <p>Test timestamp: ${new Date().toISOString()}</p>
+          <p>Environment: ${process.env.NODE_ENV || "development"}</p>
+        </div>
+      `,
     });
 
-    console.log("📧 Test email result:", testResult);
-
     res.json({
-      success: true,
-      message: "Test email sent",
-      result: testResult,
+      success: testResult.success,
+      message: testResult.success
+        ? "Test email sent successfully"
+        : "Test email failed",
+      details: {
+        service: testResult.service,
+        messageId: testResult.messageId,
+        error: testResult.error,
+      },
     });
   } catch (error) {
     console.error("❌ Test email failed:", error);
@@ -892,40 +960,37 @@ router.post("/test-email", async (req, res) => {
   }
 });
 
-// Test SendGrid authentication endpoint
-router.post('/test-sendgrid', async (req, res) => {
+// Enhanced email service status endpoint
+router.get("/email-service-status", async (req, res) => {
   try {
-    console.log('🧪 Testing SendGrid authentication...');
-    
-    // Import the test function
-    const { testSendGridAuth } = await import('../utils/emailService.js');
-    const authTest = await testSendGridAuth();
-    
-    if (authTest.valid) {
-      console.log('✅ SendGrid authentication successful');
-      res.json({
-        success: true,
-        message: 'SendGrid authentication successful',
-        service: 'sendgrid'
-      });
-    } else {
-      console.log('❌ SendGrid authentication failed:', authTest.error);
-      res.status(400).json({
-        success: false,
-        message: 'SendGrid authentication failed',
-        error: authTest.error
-      });
-    }
+    console.log("🔍 Checking email service status...");
+
+    // Test all available email services
+    const serviceStatus = await testEmailService();
+
+    // Determine overall status
+    const hasWorkingService = Object.values(serviceStatus).some(Boolean);
+
+    res.json({
+      success: true,
+      message: hasWorkingService
+        ? "Email services available"
+        : "No email services available",
+      services: serviceStatus,
+      environment: process.env.NODE_ENV || "development",
+      timestamp: new Date().toISOString(),
+    });
   } catch (error) {
-    console.error('❌ SendGrid test failed:', error);
+    console.error("❌ Email service status check failed:", error);
     res.status(500).json({
       success: false,
-      message: 'SendGrid test failed',
-      error: error.message
+      message: "Failed to check email service status",
+      error: error.message,
     });
   }
 });
 
+// Verify email endpoint
 router.post("/verify-email", async (req, res) => {
   try {
     const { email, code } = req.body;
@@ -974,6 +1039,7 @@ router.post("/verify-email", async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Invalid verification code",
+        attemptsLeft: Math.max(0, 3 - (verification.attempts + 1)),
       });
     }
 
