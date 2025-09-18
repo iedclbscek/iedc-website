@@ -17,10 +17,17 @@ const createTransporter = () => {
   // Try SendGrid first if API key is available
   if (process.env.SENDGRID_API_KEY) {
     console.log("📧 Using SendGrid for email delivery");
+    console.log("🔑 SendGrid API Key:", process.env.SENDGRID_API_KEY ? `${process.env.SENDGRID_API_KEY.substring(0, 10)}...` : "Not set");
+    
+    // Validate SendGrid API key format
+    if (!process.env.SENDGRID_API_KEY.startsWith('SG.')) {
+      console.warn("⚠️ SendGrid API key doesn't start with 'SG.' - this may cause authentication issues");
+    }
+    
     globalTransporter = nodemailer.createTransport({
       host: "smtp.sendgrid.net",
       port: 587,
-      secure: false,
+      secure: false, // Use STARTTLS
       auth: {
         user: "apikey",
         pass: process.env.SENDGRID_API_KEY,
@@ -31,6 +38,8 @@ const createTransporter = () => {
       connectionTimeout: 60000,
       greetingTimeout: 30000,
       socketTimeout: 60000,
+      debug: process.env.NODE_ENV === 'development', // Enable debug in development
+      logger: process.env.NODE_ENV === 'development', // Enable logging in development
     });
   }
   // Fallback to Gmail/SMTP configuration
@@ -104,10 +113,43 @@ const createTransporter = () => {
     console.error("❌ Transporter error:", error);
   });
 
+  // Verify transporter connection
+  globalTransporter.verify((error, success) => {
+    if (error) {
+      console.error("❌ Email transporter verification failed:", error.message);
+    } else {
+      console.log("✅ Email transporter verified and ready");
+    }
+  });
+
   return globalTransporter;
 };
 
-// Rate-limited email sending function
+// Test SendGrid API key validity
+const testSendGridAuth = async () => {
+  if (!process.env.SENDGRID_API_KEY) {
+    return { valid: false, error: "No SendGrid API key provided" };
+  }
+
+  try {
+    const testTransporter = nodemailer.createTransport({
+      host: "smtp.sendgrid.net",
+      port: 587,
+      secure: false,
+      auth: {
+        user: "apikey",
+        pass: process.env.SENDGRID_API_KEY,
+      },
+    });
+
+    await testTransporter.verify();
+    return { valid: true };
+  } catch (error) {
+    return { valid: false, error: error.message };
+  }
+};
+
+// Rate-limited email sending function with fallback
 const sendEmailWithRateLimit = async (mailOptions, retryCount = 0) => {
   const maxRetries = 3;
   const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -126,6 +168,37 @@ const sendEmailWithRateLimit = async (mailOptions, retryCount = 0) => {
       `❌ Error sending email to ${mailOptions.to}:`,
       error.message
     );
+
+    // If using SendGrid and it fails, try falling back to Gmail SMTP
+    if (process.env.SENDGRID_API_KEY && retryCount === 0 && 
+        (error.code === "EAUTH" || error.message.includes("authentication") || 
+         error.message.includes("timeout") || error.message.includes("Connection timeout"))) {
+      
+      console.log("🔄 SendGrid failed, trying Gmail SMTP fallback...");
+      
+      // Create Gmail fallback transporter
+      const fallbackTransporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+        pool: true,
+        maxConnections: 2,
+        connectionTimeout: 60000,
+        greetingTimeout: 30000,
+        socketTimeout: 60000,
+      });
+
+      try {
+        const fallbackResult = await fallbackTransporter.sendMail(mailOptions);
+        console.log(`📧 Email sent via Gmail fallback to ${mailOptions.to}:`, fallbackResult.messageId);
+        return { success: true, messageId: fallbackResult.messageId, service: 'gmail-fallback' };
+      } catch (fallbackError) {
+        console.error(`❌ Gmail fallback also failed for ${mailOptions.to}:`, fallbackError.message);
+        // Continue with normal retry logic below
+      }
+    }
 
     // Retry logic for temporary failures
     if (
@@ -1315,3 +1388,6 @@ export const closeTransporter = () => {
     console.log("📧 Email transporter closed");
   }
 };
+
+// Export the test function
+export { testSendGridAuth };

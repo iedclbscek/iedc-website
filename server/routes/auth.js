@@ -892,6 +892,40 @@ router.post("/test-email", async (req, res) => {
   }
 });
 
+// Test SendGrid authentication endpoint
+router.post('/test-sendgrid', async (req, res) => {
+  try {
+    console.log('🧪 Testing SendGrid authentication...');
+    
+    // Import the test function
+    const { testSendGridAuth } = await import('../utils/emailService.js');
+    const authTest = await testSendGridAuth();
+    
+    if (authTest.valid) {
+      console.log('✅ SendGrid authentication successful');
+      res.json({
+        success: true,
+        message: 'SendGrid authentication successful',
+        service: 'sendgrid'
+      });
+    } else {
+      console.log('❌ SendGrid authentication failed:', authTest.error);
+      res.status(400).json({
+        success: false,
+        message: 'SendGrid authentication failed',
+        error: authTest.error
+      });
+    }
+  } catch (error) {
+    console.error('❌ SendGrid test failed:', error);
+    res.status(500).json({
+      success: false,
+      message: 'SendGrid test failed',
+      error: error.message
+    });
+  }
+});
+
 router.post("/verify-email", async (req, res) => {
   try {
     const { email, code } = req.body;
