@@ -162,8 +162,8 @@ const sendEmailSafely = async (emailFunction, ...args) => {
     // Create a timeout promise
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(
-        () => reject(new Error("Email timeout after 45 seconds")),
-        45000
+        () => reject(new Error("Email timeout after 90 seconds")),
+        90000
       );
     });
 

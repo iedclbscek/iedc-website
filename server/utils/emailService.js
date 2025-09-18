@@ -78,7 +78,7 @@ const createTransporter = () => {
       });
     } else {
       console.log("📧 Using SMTP for email delivery (production)");
-      globalTransporter = nodemailer.createTransport({
+      const baseConfig = {
         host: process.env.SMTP_HOST,
         port: Number(process.env.SMTP_PORT) || 587,
         secure:
@@ -88,9 +88,9 @@ const createTransporter = () => {
         maxMessages: parseInt(process.env.EMAIL_POOL_MAX_MESSAGES) || 50,
         rateDelta: parseInt(process.env.EMAIL_BULK_DELAY_MS) || 2000,
         rateLimit: parseInt(process.env.EMAIL_BULK_RATE_LIMIT) || 5,
-        connectionTimeout: 60000,
-        greetingTimeout: 30000,
-        socketTimeout: 60000,
+        connectionTimeout: 90000,
+        greetingTimeout: 45000,
+        socketTimeout: 90000,
         auth: {
           user: process.env.SMTP_USER,
           pass: process.env.SMTP_PASS,
@@ -109,7 +109,25 @@ const createTransporter = () => {
               privateKey: process.env.DKIM_PRIVATE_KEY,
             }
           : undefined,
-      });
+        debug:
+          String(process.env.EMAIL_DEBUG || "false").toLowerCase() === "true",
+        logger:
+          String(process.env.EMAIL_DEBUG || "false").toLowerCase() === "true",
+      };
+
+      try {
+        globalTransporter = nodemailer.createTransport(baseConfig);
+      } catch (e) {
+        console.warn(
+          "⚠️ Primary SMTP config failed, trying SMTPS:465",
+          e.message
+        );
+        globalTransporter = nodemailer.createTransport({
+          ...baseConfig,
+          port: 465,
+          secure: true,
+        });
+      }
     }
   }
 
