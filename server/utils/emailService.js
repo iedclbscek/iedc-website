@@ -20,16 +20,6 @@ const getResend = async () => {
 
 // Select a verified "from" address, especially for SendGrid requirements
 const getVerifiedFromAddress = () => {
-  const prefersSendGrid = Boolean(process.env.SENDGRID_API_KEY);
-  if (prefersSendGrid) {
-    // Must match a verified Single Sender or a domain-authenticated sender in SendGrid
-    return (
-      process.env.SENDGRID_VERIFIED_FROM ||
-      process.env.EMAIL_FROM ||
-      process.env.SMTP_USER ||
-      process.env.EMAIL_USER
-    );
-  }
   // Prefer explicit RESEND_FROM when using Resend
   if (process.env.RESEND_API_KEY) {
     return (
