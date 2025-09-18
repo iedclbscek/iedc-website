@@ -33,7 +33,10 @@ console.log("JWT_SECRET:", process.env.JWT_SECRET ? "✅ Set" : "❌ Not Set");
 console.log("EMAIL_USER:", process.env.EMAIL_USER ? "✅ Set" : "❌ Not Set");
 console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "✅ Set" : "❌ Not Set");
 console.log("EMAIL_FROM:", process.env.EMAIL_FROM ? "✅ Set" : "❌ Not Set");
-console.log("SENDGRID_API_KEY:", process.env.SENDGRID_API_KEY ? "✅ Set" : "❌ Not Set");
+console.log(
+  "SENDGRID_API_KEY:",
+  process.env.SENDGRID_API_KEY ? "✅ Set" : "❌ Not Set"
+);
 console.log("---");
 
 // Import routes

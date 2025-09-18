@@ -56,7 +56,7 @@ const createTransporter = () => {
         "Reply-To": process.env.EMAIL_USER,
       },
     });
-    } else {
+  } else {
     // Production email service configuration with custom domain
     console.log("📧 Using SMTP/Gmail for email delivery (production)");
     globalTransporter = nodemailer.createTransporter({
@@ -85,8 +85,8 @@ const createTransporter = () => {
       },
       // Better TLS configuration for production
       tls: {
-        ciphers: 'SSLv3',
-        rejectUnauthorized: false
+        ciphers: "SSLv3",
+        rejectUnauthorized: false,
       },
       // DKIM configuration (if available)
       dkim: process.env.DKIM_PRIVATE_KEY

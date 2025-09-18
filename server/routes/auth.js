@@ -726,14 +726,14 @@ router.post(
 );
 
 // Email verification endpoints
-router.post('/send-verification', async (req, res) => {
+router.post("/send-verification", async (req, res) => {
   try {
     const { email } = req.body;
 
     if (!email) {
       return res.status(400).json({
         success: false,
-        message: 'Email is required'
+        message: "Email is required",
       });
     }
 
@@ -742,33 +742,37 @@ router.post('/send-verification', async (req, res) => {
     if (!emailRegex.test(email)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid email format'
+        message: "Invalid email format",
       });
     }
 
     // Check if email already exists in registrations
-    const existingRegistration = await Registration.findOne({ email: email.toLowerCase() });
+    const existingRegistration = await Registration.findOne({
+      email: email.toLowerCase(),
+    });
     if (existingRegistration) {
       return res.status(400).json({
         success: false,
-        message: 'Email already registered'
+        message: "Email already registered",
       });
     }
 
     // Generate 6-digit verification code
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-    
+    const verificationCode = Math.floor(
+      100000 + Math.random() * 900000
+    ).toString();
+
     // Store verification code with expiration (10 minutes)
     const verificationData = {
       email: email.toLowerCase(),
       code: verificationCode,
       expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
-      attempts: 0
+      attempts: 0,
     };
 
     // Remove existing verification for this email
     await Verification.deleteOne({ email: email.toLowerCase() });
-    
+
     // Save new verification
     await Verification.create(verificationData);
 
@@ -814,99 +818,99 @@ router.post('/send-verification', async (req, res) => {
       const emailResult = await Promise.race([
         sendEmail({
           to: email,
-          subject: 'IEDC LBSCEK - Email Verification Code',
-          html: emailContent
+          subject: "IEDC LBSCEK - Email Verification Code",
+          html: emailContent,
         }),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Email timeout')), 30000)
-        )
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Email timeout")), 30000)
+        ),
       ]);
 
       if (emailResult && emailResult.success === false) {
-        throw new Error(emailResult.error || 'Failed to send email');
+        throw new Error(emailResult.error || "Failed to send email");
       }
 
       res.json({
         success: true,
-        message: 'Verification code sent successfully'
+        message: "Verification code sent successfully",
       });
-
     } catch (emailError) {
-      console.error('Email sending failed:', emailError.message);
-      
+      console.error("Email sending failed:", emailError.message);
+
       // Still return success to user since verification code is stored
       // They can try to resend later if needed
       res.json({
         success: true,
-        message: 'Verification code generated. If you don\'t receive the email, please try again.',
-        warning: 'Email delivery may be delayed'
+        message:
+          "Verification code generated. If you don't receive the email, please try again.",
+        warning: "Email delivery may be delayed",
       });
     }
-
   } catch (error) {
-    console.error('Error in send-verification:', error);
+    console.error("Error in send-verification:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to process verification request'
+      message: "Failed to process verification request",
     });
   }
 });
 
 // Test email endpoint (for debugging production email issues)
-router.post('/test-email', async (req, res) => {
+router.post("/test-email", async (req, res) => {
   try {
     const { email } = req.body;
-    
+
     if (!email) {
       return res.status(400).json({
         success: false,
-        message: 'Email is required'
+        message: "Email is required",
       });
     }
 
     console.log(`🧪 Testing email to: ${email}`);
-    
+
     const testResult = await sendEmail({
       to: email,
-      subject: 'IEDC LBSCEK - Email Test',
-      html: '<h1>Email Test</h1><p>If you receive this, email service is working!</p>'
+      subject: "IEDC LBSCEK - Email Test",
+      html: "<h1>Email Test</h1><p>If you receive this, email service is working!</p>",
     });
 
-    console.log('📧 Test email result:', testResult);
+    console.log("📧 Test email result:", testResult);
 
     res.json({
       success: true,
-      message: 'Test email sent',
-      result: testResult
+      message: "Test email sent",
+      result: testResult,
     });
-
   } catch (error) {
-    console.error('❌ Test email failed:', error);
+    console.error("❌ Test email failed:", error);
     res.status(500).json({
       success: false,
-      message: 'Test email failed',
-      error: error.message
+      message: "Test email failed",
+      error: error.message,
     });
   }
 });
 
-router.post('/verify-email', async (req, res) => {
+router.post("/verify-email", async (req, res) => {
   try {
     const { email, code } = req.body;
 
     if (!email || !code) {
       return res.status(400).json({
         success: false,
-        message: 'Email and verification code are required'
+        message: "Email and verification code are required",
       });
     }
 
-    const verification = await Verification.findOne({ email: email.toLowerCase() });
+    const verification = await Verification.findOne({
+      email: email.toLowerCase(),
+    });
 
     if (!verification) {
       return res.status(400).json({
         success: false,
-        message: 'Verification code not found or expired'
+        message: "Verification code not found or expired",
       });
     }
 
@@ -915,7 +919,7 @@ router.post('/verify-email', async (req, res) => {
       await Verification.deleteOne({ _id: verification._id });
       return res.status(400).json({
         success: false,
-        message: 'Verification code has expired'
+        message: "Verification code has expired",
       });
     }
 
@@ -924,7 +928,7 @@ router.post('/verify-email', async (req, res) => {
       await Verification.deleteOne({ _id: verification._id });
       return res.status(400).json({
         success: false,
-        message: 'Too many failed attempts. Please request a new code'
+        message: "Too many failed attempts. Please request a new code",
       });
     }
 
@@ -932,10 +936,10 @@ router.post('/verify-email', async (req, res) => {
     if (verification.code !== code) {
       // Increment attempts
       await verification.incrementAttempts();
-      
+
       return res.status(400).json({
         success: false,
-        message: 'Invalid verification code'
+        message: "Invalid verification code",
       });
     }
 
@@ -944,14 +948,13 @@ router.post('/verify-email', async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Email verified successfully'
+      message: "Email verified successfully",
     });
-
   } catch (error) {
-    console.error('Error verifying email:', error);
+    console.error("Error verifying email:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to verify email'
+      message: "Failed to verify email",
     });
   }
 });
