@@ -44,127 +44,9 @@ const getVerifiedFromAddress = () => {
   );
 };
 
-// Create email transporter with pooling
+// Create email transporter (disabled; using Resend-only)
 const createTransporter = () => {
-  if (globalTransporter) {
-    return globalTransporter;
-  }
-
-  // Development: Gmail SMTP with app password
-  if (process.env.NODE_ENV === "development") {
-    // Using Gmail for development (you'll need to enable app passwords)
-    console.log("📧 Using Gmail for email delivery (development)");
-    globalTransporter = nodemailer.createTransport({
-      service: "gmail",
-      pool: true, // Enable connection pooling
-      maxConnections: parseInt(process.env.EMAIL_POOL_MAX_CONNECTIONS) || 5,
-      maxMessages: parseInt(process.env.EMAIL_POOL_MAX_MESSAGES) || 100,
-      rateDelta: parseInt(process.env.EMAIL_BULK_DELAY_MS) || 1000,
-      rateLimit: parseInt(process.env.EMAIL_BULK_RATE_LIMIT) || 10,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS, // Use app password, not regular password
-      },
-      // Additional headers for better deliverability
-      headers: {
-        "List-Unsubscribe": `<${process.env.UNSUBSCRIBE_URL}>`,
-        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
-        "X-Mailer": "IEDC-LBSCEK-MailSystem",
-        "Reply-To": process.env.EMAIL_USER,
-      },
-    });
-  } else {
-    // Production: Prefer custom SMTP; fallback to Gmail SMTP if provided
-    const useGmail =
-      !process.env.SMTP_HOST &&
-      process.env.EMAIL_USER &&
-      process.env.EMAIL_PASS;
-    if (useGmail) {
-      console.log("📧 Using Gmail for email delivery (production fallback)");
-      globalTransporter = nodemailer.createTransport({
-        service: "gmail",
-        pool: true,
-        maxConnections: parseInt(process.env.EMAIL_POOL_MAX_CONNECTIONS) || 3,
-        maxMessages: parseInt(process.env.EMAIL_POOL_MAX_MESSAGES) || 50,
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
-        },
-        connectionTimeout: 60000,
-        greetingTimeout: 30000,
-        socketTimeout: 60000,
-        tls: { minVersion: "TLSv1.2", rejectUnauthorized: true },
-      });
-    } else {
-      console.log("📧 Using SMTP for email delivery (production)");
-      const baseConfig = {
-        host: process.env.SMTP_HOST,
-        port: Number(process.env.SMTP_PORT) || 587,
-        secure:
-          String(process.env.SMTP_SECURE || "false").toLowerCase() === "true",
-        pool: true,
-        maxConnections: parseInt(process.env.EMAIL_POOL_MAX_CONNECTIONS) || 3,
-        maxMessages: parseInt(process.env.EMAIL_POOL_MAX_MESSAGES) || 50,
-        rateDelta: parseInt(process.env.EMAIL_BULK_DELAY_MS) || 2000,
-        rateLimit: parseInt(process.env.EMAIL_BULK_RATE_LIMIT) || 5,
-        connectionTimeout: 90000,
-        greetingTimeout: 45000,
-        socketTimeout: 90000,
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
-        },
-        headers: {
-          "List-Unsubscribe": `<${process.env.UNSUBSCRIBE_URL}>`,
-          "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
-          "X-Mailer": "IEDC-LBSCEK-MailSystem",
-          "Reply-To": process.env.EMAIL_USER || process.env.SMTP_USER,
-        },
-        tls: { minVersion: "TLSv1.2", rejectUnauthorized: true },
-        dkim: process.env.DKIM_PRIVATE_KEY
-          ? {
-              domainName: process.env.DKIM_DOMAIN || "iedclbscek.com",
-              keySelector: process.env.DKIM_SELECTOR || "default",
-              privateKey: process.env.DKIM_PRIVATE_KEY,
-            }
-          : undefined,
-        debug:
-          String(process.env.EMAIL_DEBUG || "false").toLowerCase() === "true",
-        logger:
-          String(process.env.EMAIL_DEBUG || "false").toLowerCase() === "true",
-      };
-
-      try {
-        globalTransporter = nodemailer.createTransport(baseConfig);
-      } catch (e) {
-        console.warn(
-          "⚠️ Primary SMTP config failed, trying SMTPS:465",
-          e.message
-        );
-        globalTransporter = nodemailer.createTransport({
-          ...baseConfig,
-          port: 465,
-          secure: true,
-        });
-      }
-    }
-  }
-
-  // Handle transporter errors
-  globalTransporter.on("error", (error) => {
-    console.error("❌ Transporter error:", error);
-  });
-
-  // Verify transporter connection
-  globalTransporter.verify((error, success) => {
-    if (error) {
-      console.error("❌ Email transporter verification failed:", error.message);
-    } else {
-      console.log("✅ Email transporter verified and ready");
-    }
-  });
-
-  return globalTransporter;
+  throw new Error("SMTP disabled. Use RESEND_API_KEY to send emails.");
 };
 
 // Deprecated: SendGrid removed – keep placeholder to avoid import errors
@@ -180,35 +62,26 @@ const sendEmailWithRateLimit = async (mailOptions, retryCount = 0) => {
 
   try {
     // Prefer Resend in production if API key is available (avoids SMTP port issues)
-    if (process.env.NODE_ENV === "production") {
-      const resend = await getResend();
-      if (resend) {
-        const sent = await resend.emails.send({
-          from: mailOptions.from,
-          to: mailOptions.to,
-          subject: mailOptions.subject,
-          html: mailOptions.html,
-          text: mailOptions.text,
-          headers: mailOptions.headers,
-        });
-        if (sent?.id) {
-          console.log(
-            `📧 Email sent via Resend to ${mailOptions.to}:`,
-            sent.id
-          );
-          return { success: true, messageId: sent.id, service: "resend" };
-        }
-      }
+    const resend = await getResend();
+    if (!resend) {
+      throw new Error(
+        "Email service not configured: set RESEND_API_KEY (and RESEND_FROM/EMAIL_FROM)."
+      );
     }
 
-    const transporter = createTransporter();
-    const result = await transporter.sendMail(mailOptions);
-
-    console.log(
-      `📧 Email sent successfully to ${mailOptions.to}:`,
-      result.messageId
-    );
-    return { success: true, messageId: result.messageId };
+    const sent = await resend.emails.send({
+      from: mailOptions.from,
+      to: mailOptions.to,
+      subject: mailOptions.subject,
+      html: mailOptions.html,
+      text: mailOptions.text,
+      headers: mailOptions.headers,
+    });
+    if (sent?.id) {
+      console.log(`📧 Email sent via Resend to ${mailOptions.to}:`, sent.id);
+      return { success: true, messageId: sent.id, service: "resend" };
+    }
+    throw new Error("Resend did not return an id");
   } catch (error) {
     console.error(
       `❌ Error sending email to ${mailOptions.to}:`,
