@@ -20,7 +20,7 @@ const CommunitiesPage = () => {
             transition={{ duration: 0.6 }}
             className="text-center"
           >
-            <h1 className="text-4xl md:text-5xl font-bold text-text-dark mb-4">Our Communities</h1>
+            <h1 className="text-4xl md:text-5xl font-bold text-text-dark mb-4">Nexus</h1>
             <div className="w-20 h-1 bg-accent mb-6 mx-auto"></div>
             <p className="text-lg text-text-light leading-relaxed max-w-3xl mx-auto">
               Join our diverse range of technology and innovation communities.

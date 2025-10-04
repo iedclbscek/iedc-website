@@ -1,7 +1,10 @@
 import { motion } from 'framer-motion';
 import { useParams, Link } from 'react-router-dom';
-import { FaArrowLeft, FaLinkedin, FaGithub } from 'react-icons/fa';
+import { FaArrowLeft, FaLinkedin, FaGithub, FaExternalLinkAlt, FaInstagram, FaGlobe } from 'react-icons/fa';
 import { communityData } from '../data/communitiesData';
+import CommunitySection from '../components/community/CommunitySection';
+import CommunityGallery from '../components/community/CommunityGallery';
+import { getSectionConfig } from '../utils/communityConfig';
 
 const CommunityPage = () => {
   const { id } = useParams();
@@ -15,17 +18,21 @@ const CommunityPage = () => {
     contact: {
       email: "",
       coordinator: ""
-    }
+    },
+    execomTeam: []
   };
+
+  // Get dynamic sections configuration
+  const sections = getSectionConfig(community);
 
   return (
     <div className="min-h-screen bg-primary/5">
       {/* Hero section */}
       <section className="bg-accent/10 pt-24 md:pt-32 pb-12">
         <div className="container mx-auto px-4">
-          <Link to="/communities" className="inline-flex items-center text-accent hover:text-accent-dark mb-8 transition-colors">
+          <Link to="/nexus" className="inline-flex items-center text-accent hover:text-accent-dark mb-8 transition-colors">
             <FaArrowLeft className="mr-2" />
-            Back to Communities
+            Back to Nexus
           </Link>
           
           <motion.div
@@ -55,75 +62,28 @@ const CommunityPage = () => {
           >
             <div className="grid md:grid-cols-2 gap-8">
               <div>
-                <h2 className="text-2xl font-bold text-text-dark mb-4">About</h2>
-                <p className="text-text-light mb-6">{community.longDescription}</p>
-
-                {community.whatWeProvide && (
-                  <>
-                    <h2 className="text-2xl font-bold text-text-dark mb-4">{community.whatWeProvide.title}</h2>
-                    <div className="grid grid-cols-1 gap-4 mb-6">
-                      {community.whatWeProvide.items.map((item, index) => (
-                        <div key={index} className="bg-primary/10 rounded-lg p-4">
-                          <h3 className="font-semibold text-text-dark mb-2">{item.name}</h3>
-                          <p className="text-text-light">{item.description}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </>
-                )}
-
-                {community.joinUs && (
-                  <>
-                    <h2 className="text-2xl font-bold text-text-dark mb-4">Join Us</h2>
-                    <div className="bg-accent/10 rounded-lg p-6 mb-6">
-                      <p className="text-text-dark">{community.joinUs}</p>
-                    </div>
-                  </>
-                )}
-
-                {community.whyWeDoIt && (
-                  <>
-                    <h2 className="text-2xl font-bold text-text-dark mb-4">Why We Do It</h2>
-                    <p className="text-text-light mb-6">{community.whyWeDoIt}</p>
-                  </>
-                )}
-
-                {community.whatWeDo && (
-                  <>
-                    <h2 className="text-2xl font-bold text-text-dark mb-4">What We Do</h2>
-                    <p className="text-text-light mb-6">{community.whatWeDo}</p>
-                  </>
-                )}
-
-                {community.vision && (
-                  <>
-                    <h2 className="text-2xl font-bold text-text-dark mb-4">Vision</h2>
-                    <p className="text-text-light mb-6">{community.vision}</p>
-                  </>
-                )}
-
-                {community.mission && (
-                  <>
-                    <h2 className="text-2xl font-bold text-text-dark mb-4">Mission</h2>
-                    <p className="text-text-light mb-6">{community.mission}</p>
-                  </>
-                )}
-
-                <h2 className="text-2xl font-bold text-text-dark mb-4">Activities</h2>
-                <ul className="list-disc list-inside text-text-light space-y-2 mb-6">
-                  {community.activities.map((activity, index) => (
-                    <li key={index}>{activity}</li>
-                  ))}
-                </ul>
+                {/* Dynamic sections mapping */}
+                {sections.map((section, index) => (
+                  <CommunitySection
+                    key={index}
+                    title={section.title}
+                    content={section.content}
+                    type={section.type}
+                  />
+                ))}
               </div>
 
               <div>
-                <h2 className="text-2xl font-bold text-text-dark mb-4">Achievements</h2>
-                <ul className="list-disc list-inside text-text-light space-y-2 mb-8">
-                  {community.achievements.map((achievement, index) => (
-                    <li key={index}>{achievement}</li>
-                  ))}
-                </ul>
+                {community.achievements && community.achievements.length > 0 && (
+                  <>
+                    <h2 className="text-2xl font-bold text-text-dark mb-4">Achievements</h2>
+                    <ul className="list-disc list-inside text-text-light space-y-2 mb-8">
+                      {community.achievements.map((achievement, index) => (
+                        <li key={index}>{achievement}</li>
+                      ))}
+                    </ul>
+                  </>
+                )}
 
                 {community.execomTeam && community.execomTeam.length > 0 && (
                   <div className="mb-8">
@@ -133,12 +93,27 @@ const CommunityPage = () => {
                         <div key={index} className="bg-primary/10 rounded-lg p-4 flex items-center space-x-4">
                           <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
                             <img
-                              src={member.image}
+                              src={member.image || `/img/communities/${id}/execom/${member.name.toLowerCase().replace(/\s+/g, '_')}.jpg`}
                               alt={member.name}
                               className="w-full h-full object-cover"
                               onError={(e) => {
                                 e.target.onerror = null;
-                                e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=random`;
+                                // Try alternative image formats and fallback to avatar
+                                const altFormats = ['jpeg', 'png', 'webp'];
+                                const baseName = member.name.toLowerCase().replace(/\s+/g, '_');
+                                let formatIndex = 0;
+                                
+                                const tryNextFormat = () => {
+                                  if (formatIndex < altFormats.length) {
+                                    e.target.src = `/img/communities/${id}/execom/${baseName}.${altFormats[formatIndex]}`;
+                                    formatIndex++;
+                                  } else {
+                                    e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=random`;
+                                  }
+                                };
+                                
+                                e.target.onerror = tryNextFormat;
+                                tryNextFormat();
                               }}
                             />
                           </div>
@@ -153,6 +128,7 @@ const CommunityPage = () => {
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="text-accent hover:text-accent-dark"
+                                  title="LinkedIn"
                                 >
                                   <FaLinkedin size={20} />
                                 </a>
@@ -163,8 +139,20 @@ const CommunityPage = () => {
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="text-text-light hover:text-text-dark"
+                                  title="GitHub"
                                 >
                                   <FaGithub size={20} />
+                                </a>
+                              )}
+                              {member.fossUnited && (
+                                <a
+                                  href={member.fossUnited}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-orange-500 hover:text-orange-600"
+                                  title="FOSS United Profile"
+                                >
+                                  <FaExternalLinkAlt size={18} />
                                 </a>
                               )}
                             </div>
@@ -175,22 +163,74 @@ const CommunityPage = () => {
                   </div>
                 )}
 
+                {community.socialMedia && (
+                  <div className="mb-8">
+                    <h2 className="text-xl font-bold text-text-dark mb-4">Follow Us</h2>
+                    <div className="flex space-x-4">
+                      {community.socialMedia.instagram && (
+                        <a
+                          href={community.socialMedia.instagram.startsWith('http') 
+                            ? community.socialMedia.instagram 
+                            : `https://www.instagram.com/${community.socialMedia.instagram}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center text-pink-600 hover:text-pink-700 transition-colors"
+                          title="Instagram"
+                        >
+                          <FaInstagram size={24} className="mr-2" />
+                          <span className="text-sm">Instagram</span>
+                        </a>
+                      )}
+                      {community.socialMedia.linkedin && (
+                        <a
+                          href={community.socialMedia.linkedin}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center text-blue-600 hover:text-blue-700 transition-colors"
+                          title="LinkedIn"
+                        >
+                          <FaLinkedin size={24} className="mr-2" />
+                          <span className="text-sm">LinkedIn</span>
+                        </a>
+                      )}
+                      {community.socialMedia.website && (
+                        <a
+                          href={community.socialMedia.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center text-green-600 hover:text-green-700 transition-colors"
+                          title="Website"
+                        >
+                          <FaGlobe size={24} className="mr-2" />
+                          <span className="text-sm">Website</span>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 <div className="p-6 bg-primary/10 rounded-lg">
                   <h2 className="text-xl font-bold text-text-dark mb-4">Contact</h2>
-                  {community.execomTeam && community.execomTeam.length > 0 ? (
+                  {/* Prioritize contact object over execomTeam */}
+                  {community.contact && (community.contact.coordinator || community.contact.email) ? (
+                    <>
+                      <p className="text-text-light">Coordinator: {community.contact.coordinator}</p>
+                      <p className="text-text-light">Email: {community.contact.email}</p>
+                    </>
+                  ) : community.execomTeam && community.execomTeam.length > 0 ? (
                     <>
                       <p className="text-text-light">Coordinator: {community.execomTeam[0].name}</p>
                       <p className="text-text-light">Email: {community.execomTeam[0].contact}</p>
                     </>
                   ) : (
-                    <>
-                      <p className="text-text-light">Coordinator: {community.contact.coordinator}</p>
-                      <p className="text-text-light">Email: {community.contact.email}</p>
-                    </>
+                    <p className="text-text-light">Contact information not available</p>
                   )}
                 </div>
               </div>
             </div>
+            
+            {/* Community Gallery */}
+            <CommunityGallery galleryImages={community.galleryImages} />
           </motion.div>
         </div>
       </section>

@@ -733,4 +733,81 @@ router.post(
   }
 );
 
+// @route   PUT /api/users/:id/display-order
+// @desc    Update user display order for specific team year (admin only)
+// @access  Private
+router.put(
+  "/:id/display-order",
+  authenticateToken,
+  authorizeRoles("admin"),
+  [
+    body("displayOrder")
+      .isInt({ min: 0 })
+      .withMessage("Display order must be a non-negative integer"),
+    body("teamYear")
+      .optional()
+      .isString()
+      .withMessage("Team year must be a string"),
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          message: "Validation failed",
+          details: errors.array().map((err) => err.msg),
+        });
+      }
+
+      const { id } = req.params;
+      const { displayOrder, teamYear } = req.body;
+      const currentYear = teamYear || new Date().getFullYear().toString();
+
+      const user = await User.findById(id);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+      }
+
+      // Update global display order
+      user.displayOrder = displayOrder;
+
+      // Update yearly display order
+      user.yearlyDisplayOrders.set(currentYear, displayOrder);
+
+      // If updating yearly roles, also update the order there
+      const yearlyRole = user.yearlyRoles.find(
+        (yr) => yr.year === parseInt(currentYear)
+      );
+      if (yearlyRole) {
+        yearlyRole.order = displayOrder;
+      }
+
+      await user.save();
+
+      res.status(200).json({
+        success: true,
+        message: `Display order for ${user.name} updated successfully`,
+        data: {
+          user: {
+            id: user._id,
+            name: user.name,
+            displayOrder: user.displayOrder,
+            yearlyDisplayOrders: Object.fromEntries(user.yearlyDisplayOrders),
+          },
+        },
+      });
+    } catch (error) {
+      console.error("Update display order error:", error);
+      res.status(500).json({
+        success: false,
+        message: "An error occurred while updating display order",
+      });
+    }
+  }
+);
+
 export default router;

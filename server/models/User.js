@@ -19,8 +19,8 @@ const userSchema = new mongoose.Schema(
       minlength: [3, "Username must be at least 3 characters long"],
       maxlength: [20, "Username cannot exceed 20 characters"],
       match: [
-        /^[a-z0-9_]+$/,
-        "Username can only contain lowercase letters, numbers, and underscores",
+        /^[a-zA-Z0-9_]+$/,
+        "Username can only contain letters, numbers, and underscores",
       ],
     },
     email: {
@@ -48,6 +48,7 @@ const userSchema = new mongoose.Schema(
         "co_lead",
         "coordinator",
         "member",
+        "execom",
         "iic_admin",
       ],
       default: "member",
@@ -69,6 +70,7 @@ const userSchema = new mongoose.Schema(
             "co_lead",
             "coordinator",
             "member",
+            "execom",
             "iic_admin",
           ],
           required: true,
