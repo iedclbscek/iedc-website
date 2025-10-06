@@ -6,9 +6,6 @@ import { communities } from '../../data/communitiesData';
 const CommunitiesSection = () => {
   const [isHovered, setIsHovered] = useState(false);
 
-  // Duplicate the list for seamless looping
-  const marqueeCommunities = [...communities, ...communities];
-
   return (
     <section id="communities" className="py-24 bg-primary/5">
       <div className="container mx-auto px-6">
@@ -106,7 +103,7 @@ const CommunitiesSection = () => {
           className="text-center mt-12"
         >
           <Link 
-            to="/communities"
+            to="/nexus"
             className="inline-flex items-center justify-center px-8 py-3 border-2 border-accent text-accent font-medium rounded-full hover:bg-accent hover:text-white transition-colors transform hover:-translate-y-1"
           >
             Explore All Communities

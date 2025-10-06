@@ -13,6 +13,7 @@ const RegistrationPage = () => {
     department: '',
     yearOfJoining: '',
     semester: '',
+    isLateralEntry: false, // Added for lateral entry students
     interests: [],
     nonTechInterests: '',
     experience: '',
@@ -73,10 +74,10 @@ const RegistrationPage = () => {
   ];
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     }));
     
     // Reset email verification if email changes
@@ -292,6 +293,7 @@ const RegistrationPage = () => {
         department: formData.department,
         yearOfJoining: formData.yearOfJoining,
         semester: formData.semester,
+        isLateralEntry: formData.isLateralEntry === true, // Ensure it's a proper boolean
         interests: formData.interests,
         nonTechInterests: formData.nonTechInterests,
         experience: formData.experience,
@@ -320,6 +322,7 @@ const RegistrationPage = () => {
         department: '',
         yearOfJoining: '',
         semester: '',
+        isLateralEntry: false,
         interests: [],
         nonTechInterests: '',
         experience: '',
@@ -591,6 +594,26 @@ const RegistrationPage = () => {
                       <option key={sem} value={sem}>{sem}</option>
                     ))}
                   </select>
+                </div>
+
+                {/* Lateral Entry Checkbox */}
+                <div className="sm:col-span-2">
+                  <div className="flex items-center mt-4">
+                    <input
+                      type="checkbox"
+                      id="isLateralEntry"
+                      name="isLateralEntry"
+                      checked={formData.isLateralEntry}
+                      onChange={handleInputChange}
+                      className="h-4 w-4 text-accent focus:ring-accent border-gray-300 rounded"
+                    />
+                    <label htmlFor="isLateralEntry" className="ml-2 block text-sm font-medium text-text-dark">
+                      I am a lateral entry student
+                    </label>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Check this box if you joined through lateral entry scheme (directly to a higher semester)
+                  </p>
                 </div>
               </div>
             </div>

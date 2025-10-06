@@ -30,6 +30,13 @@ console.log(
 );
 console.log("MONGODB_URI:", process.env.MONGODB_URI ? "✅ Set" : "❌ Not Set");
 console.log("JWT_SECRET:", process.env.JWT_SECRET ? "✅ Set" : "❌ Not Set");
+console.log("EMAIL_USER:", process.env.EMAIL_USER ? "✅ Set" : "❌ Not Set");
+console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "✅ Set" : "❌ Not Set");
+console.log("EMAIL_FROM:", process.env.EMAIL_FROM ? "✅ Set" : "❌ Not Set");
+console.log(
+  "RESEND_API_KEY:",
+  process.env.RESEND_API_KEY ? "✅ Set" : "❌ Not Set"
+);
 console.log("---");
 
 // Import routes
@@ -38,6 +45,7 @@ import userRoutes from "./routes/users.js";
 import eventRoutes from "./routes/events.js";
 import registrationRoutes from "./routes/registrations.js";
 import uploadRoutes from "./routes/upload.js";
+import execomRoutes from "./routes/execom.js";
 //import googleAuthRoutes from "./routes/googleAuth.js";
 
 const app = express();
@@ -80,6 +88,8 @@ if (process.env.NODE_ENV === "development") {
     process.env.FRONTEND_URL || "http://localhost:5173",
     "http://localhost:5173",
     "http://localhost:3000",
+    "https://www.iedclbscek.in",
+    "https://iedclbscek.in",
     "https://iedclbscekapi.onrender.com",
     "https://das-nabvuax2d-umar-al-mukhtar-s-projects.vercel.app",
     /\.onrender\.com$/,
@@ -136,6 +146,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/registrations", registrationRoutes);
 app.use("/api/upload", uploadRoutes);
+app.use("/api/execom", execomRoutes);
 //app.use("/auth", googleAuthRoutes);
 
 // Health check endpoint
