@@ -88,9 +88,14 @@ router.post("/", upload.single("payment_proof"), async (req, res) => {
       `,
     };
 
-    // Send email asynchronously (don't wait for it to finish to respond to client)
-    queueEmail(mailOptions).catch((err) =>
-      console.error("Failed to send donation email:", err)
+    // Send emails (awaiting them to ensure they complete in serverless environment)
+    const emailPromises = [];
+
+    // 1. Email to Donor
+    emailPromises.push(
+      queueEmail(mailOptions).catch((err) =>
+        console.error("Failed to send donation email to donor:", err)
+      )
     );
 
     // Send notification email to Admin
@@ -150,10 +155,16 @@ router.post("/", upload.single("payment_proof"), async (req, res) => {
           </div>
         `,
       };
-      queueEmail(adminMailOptions).catch((err) =>
-        console.error("Failed to send admin notification:", err)
+
+      emailPromises.push(
+        queueEmail(adminMailOptions).catch((err) =>
+          console.error("Failed to send admin notification:", err)
+        )
       );
     }
+
+    // Wait for all emails to be processed
+    await Promise.all(emailPromises);
 
     res.status(201).json({
       success: true,
@@ -180,6 +191,30 @@ router.get("/verify/:id", async (req, res) => {
     if (!donation) {
       return res.status(404).send("Donation not found");
     }
+
+    // Send verification email to donor
+    const mailOptions = {
+      to: donation.email,
+      subject: "Donation Verified - IEDC Summit 2025",
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #4CAF50;">Donation Verified!</h2>
+          <p>Dear ${donation.name},</p>
+          <p>We are happy to inform you that your donation of <strong>₹${donation.amount}</strong> has been successfully verified.</p>
+          ${
+            donation.show_on_wall
+              ? "<p>Your name has been added to our Donor Wall.</p>"
+              : ""
+          }
+          <p>Thank you once again for your generous support towards IEDC Summit 2025.</p>
+          <p>Best regards,<br>IEDC LBSCEK Team</p>
+        </div>
+      `,
+    };
+
+    await queueEmail(mailOptions).catch((err) =>
+      console.error("Failed to send verification email:", err)
+    );
 
     res.send(`
       <html>
