@@ -136,11 +136,36 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 // Serve static files from uploads directory
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Database connection
-mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(() => console.log("📊 MongoDB connected successfully"))
-  .catch((err) => console.error("❌ MongoDB connection error:", err));
+// Database connection function
+const connectDB = async () => {
+  if (mongoose.connections[0].readyState) {
+    return;
+  }
+  try {
+    await mongoose.connect(process.env.MONGODB_URI);
+    console.log("📊 MongoDB connected successfully");
+  } catch (err) {
+    console.error("❌ MongoDB connection error:", err);
+    throw err;
+  }
+};
+
+// Middleware to ensure DB connection
+app.use(async (req, res, next) => {
+  // Skip DB connection for static files or health check if needed,
+  // but generally we want it for API routes.
+  if (req.path === "/api/health") {
+    // Optional: allow health check without DB, or keep it to verify DB too.
+    // Let's keep it simple and connect for everything to be safe.
+  }
+
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    res.status(500).json({ error: "Database connection failed" });
+  }
+});
 
 // Routes
 app.use("/api/auth", authRoutes);
