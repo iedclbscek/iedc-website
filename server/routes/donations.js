@@ -200,7 +200,9 @@ router.get("/verify/:id", async (req, res) => {
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #4CAF50;">Donation Verified!</h2>
           <p>Dear ${donation.name},</p>
-          <p>We are happy to inform you that your donation of <strong>₹${donation.amount}</strong> has been successfully verified.</p>
+          <p>We are happy to inform you that your donation of <strong>₹${
+            donation.amount
+          }</strong> has been successfully verified.</p>
           ${
             donation.show_on_wall
               ? "<p>Your name has been added to our Donor Wall.</p>"
