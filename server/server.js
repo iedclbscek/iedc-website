@@ -188,10 +188,12 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`🚀 IEDC Dashboard Server running on port ${PORT}`);
-  console.log(`🌍 Environment: ${process.env.NODE_ENV}`);
-  console.log(`📱 Client URL: ${process.env.CLIENT_URL}`);
-});
+if (process.argv[1] === __filename) {
+  app.listen(PORT, () => {
+    console.log(`🚀 IEDC Dashboard Server running on port ${PORT}`);
+    console.log(`🌍 Environment: ${process.env.NODE_ENV}`);
+    console.log(`📱 Client URL: ${process.env.CLIENT_URL}`);
+  });
+}
 
 export default app;
