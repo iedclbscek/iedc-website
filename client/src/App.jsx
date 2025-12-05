@@ -29,6 +29,7 @@ import DashboardPage from './pages/DashboardPage';
 import RegistrationPage from './pages/RegistrationPage';
 import ExecomCallFormPage from './pages/ExecomCallFormPage';
 import ExecomDashboardPage from './pages/ExecomDashboardPage';
+import CrowdfundingPage from './pages/CrowdfundingPage';
 
 // Placeholder page component
 const PlaceholderPage = ({ title }) => (
@@ -99,6 +100,7 @@ const AppContent = () => {
           <Route path="/nexus/:id" element={<CommunityPage />} />
           <Route path="/register" element={<RegistrationPage />} />
           <Route path="/execom-call" element={<ExecomCallFormPage />} />
+          <Route path="/crowdfunding" element={<CrowdfundingPage />} />
           <Route path="*" element={<PlaceholderPage title="Page Not Found" />} />
         </Routes>
       </main>
