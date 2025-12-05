@@ -14,6 +14,8 @@ export default function CrowdfundingPage() {
   const today = new Date()
   const isFundingClosed = today >= fundingCloseDate
 
+  const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+
   // Fetch verified donors and testimonials on mount
   useEffect(() => {
     fetchDonors()
@@ -22,7 +24,7 @@ export default function CrowdfundingPage() {
 
   const fetchDonors = async () => {
     try {
-      const res = await fetch('/api/donations')
+      const res = await fetch(`${API_BASE_URL}/api/donations`)
       const data = await res.json()
       if (data.success && data.data && data.data.length > 0) {
         setDonors(data.data.map((d) => ({
@@ -46,7 +48,7 @@ export default function CrowdfundingPage() {
 
   const fetchTestimonials = async () => {
     try {
-      const res = await fetch('/api/testimonials')
+      const res = await fetch(`${API_BASE_URL}/api/testimonials`)
       const data = await res.json()
       if (data.success && data.data && data.data.length > 0) {
         setTestimonials(data.data)
@@ -65,7 +67,7 @@ export default function CrowdfundingPage() {
       formData.append('amount', amount)
       formData.append('donor_type', donorType)
 
-      const res = await fetch('/api/donations', {
+      const res = await fetch(`${API_BASE_URL}/api/donations`, {
         method: 'POST',
         body: formData
       })
