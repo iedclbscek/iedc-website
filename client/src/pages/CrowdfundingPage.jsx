@@ -13,9 +13,6 @@ export default function CrowdfundingPage() {
   const fundingCloseDate = new Date('2025-12-19')
   const today = new Date()
   const isFundingClosed = today >= fundingCloseDate
-  
-  // Calculate days remaining
-  const daysRemaining = Math.ceil((fundingCloseDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
 
   // Fetch verified donors and testimonials on mount
   useEffect(() => {
@@ -90,39 +87,6 @@ export default function CrowdfundingPage() {
 
   return (
     <main className="min-h-screen bg-white">
-      {/* Navbar */}
-      <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-6xl">
-        <div className="bg-white/80 backdrop-blur-md rounded-full shadow-lg border border-gray-200 px-6 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <span className="text-2xl">🚀</span>
-              <div className="flex flex-col">
-                <span className="font-bold text-gray-900 text-sm md:text-base">IEDC Crowdfunding Campaign</span>
-                <span className="text-xs text-gray-500 hidden sm:block">SUMMIT 2025</span>
-              </div>
-            </div>
-            <div className="hidden md:flex items-center space-x-6">
-              <a href="#impact" className="text-gray-600 hover:text-gray-900 transition">Impact</a>
-              <a href="#testimonials" className="text-gray-600 hover:text-gray-900 transition">Stories</a>
-              <a href="#donors" className="text-gray-600 hover:text-gray-900 transition">Donors</a>
-              {!isFundingClosed ? (
-                <button onClick={() => setStep(1)} className="bg-black text-white px-6 py-2 rounded-full hover:bg-gray-800 transition">
-                  Donate Now
-                </button>
-              ) : (
-                <span className="text-red-600 font-semibold">Funding Closed</span>
-              )}
-            </div>
-            {!isFundingClosed ? (
-              <button onClick={() => setStep(1)} className="md:hidden bg-black text-white px-6 py-2 rounded-full hover:bg-gray-800 transition">
-                Donate
-              </button>
-            ) : (
-              <span className="md:hidden text-red-600 font-semibold text-sm">Closed</span>
-            )}
-          </div>
-        </div>
-      </nav>
 
       {/* Hero Section */}
       <section className="relative bg-white border-b pt-24">
@@ -137,27 +101,6 @@ export default function CrowdfundingPage() {
             <p className="text-lg text-gray-600 mb-8">
               Your contribution directly funds the summit's events, competitions, workshops, and resources for the next generation of student entrepreneurs.
             </p>
-            
-            {/* Countdown/Status */}
-            {!isFundingClosed ? (
-              <div className="mb-8">
-                <div className="inline-block bg-orange-50 border border-orange-200 rounded-lg px-6 py-3">
-                  <p className="text-orange-800 font-semibold">
-                    ⏰ Funding closes in {daysRemaining} {daysRemaining === 1 ? 'day' : 'days'} (19th Dec 2025)
-                  </p>
-                  <p className="text-orange-600 text-sm mt-1">Event Date: 22nd December 2025</p>
-                </div>
-              </div>
-            ) : (
-              <div className="mb-8">
-                <div className="inline-block bg-red-50 border border-red-200 rounded-lg px-6 py-3">
-                  <p className="text-red-800 font-semibold">
-                    🔒 Crowdfunding has closed
-                  </p>
-                  <p className="text-red-600 text-sm mt-1">Thank you to all our alumni contributors!</p>
-                </div>
-              </div>
-            )}
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               {!isFundingClosed ? (
@@ -233,36 +176,9 @@ export default function CrowdfundingPage() {
                 </div>
               ))
             ) : (
-              <>
-                <div className="bg-white p-8 rounded-lg border">
-                  <p className="text-gray-700 mb-4 italic">
-                    "IEDC gave me the platform to experiment, fail, and learn. Now I want to ensure current students have even better resources to chase their startup dreams."
-                  </p>
-                  <div className="flex items-center">
-                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mr-4">
-                      <span className="font-bold text-gray-900">AK</span>
-                    </div>
-                    <div>
-                      <p className="font-semibold">Anand Kumar</p>
-                      <p className="text-sm text-gray-500">Batch 2012-2016 • Founder, TechStartup</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-white p-8 rounded-lg border">
-                  <p className="text-gray-700 mb-4 italic">
-                    "The hackathons and projects I worked on through IEDC shaped my career. Giving back means more students get to experience that same growth."
-                  </p>
-                  <div className="flex items-center">
-                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mr-4">
-                      <span className="font-bold text-gray-900">SM</span>
-                    </div>
-                    <div>
-                      <p className="font-semibold">Sneha Menon</p>
-                      <p className="text-sm text-gray-500">Batch 2014-2018 • Product Manager, Amazon</p>
-                    </div>
-                  </div>
-                </div>
-              </>
+              <div className="col-span-2 text-center text-gray-500 italic">
+                No testimonials yet. Be the first to share your support!
+              </div>
             )}
           </div>
         </div>
@@ -512,12 +428,24 @@ export default function CrowdfundingPage() {
                 <p className="text-xs text-gray-500 mt-1">Your testimonial may be featured on our website</p>
               </div>
 
-              <button type="submit" disabled={isSubmitting} className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 disabled:bg-gray-400">
-                {isSubmitting ? 'Submitting...' : 'Submit'}
-              </button>
-              <button type="button" onClick={() => setStep(3)} className="w-full text-gray-500 hover:text-gray-700">
-                Back
-              </button>
+              {isSubmitting ? (
+                <div className="space-y-3">
+                  <div className="w-full bg-gray-50 border border-gray-200 rounded-lg p-4 flex flex-col items-center justify-center">
+                    <div className="animate-spin w-8 h-8 border-4 border-black border-t-transparent rounded-full mb-3"></div>
+                    <p className="font-medium text-gray-900">Uploading Payment Proof...</p>
+                    <p className="text-xs text-gray-500 mt-1">Please do not close this window</p>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <button type="submit" className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition-colors">
+                    Submit Donation
+                  </button>
+                  <button type="button" onClick={() => setStep(3)} className="w-full text-gray-500 hover:text-gray-700 transition-colors">
+                    Back
+                  </button>
+                </>
+              )}
             </form>
           </div>
         </div>

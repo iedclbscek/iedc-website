@@ -267,7 +267,7 @@ const processEmailQueue = async () => {
 };
 
 // Queue email for rate-limited sending
-const queueEmail = (mailOptions) => {
+export const queueEmail = (mailOptions) => {
   // Enforce a verified FROM when SendGrid is used (or any provider requiring strict FROM)
   const verifiedFrom = getVerifiedFromAddress();
   const enforcedMailOptions = {

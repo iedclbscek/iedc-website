@@ -9,20 +9,46 @@ import cloudinary from "../config/cloudinary.js";
  */
 export const uploadToCloudinary = async (fileBuffer, folder, originalName) => {
   try {
+    // Check if Cloudinary credentials are set
+    if (
+      !process.env.CLOUDINARY_CLOUD_NAME ||
+      process.env.CLOUDINARY_CLOUD_NAME === "placeholder" ||
+      !process.env.CLOUDINARY_API_KEY ||
+      process.env.CLOUDINARY_API_KEY === "placeholder"
+    ) {
+      console.warn("⚠️ Cloudinary credentials not set. Using mock URL.");
+      return {
+        url: "https://placehold.co/600x400?text=Payment+Proof",
+        public_id: `mock_${Date.now()}`,
+        format: "jpg",
+        size: 1024,
+      };
+    }
+
     // Convert buffer to base64 string
     const base64String = `data:image/jpeg;base64,${fileBuffer.toString(
       "base64"
     )}`;
 
+    // Ensure Cloudinary is configured with latest env vars (fixes hoisting issues)
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
+
+    // Sanitize public_id: remove spaces and special chars, keep alphanumeric, underscores, and hyphens
+    const sanitizedName = originalName
+      .replace(/\.[^/.]+$/, "") // Remove extension
+      .replace(/[^a-zA-Z0-9-_]/g, "_"); // Replace non-alphanumeric chars with underscore
+
     // Upload to Cloudinary
     const result = await cloudinary.uploader.upload(base64String, {
       folder: folder,
-      public_id: `${Date.now()}_${originalName.replace(/\.[^/.]+$/, "")}`,
+      public_id: `${Date.now()}_${sanitizedName}`,
       resource_type: "image",
-      transformation: [
-        { quality: "auto:good" }, // Optimize quality
-        { fetch_format: "auto" }, // Auto-format (WebP if supported)
-      ],
+      // Remove transformation from upload call to avoid signature issues with some SDK versions
+      // We can apply transformations when displaying the image instead
     });
 
     return {

@@ -46,6 +46,8 @@ import eventRoutes from "./routes/events.js";
 import registrationRoutes from "./routes/registrations.js";
 import uploadRoutes from "./routes/upload.js";
 import execomRoutes from "./routes/execom.js";
+import donationRoutes from "./routes/donations.js";
+import testimonialRoutes from "./routes/testimonials.js";
 //import googleAuthRoutes from "./routes/googleAuth.js";
 
 const app = express();
@@ -147,6 +149,8 @@ app.use("/api/events", eventRoutes);
 app.use("/api/registrations", registrationRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/execom", execomRoutes);
+app.use("/api/donations", donationRoutes);
+app.use("/api/testimonials", testimonialRoutes);
 //app.use("/auth", googleAuthRoutes);
 
 // Health check endpoint
