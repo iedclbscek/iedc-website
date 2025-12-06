@@ -1,9 +1,73 @@
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 
 const HeroSection = () => {
+  const [showPopup, setShowPopup] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowPopup(true);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <section className="relative min-h-screen flex items-center bg-primary/5 overflow-hidden">
+      {/* Popup Modal */}
+      <AnimatePresence>
+        {showPopup && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowPopup(false)}
+          >
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-2xl p-8 max-w-lg w-full shadow-2xl relative overflow-hidden"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-600 to-purple-600"></div>
+              <button 
+                onClick={() => setShowPopup(false)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+
+              <div className="text-center mb-8">
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Support IEDC Summit 2025 🚀</h3>
+                <p className="text-gray-600">Join us in making the biggest student entrepreneurship event a reality. Choose your contribution path below.</p>
+              </div>
+
+              <div className="space-y-4">
+                <Link 
+                  to="/crowdfunding" 
+                  className="block w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 rounded-xl font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-200 text-center group"
+                >
+                  <span className="block text-sm opacity-90 mb-1">For Alumni</span>
+                  <span className="text-lg">Alumni Crowdfunding</span>
+                </Link>
+
+                <Link 
+                  to="/ksd-crowdfunding" 
+                  className="block w-full bg-white border-2 border-gray-200 text-gray-800 p-4 rounded-xl font-semibold hover:border-blue-600 hover:text-blue-600 hover:shadow-md hover:scale-[1.02] transition-all duration-200 text-center"
+                >
+                  <span className="block text-sm text-gray-500 mb-1 group-hover:text-blue-500">For General Public & Kasaragod Residents</span>
+                  <span className="text-lg">Community Support</span>
+                </Link>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Decorative elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-20 left-[10%] w-64 h-64 bg-accent/5 rounded-full blur-3xl"></div>

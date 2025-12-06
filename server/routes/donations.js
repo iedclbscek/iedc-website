@@ -21,31 +21,50 @@ router.get("/", async (req, res) => {
 });
 
 // POST /api/donations - Create a new donation
-router.post("/", upload.single("payment_proof"), async (req, res) => {
+// Using upload.any() to handle multipart/form-data even if no file is sent (since we upload proof beforehand)
+router.post("/", upload.any(), async (req, res) => {
   try {
+    console.log("Donation submission received");
+    console.log("Body:", req.body);
+    
+    // If files were sent by mistake, we can ignore them or log them
+    if (req.files && req.files.length > 0) {
+      console.log("Files received (unexpected):", req.files);
+    }
+
     const {
       name,
-      batch,
+      batch = "Community", // Default to "Community" if not provided (e.g. for KSD crowdfunding)
       email,
       phone,
       amount,
       donor_type,
       show_on_wall,
       testimonial,
+      payment_proof_url
     } = req.body;
 
-    if (!req.file) {
+    let screenshotUrl;
+
+    // Check if file was uploaded in this request (legacy/fallback)
+    const file = req.files && req.files.find(f => f.fieldname === 'payment_proof');
+
+    if (file) {
+      // Upload screenshot to Cloudinary
+      const uploadResult = await uploadToCloudinary(
+        file.buffer,
+        "iedc/donations",
+        file.originalname
+      );
+      screenshotUrl = uploadResult.url;
+    } else if (payment_proof_url && payment_proof_url !== 'null' && payment_proof_url !== 'undefined') {
+      screenshotUrl = payment_proof_url;
+    } else {
+      console.log("Missing payment proof. Body:", req.body);
       return res
         .status(400)
         .json({ success: false, error: "Payment proof is required" });
     }
-
-    // Upload screenshot to Cloudinary
-    const uploadResult = await uploadToCloudinary(
-      req.file.buffer,
-      "iedc/donations",
-      req.file.originalname
-    );
 
     const newDonation = new Donation({
       name,
@@ -54,7 +73,7 @@ router.post("/", upload.single("payment_proof"), async (req, res) => {
       phone,
       amount,
       donorType: donor_type,
-      screenshot: uploadResult.url,
+      screenshot: screenshotUrl,
       showOnWall: show_on_wall === "true" || show_on_wall === true, // Handle string/boolean
       testimonial,
       status: "pending", // Default status
@@ -132,12 +151,8 @@ router.post("/", upload.single("payment_proof"), async (req, res) => {
 
             <h3>Payment Proof:</h3>
             <div style="margin: 20px 0; text-align: center;">
-              <img src="${
-                uploadResult.url
-              }" alt="Payment Proof" style="max-width: 100%; border: 1px solid #ddd; border-radius: 5px;" />
-              <p><a href="${
-                uploadResult.url
-              }" target="_blank">View Full Image</a></p>
+              <img src="${screenshotUrl}" alt="Payment Proof" style="max-width: 100%; border: 1px solid #ddd; border-radius: 5px;" />
+              <p><a href="${screenshotUrl}" target="_blank">View Full Image</a></p>
             </div>
 
             <div style="margin-top: 30px; text-align: center;">

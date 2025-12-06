@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { toast } from 'react-hot-toast'
 
-export default function CrowdfundingPage() {
+export default function KsdCrowdfundingPage() {
   const [step, setStep] = useState(0)
   const [donorType, setDonorType] = useState('')
   const [amount, setAmount] = useState('')
@@ -83,7 +83,7 @@ export default function CrowdfundingPage() {
       })
       const data = await res.json()
       
-      //console.log('Upload response:', data) // Debug log
+    //   console.log('Upload response:', data) // Debug log
 
       if (data.success) {
         if (!data.url) {
@@ -130,9 +130,9 @@ export default function CrowdfundingPage() {
       }
 
       // Log formData entries for debugging
-      // for (let [key, value] of formData.entries()) {
-      //   console.log(`${key}: ${value}`);
-      // }
+    //   for (let [key, value] of formData.entries()) {
+    //     console.log(`${key}: ${value}`);
+    //   }
 
       const res = await fetch(`${API_BASE_URL}/api/donations`, {
         method: 'POST',
@@ -162,10 +162,10 @@ export default function CrowdfundingPage() {
         <div className="max-w-5xl mx-auto px-6 py-20 md:py-32">
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight text-gray-900">
-              Alumni, Support IEDC SUMMIT 2025
+              Kasaragod Community,<br/>Support IEDC SUMMIT 2025
             </h1>
             <p className="text-xl md:text-2xl text-gray-700 mb-8 max-w-3xl mx-auto">
-              Dear LBSCEK Alumni, help us make IEDC SUMMIT 2025 the biggest celebration of student innovation and entrepreneurship at our alma mater.
+              Dear Kasaragod Community & Alumni, help us make IEDC SUMMIT 2025 the biggest celebration of student innovation and entrepreneurship in our region.
             </p>
             <p className="text-lg text-gray-600 mb-8">
               Your contribution directly funds the summit's events, competitions, workshops, and resources for the next generation of student entrepreneurs.
@@ -235,7 +235,7 @@ export default function CrowdfundingPage() {
       {/* Testimonial Section */}
       <section id="testimonials" className="bg-white py-16 border-t">
         <div className="max-w-5xl mx-auto px-6">
-          <h2 className="text-3xl font-bold text-center mb-12">Why Alumni Support IEDC SUMMIT 2025</h2>
+          <h2 className="text-3xl font-bold text-center mb-12">Why Community Supports Us</h2>
           <div className="grid md:grid-cols-2 gap-8">
             {testimonials.length > 0 ? (
               testimonials.map((testimonial, idx) => (
@@ -249,7 +249,7 @@ export default function CrowdfundingPage() {
                     </div>
                     <div>
                       <p className="font-semibold">{testimonial.name}</p>
-                      <p className="text-sm text-gray-500">IEDC Alumni</p>
+                      <p className="text-sm text-gray-500">IEDC Supporter</p>
                     </div>
                   </div>
                 </div>
@@ -265,7 +265,7 @@ export default function CrowdfundingPage() {
 
       {/* Donor Wall */}
       <section id="donors" className="max-w-5xl mx-auto px-6 py-16 bg-white border-t">
-        <h2 className="text-3xl font-bold text-center mb-12">Thank You, LBSCEK Alumni! 🙏</h2>
+        <h2 className="text-3xl font-bold text-center mb-12">Thank You, Kasaragod! 🙏</h2>
         <div className="bg-white rounded-lg border p-8">
           <div className="space-y-4 max-h-96 overflow-y-auto">
             {donors.map((donor, idx) => (
@@ -380,50 +380,7 @@ export default function CrowdfundingPage() {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-600">Account Name:</span>
-                      <span className="font-medium">IEDC LBS COLLEGE OF ENGINEERING</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Bank:</span>
-                      <span className="font-medium">Union Bank of India</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Account No:</span>
-                      <span className="font-mono">016922010002158</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">IFSC:</span>
-                      <span className="font-mono">UBIN0901695</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Branch:</span>
-                      <span className="font-medium">BOVIKAN</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <button onClick={() => setStep(4)} className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800">
-                    Paid via UPI — Upload Screenshot
-                  </button>
-                  <button onClick={() => setStep(4)} className="w-full border-2 border-black py-3 rounded-lg hover:bg-black hover:text-white">
-                    Paid via Bank Transfer — Upload Proof
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* International */}
-            {donorType === 'international' && (
-              <div>
-                <div className="bg-gray-50 border p-4 rounded-lg mb-4">
-                  <p className="font-semibold mb-3">Bank Account Details</p>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Account Name:</span>
-                      <span className="font-medium">IEDC LBS COLLEGE OF ENGINEERING</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Bank:</span>
-                      <span className="font-medium">Union Bank of India</span>
+                      <span className="font-medium">IEDC LBSCEK</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Account No:</span>
@@ -489,7 +446,6 @@ export default function CrowdfundingPage() {
                 {paymentProofUrl && <p className="text-xs text-green-600 mt-1">Proof uploaded successfully!</p>}
               </div>
               <input name="name" type="text" placeholder="Your Name" className="w-full border rounded-lg px-3 py-2" required />
-              <input name="batch" type="text" placeholder="Batch (e.g., 2015-2019)" className="w-full border rounded-lg px-3 py-2" />
               <input name="email" type="email" placeholder="Email" className="w-full border rounded-lg px-3 py-2" required />
               <input name="phone" type="tel" placeholder="Phone" className="w-full border rounded-lg px-3 py-2" required />
               {donorType === 'india' && parseInt(amount) >= 10000 && (
@@ -507,13 +463,13 @@ export default function CrowdfundingPage() {
 
               {/* Testimonial */}
               <div>
-                <label className="block text-sm font-medium mb-2">Share your IEDC LBSCEK story (Optional)</label>
+                <label className="block text-sm font-medium mb-2">Share your message (Optional)</label>
                 <textarea 
                   name="testimonial"
-                  placeholder="Tell us how IEDC impacted your journey..."
+                  placeholder="Tell us why you support IEDC..."
                   className="w-full border rounded-lg px-3 py-2 h-24 resize-none"
                 ></textarea>
-                <p className="text-xs text-gray-500 mt-1">Your testimonial may be featured on our website</p>
+                <p className="text-xs text-gray-500 mt-1">Your message may be featured on our website</p>
               </div>
 
               {isSubmitting ? (
@@ -544,31 +500,19 @@ export default function CrowdfundingPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg p-8 max-w-md w-full text-center">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl">✓</span>
+              <span className="text-3xl">🎉</span>
             </div>
-            <h3 className="text-2xl font-semibold mb-3">Thank you for powering the mission!</h3>
-            <p className="text-gray-600 mb-4">Your contribution has been recorded.</p>
-            <p className="text-sm text-gray-500 mb-6">Transaction Reference: #{Math.random().toString(36).substring(2, 11).toUpperCase()}</p>
-            <p className="text-sm text-gray-600 mb-6">You'll receive a confirmation email shortly.</p>
-            <button onClick={() => { setStep(0); setAmount(''); setDonorType(''); }} className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800">
+            <h3 className="text-2xl font-semibold mb-2">Thank You!</h3>
+            <p className="text-gray-600 mb-6">
+              Your donation has been submitted for verification. You will receive a confirmation email shortly.
+            </p>
+            <button onClick={() => setStep(0)} className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800">
               Close
             </button>
           </div>
         </div>
       )}
 
-      {/* Transparency Section */}
-      <section className="bg-white py-16 border-t">
-        <div className="max-w-5xl mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold mb-4">Complete Transparency</h2>
-          <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
-            Every rupee contributed by our alumni is accounted for. A detailed financial breakdown will be published after IEDC SUMMIT 2025, showing exactly how your contributions made the event successful.
-          </p>
-          <div className="inline-block bg-gray-50 border px-6 py-3 rounded-lg">
-            <p className="font-semibold">Alumni contributions go directly to IEDC LBSCEK's official account</p>
-          </div>
-        </div>
-      </section>
     </main>
   )
 }

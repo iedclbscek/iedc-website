@@ -57,6 +57,31 @@ router.post(
   }
 );
 
+// POST /api/upload/donation-proof
+router.post("/donation-proof", upload.single("payment_proof"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "No file uploaded" });
+    }
+
+    const result = await uploadToCloudinary(
+      req.file.buffer,
+      "iedc/donations",
+      req.file.originalname
+    );
+
+    res.json({
+      success: true,
+      url: result.url || result.secure_url, // Handle both mock and real responses
+      public_id: result.public_id
+    });
+  } catch (error) {
+    console.error("Donation proof upload error:", error);
+    // Pass error to the error handling middleware
+    throw error;
+  }
+});
+
 // Error handling middleware for multer
 router.use((error, req, res, next) => {
   console.log("Multer error:", error);
