@@ -357,7 +357,7 @@ export default function KsdCrowdfundingPage() {
                 <div className="bg-gray-50 border p-6 rounded-lg mb-4 text-center">
                   <img src="/qr1.jpg" alt="UPI QR Code" className="w-48 h-48 mx-auto mb-3 object-contain" />
                   <p className="text-sm text-gray-600 mb-2">Scan to pay via UPI</p>
-                  <p className="font-mono text-base text-gray-900 mb-2">78707501@ubinb</p>
+                  <p className="font-mono text-base text-gray-900 mb-2">78707501@ubin</p>
                   <p className="text-xs text-gray-500">Fast-track UPI flow, typically under 30 seconds</p>
                 </div>
                 <button onClick={() => setStep(4)} className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800">
@@ -373,7 +373,7 @@ export default function KsdCrowdfundingPage() {
                   <p className="font-semibold mb-3">UPI Payment</p>
                   <img src="/qr1.jpg" alt="UPI QR Code" className="w-40 h-40 mx-auto mb-2 object-contain" />
                   <p className="text-sm text-gray-600 text-center mb-1">Scan to pay via UPI</p>
-                  <p className="font-mono text-sm text-gray-900 text-center">78707501@ubinb</p>
+                  <p className="font-mono text-sm text-gray-900 text-center">78707501@ubin</p>
                 </div>
                 <div className="bg-gray-50 border p-4 rounded-lg mb-4">
                   <p className="font-semibold mb-3">Bank Transfer</p>
