@@ -26,7 +26,7 @@ router.post("/", upload.any(), async (req, res) => {
   try {
     console.log("Donation submission received");
     console.log("Body:", req.body);
-    
+
     // If files were sent by mistake, we can ignore them or log them
     if (req.files && req.files.length > 0) {
       console.log("Files received (unexpected):", req.files);
@@ -41,13 +41,14 @@ router.post("/", upload.any(), async (req, res) => {
       donor_type,
       show_on_wall,
       testimonial,
-      payment_proof_url
+      payment_proof_url,
     } = req.body;
 
     let screenshotUrl;
 
     // Check if file was uploaded in this request (legacy/fallback)
-    const file = req.files && req.files.find(f => f.fieldname === 'payment_proof');
+    const file =
+      req.files && req.files.find((f) => f.fieldname === "payment_proof");
 
     if (file) {
       // Upload screenshot to Cloudinary
@@ -57,7 +58,11 @@ router.post("/", upload.any(), async (req, res) => {
         file.originalname
       );
       screenshotUrl = uploadResult.url;
-    } else if (payment_proof_url && payment_proof_url !== 'null' && payment_proof_url !== 'undefined') {
+    } else if (
+      payment_proof_url &&
+      payment_proof_url !== "null" &&
+      payment_proof_url !== "undefined"
+    ) {
       screenshotUrl = payment_proof_url;
     } else {
       console.log("Missing payment proof. Body:", req.body);

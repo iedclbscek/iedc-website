@@ -201,16 +201,16 @@ app.use((err, req, res, next) => {
   console.error("❌ Server Error:", err.stack);
 
   // Handle Multer errors
-  if (err.name === 'MulterError') {
-    if (err.code === 'LIMIT_FILE_SIZE') {
+  if (err.name === "MulterError") {
+    if (err.code === "LIMIT_FILE_SIZE") {
       return res.status(400).json({
         success: false,
-        error: 'File is too large. Maximum size allowed is 5MB.'
+        error: "File is too large. Maximum size allowed is 5MB.",
       });
     }
     return res.status(400).json({
       success: false,
-      error: err.message
+      error: err.message,
     });
   }
 
