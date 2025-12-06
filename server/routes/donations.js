@@ -81,12 +81,13 @@ router.post("/", upload.any(), async (req, res) => {
       screenshot: screenshotUrl,
       showOnWall: show_on_wall === "true" || show_on_wall === true, // Handle string/boolean
       testimonial,
-      status: "pending", // Default status
+      status: "verified", // Auto-verify for now
     });
 
     await newDonation.save();
 
     // Send confirmation email to the donor
+    /*
     const mailOptions = {
       to: email,
       subject: "Thank you for your contribution to IEDC Summit 2025",
@@ -111,16 +112,19 @@ router.post("/", upload.any(), async (req, res) => {
         </div>
       `,
     };
+    */
 
     // Send emails (awaiting them to ensure they complete in serverless environment)
     const emailPromises = [];
 
     // 1. Email to Donor
+    /*
     emailPromises.push(
       queueEmail(mailOptions).catch((err) =>
         console.error("Failed to send donation email to donor:", err)
       )
     );
+    */
 
     // Send notification email to Admin
     const adminEmail = process.env.EMAIL_USER; // Or process.env.ADMIN_EMAIL
