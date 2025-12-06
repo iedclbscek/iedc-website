@@ -10,10 +10,18 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   try {
     const donors = await Donation.find({ status: "verified" })
-      .select("name batch amount created_at")
+      .select("name batch amount created_at showOnWall")
       .sort({ created_at: -1 });
 
-    res.json({ success: true, data: donors });
+    const sanitizedDonors = donors.map((donor) => {
+      const d = donor.toObject();
+      if (!d.showOnWall) {
+        d.name = "Anonymous Donor";
+      }
+      return d;
+    });
+
+    res.json({ success: true, data: sanitizedDonors });
   } catch (error) {
     console.error("Error fetching donors:", error);
     res.status(500).json({ success: false, error: "Failed to fetch donors" });
