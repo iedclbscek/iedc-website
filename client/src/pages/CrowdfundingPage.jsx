@@ -53,6 +53,13 @@ export default function CrowdfundingPage() {
             }
             return `${startYear}-${endYearFull}`
           }
+
+          // Handle single year format: "2019" -> "2019-2023"
+          const singleYearMatch = normalized.match(/^(\d{4})$/)
+          if (singleYearMatch) {
+             const startYear = parseInt(singleYearMatch[1])
+             return `${startYear}-${startYear + 4}`
+          }
           
           return normalized
         }
