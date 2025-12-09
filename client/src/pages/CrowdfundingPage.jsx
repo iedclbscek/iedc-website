@@ -7,6 +7,7 @@ export default function CrowdfundingPage() {
   const [amount, setAmount] = useState('')
   const [showCompliance, setShowCompliance] = useState(false)
   const [donors, setDonors] = useState([])
+  const [groupedDonors, setGroupedDonors] = useState({})
   const [testimonials, setTestimonials] = useState([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [paymentProofUrl, setPaymentProofUrl] = useState(null)
@@ -30,19 +31,66 @@ export default function CrowdfundingPage() {
       const res = await fetch(`${API_BASE_URL}/api/donations`)
       const data = await res.json()
       if (data.success && data.data && data.data.length > 0) {
+        // Helper to normalize batch names
+        const normalizeBatch = (batch) => {
+          if (!batch) return 'Alumni'
+          let normalized = batch.trim()
+          
+          // Remove spaces around hyphen: "2014 - 2018" -> "2014-2018"
+          normalized = normalized.replace(/\s*-\s*/g, '-')
+          
+          // Handle YYYY-YY format: "2018-22" -> "2018-2022"
+          const shortYearMatch = normalized.match(/^(\d{4})-(\d{2})$/)
+          if (shortYearMatch) {
+            const startYear = shortYearMatch[1]
+            const endYearShort = shortYearMatch[2]
+            const startYearPrefix = startYear.substring(0, 2)
+            let endYearFull = startYearPrefix + endYearShort
+            
+            // Handle century crossing (e.g. 1998-02 -> 1998-2002)
+            if (parseInt(endYearFull) < parseInt(startYear)) {
+              endYearFull = (parseInt(startYearPrefix) + 1) + endYearShort
+            }
+            return `${startYear}-${endYearFull}`
+          }
+          
+          return normalized
+        }
+
+        // Group by batch
+        const groups = {}
+        data.data.forEach(donor => {
+          const batch = normalizeBatch(donor.batch)
+          if (!groups[batch]) {
+            groups[batch] = {
+              totalAmount: 0,
+              donors: []
+            }
+          }
+          groups[batch].totalAmount += Number(donor.amount)
+          groups[batch].donors.push({
+            name: donor.name,
+            amount: `₹${Number(donor.amount).toLocaleString()}`,
+            time: new Date(donor.created_at).toLocaleDateString()
+          })
+        })
+        setGroupedDonors(groups)
+
         setDonors(data.data.map((d) => ({
           name: d.name,
-          batch: d.batch || 'Alumni',
+          batch: normalizeBatch(d.batch),
           amount: `₹${Number(d.amount).toLocaleString()}`,
           time: new Date(d.created_at).toLocaleDateString()
         })))
       } else {
+        setGroupedDonors({})
         setDonors([
           { name: 'Be the first!', amount: '₹0', time: 'Waiting for donations' },
         ])
       }
     } catch (error) {
       console.error('Failed to fetch donors:', error)
+      setGroupedDonors({})
       setDonors([
         { name: 'Be the first!', amount: '₹0', time: 'Waiting for donations' },
       ])
@@ -267,24 +315,55 @@ export default function CrowdfundingPage() {
       <section id="donors" className="max-w-5xl mx-auto px-6 py-16 bg-white border-t">
         <h2 className="text-3xl font-bold text-center mb-12">Thank You, LBSCEK Alumni! 🙏</h2>
         <div className="bg-white rounded-lg border p-8">
-          <div className="space-y-4 max-h-96 overflow-y-auto">
-            {donors.map((donor, idx) => (
-              <div key={idx} className="bg-white rounded-lg p-4 border flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-900 font-bold mr-4">
-                    {donor.name.charAt(0)}
+          <div className="space-y-8 max-h-[800px] overflow-y-auto">
+            {Object.keys(groupedDonors).length > 0 ? (
+              Object.entries(groupedDonors)
+                .sort((a, b) => b[1].totalAmount - a[1].totalAmount)
+                .map(([batch, group]) => (
+                <div key={batch} className="mb-8 last:mb-0">
+                  <div className="flex justify-between items-center mb-4 bg-gray-50 p-4 rounded-lg">
+                    <h3 className="text-xl font-bold text-gray-900">{batch}</h3>
+                    <span className="text-blue-600 font-bold">Total: ₹{group.totalAmount.toLocaleString()}</span>
                   </div>
-                  <div>
-                    <p className="font-semibold">{donor.name}</p>
-                    <p className="text-sm text-gray-500">{donor.batch}</p>
+                  <div className="space-y-4 pl-4 border-l-2 border-gray-100">
+                    {group.donors.map((donor, idx) => (
+                      <div key={idx} className="bg-white rounded-lg p-4 border flex items-center justify-between">
+                        <div className="flex items-center">
+                          <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-900 font-bold mr-4">
+                            {donor.name.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="font-semibold">{donor.name}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-gray-900">{donor.amount}</p>
+                          <p className="text-xs text-gray-400">{donor.time}</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="font-bold text-gray-900">{donor.amount}</p>
-                  <p className="text-xs text-gray-400">{donor.time}</p>
+              ))
+            ) : (
+              donors.map((donor, idx) => (
+                <div key={idx} className="bg-white rounded-lg p-4 border flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-900 font-bold mr-4">
+                      {donor.name.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="font-semibold">{donor.name}</p>
+                      <p className="text-sm text-gray-500">{donor.batch}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-gray-900">{donor.amount}</p>
+                    <p className="text-xs text-gray-400">{donor.time}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
           <p className="text-center text-sm text-gray-500 mt-6">
             🙏 Thank you to all our contributors
@@ -489,7 +568,14 @@ export default function CrowdfundingPage() {
                 {paymentProofUrl && <p className="text-xs text-green-600 mt-1">Proof uploaded successfully!</p>}
               </div>
               <input name="name" type="text" placeholder="Your Name" className="w-full border rounded-lg px-3 py-2" required />
-              <input name="batch" type="text" placeholder="Batch (e.g., 2015-2019)" className="w-full border rounded-lg px-3 py-2" />
+              <select name="batch" className="w-full border rounded-lg px-3 py-2" defaultValue="" required>
+                <option value="" disabled>Select Batch</option>
+                {Array.from({ length: 27 }, (_, i) => 1995 + i).map(year => (
+                  <option key={year} value={`${year}-${year + 4}`}>
+                    {year}-{year + 4}
+                  </option>
+                ))}
+              </select>
               <input name="email" type="email" placeholder="Email" className="w-full border rounded-lg px-3 py-2" required />
               <input name="phone" type="tel" placeholder="Phone" className="w-full border rounded-lg px-3 py-2" required />
               {donorType === 'india' && parseInt(amount) >= 10000 && (
