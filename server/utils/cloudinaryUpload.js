@@ -61,14 +61,20 @@ export const uploadToCloudinary = async (fileBuffer, folder, originalName) => {
     console.error("Cloudinary upload error:", error);
 
     // Fallback to mock if account is disabled or invalid (useful for dev/testing)
-    if (error.http_code === 401 && (error.message.includes('disabled') || error.message.includes('unknown api key'))) {
-        console.warn("⚠️ Cloudinary account issue detected. Falling back to mock URL.");
-        return {
-            url: "https://placehold.co/600x400?text=Payment+Proof+(Mock)",
-            public_id: `mock_${Date.now()}`,
-            format: "jpg",
-            size: 1024,
-        };
+    if (
+      error.http_code === 401 &&
+      (error.message.includes("disabled") ||
+        error.message.includes("unknown api key"))
+    ) {
+      console.warn(
+        "⚠️ Cloudinary account issue detected. Falling back to mock URL."
+      );
+      return {
+        url: "https://placehold.co/600x400?text=Payment+Proof+(Mock)",
+        public_id: `mock_${Date.now()}`,
+        format: "jpg",
+        size: 1024,
+      };
     }
 
     throw new Error("Failed to upload image. Please try again.");
