@@ -30,9 +30,12 @@ export default function KsdCrowdfundingPage() {
       const res = await fetch(`${API_BASE_URL}/api/donations`)
       const data = await res.json()
       if (data.success && data.data && data.data.length > 0) {
-        setDonors(data.data.map((d) => ({
+        // Filter for Community batch only
+        const communityDonors = data.data.filter(donor => donor.batch === 'Community')
+        
+        setDonors(communityDonors.map((d) => ({
           name: d.name,
-          batch: d.batch || 'Alumni',
+          batch: d.batch || 'Community',
           amount: `₹${Number(d.amount).toLocaleString()}`,
           time: new Date(d.created_at).toLocaleDateString()
         })))
@@ -119,6 +122,7 @@ export default function KsdCrowdfundingPage() {
       const formData = new FormData(e.currentTarget)
       formData.append('amount', amount)
       formData.append('donor_type', donorType)
+      formData.append('batch', 'Community') // Force batch to Community
       
       // Ensure payment_proof_url is appended correctly
       if (paymentProofUrl) {

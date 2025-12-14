@@ -31,6 +31,7 @@ import ExecomCallFormPage from './pages/ExecomCallFormPage';
 import ExecomDashboardPage from './pages/ExecomDashboardPage';
 import CrowdfundingPage from './pages/CrowdfundingPage';
 import KsdCrowdfundingPage from './pages/KsdCrowdfundingPage';
+import SponsorPage from './pages/SponsorPage';
 
 // Placeholder page component
 const PlaceholderPage = ({ title }) => (
@@ -103,6 +104,7 @@ const AppContent = () => {
           <Route path="/execom-call" element={<ExecomCallFormPage />} />
           <Route path="/crowdfunding" element={<CrowdfundingPage />} />
           <Route path="/ksd-crowdfunding" element={<KsdCrowdfundingPage />} />
+          <Route path="/sponsor" element={<SponsorPage />} />
           <Route path="*" element={<PlaceholderPage title="Page Not Found" />} />
         </Routes>
       </main>

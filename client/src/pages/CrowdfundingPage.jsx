@@ -8,6 +8,7 @@ export default function CrowdfundingPage() {
   const [showCompliance, setShowCompliance] = useState(false)
   const [donors, setDonors] = useState([])
   const [groupedDonors, setGroupedDonors] = useState({})
+  const [totalRaised, setTotalRaised] = useState(0)
   const [testimonials, setTestimonials] = useState([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [paymentProofUrl, setPaymentProofUrl] = useState(null)
@@ -66,7 +67,11 @@ export default function CrowdfundingPage() {
 
         // Group by batch
         const groups = {}
+        let total = 0
         data.data.forEach(donor => {
+          // Filter out Sponsors and Community from Alumni page
+          if (donor.batch === 'Sponsor' || donor.batch === 'Community') return
+
           const batch = normalizeBatch(donor.batch)
           if (!groups[batch]) {
             groups[batch] = {
@@ -74,23 +79,30 @@ export default function CrowdfundingPage() {
               donors: []
             }
           }
-          groups[batch].totalAmount += Number(donor.amount)
+          const amount = Number(donor.amount)
+          groups[batch].totalAmount += amount
+          total += amount
           groups[batch].donors.push({
             name: donor.name,
-            amount: `₹${Number(donor.amount).toLocaleString()}`,
+            amount: `₹${amount.toLocaleString()}`,
             time: new Date(donor.created_at).toLocaleDateString()
           })
         })
         setGroupedDonors(groups)
+        setTotalRaised(total)
 
-        setDonors(data.data.map((d) => ({
-          name: d.name,
-          batch: normalizeBatch(d.batch),
-          amount: `₹${Number(d.amount).toLocaleString()}`,
-          time: new Date(d.created_at).toLocaleDateString()
-        })))
+        setDonors(data.data
+          .filter(d => d.batch !== 'Sponsor' && d.batch !== 'Community')
+          .map((d) => ({
+            name: d.name,
+            batch: normalizeBatch(d.batch),
+            amount: `₹${Number(d.amount).toLocaleString()}`,
+            time: new Date(d.created_at).toLocaleDateString()
+          }))
+        )
       } else {
         setGroupedDonors({})
+        setTotalRaised(0)
         setDonors([
           { name: 'Be the first!', amount: '₹0', time: 'Waiting for donations' },
         ])
@@ -98,6 +110,7 @@ export default function CrowdfundingPage() {
     } catch (error) {
       console.error('Failed to fetch donors:', error)
       setGroupedDonors({})
+      setTotalRaised(0)
       setDonors([
         { name: 'Be the first!', amount: '₹0', time: 'Waiting for donations' },
       ])
@@ -320,7 +333,10 @@ export default function CrowdfundingPage() {
 
       {/* Donor Wall */}
       <section id="donors" className="max-w-5xl mx-auto px-6 py-16 bg-white border-t">
-        <h2 className="text-3xl font-bold text-center mb-12">Thank You, LBSCEK Alumni! 🙏</h2>
+        <h2 className="text-3xl font-bold text-center mb-4">Thank You, LBSCEK Alumni! 🙏</h2>
+        <p className="text-center text-xl text-gray-600 mb-12">
+          Grand Total Raised: <span className="font-bold text-green-600">₹{totalRaised.toLocaleString()}</span>
+        </p>
         <div className="bg-white rounded-lg border p-8">
           <div className="space-y-8 max-h-[800px] overflow-y-auto">
             {Object.keys(groupedDonors).length > 0 ? (
