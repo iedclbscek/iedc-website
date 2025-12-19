@@ -12,7 +12,7 @@ export default function SponsorPage() {
   const [isUploadingProof, setIsUploadingProof] = useState(false)
   
   // Event date: 22/12/2025, Funding closes: 19/12/2025 (3 days before)
-  const fundingCloseDate = new Date('2025-12-19')
+  const fundingCloseDate = new Date('2025-12-30')
   const today = new Date()
   const isFundingClosed = today >= fundingCloseDate
 
