@@ -4,6 +4,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { authenticateToken, authorizeRoles } from "../middleware/auth.js";
 import User from "../models/User.js";
+import Registration from "../models/Registration.js";
 import { body, validationResult } from "express-validator";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -255,6 +256,76 @@ router.patch(
     }
   }
 );
+
+// @route   GET /api/users/member?id=
+// @desc    Get member info by IEDC ID (membershipId)
+// @access  Public
+router.get("/member", async (req, res) => {
+  try {
+    const { id } = req.query;
+
+    // Validate IEDC ID
+    if (!id || id.trim() === "") {
+      return res.status(400).json({
+        success: false,
+        message: "IEDC ID is required",
+      });
+    }
+
+    console.log("🔍 Searching for membershipId:", id);
+
+    // Search by membershipId (case-insensitive)
+    let member = await Registration.findOne({ 
+      membershipId: { $regex: `^${id}$`, $options: "i" } 
+    }).select(
+      "firstName lastName admissionNo department yearOfJoining membershipId"
+    );
+
+    if (!member) {
+      console.log("📊 Searching by email or other fields...");
+      // Try searching by admissionNo as fallback
+      member = await Registration.findOne({ 
+        admissionNo: { $regex: id, $options: "i" } 
+      }).select(
+        "firstName lastName admissionNo department yearOfJoining membershipId"
+      );
+    }
+
+    if (!member) {
+      console.log("📋 Total registrations in DB:", await Registration.countDocuments());
+      const sample = await Registration.find({}).select("membershipId firstName admissionNo").limit(3);
+      console.log("Sample records:", sample);
+    }
+
+    console.log("✅ Member found:", member);
+
+    if (!member) {
+      return res.status(404).json({
+        success: false,
+        message: "Member not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        firstName: member.firstName || "",
+        lastName: member.lastName || "",
+        admissionNo: member.admissionNo || "",
+        department: member.department || "",
+        yearOfJoining: member.yearOfJoining || null,
+        membershipId: member.membershipId || "",
+      },
+    });
+  } catch (error) {
+    console.error("❌ Get member by IEDC ID error:", error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while retrieving member information",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
+});
 
 // @route   GET /api/users/:id
 // @desc    Get user by ID

@@ -3,12 +3,41 @@ import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema(
   {
+    firstName: {
+      type: String,
+      trim: true,
+    },
+    lastName: {
+      type: String,
+      trim: true,
+    },
     name: {
       type: String,
       required: [true, "Name is required"],
       trim: true,
       minlength: [2, "Name must be at least 2 characters long"],
       maxlength: [50, "Name cannot exceed 50 characters"],
+    },
+    iedcId: {
+      type: String,
+      unique: true,
+      sparse: true,
+      trim: true,
+    },
+    admissionNo: {
+      type: String,
+      unique: true,
+      sparse: true,
+      trim: true,
+    },
+    membershipId: {
+      type: String,
+      unique: true,
+      sparse: true,
+      trim: true,
+    },
+    yearOfJoining: {
+      type: Number,
     },
     username: {
       type: String,
